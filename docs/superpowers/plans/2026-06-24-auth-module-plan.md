@@ -934,10 +934,11 @@ Expected: typecheck exit 0; all Vitest suites pass (schema, service, store, auth
 - Modify: `D:\CODE\startica\app\src\core\i18n\locales\ro.json`
 - Modify: `D:\CODE\startica\app\src\core\i18n\locales\en.json`
 - Create: `D:\CODE\startica\app\src\shared\ui\LanguageSwitcher.vue`
+- Create: `D:\CODE\startica\app\src\shared\ui\AuthCardHeader.vue`
 - Create: `D:\CODE\startica\app\src\layouts\auth.vue`
 
 **Interfaces:**
-- Produces: `auth.*` i18n keys consumed by Task 8/9 pages. Produces `<LanguageSwitcher />` (auto-imported component, since `~/shared/ui` is already in `components.dirs`). Produces the `auth` layout, selected via `definePageMeta({ layout: 'auth' })` in Task 8/9's thin route pages.
+- Produces: `auth.*` i18n keys consumed by Task 8/9 pages. Produces `<LanguageSwitcher />` and `<AuthCardHeader :title="..." />` (both auto-imported, since `~/shared/ui` is already in `components.dirs`) — `AuthCardHeader` exists so the "Startica" wordmark + page title markup is written once, not repeated identically across the three auth pages in Task 8/9. Produces the `auth` layout, selected via `definePageMeta({ layout: 'auth' })` in Task 8/9's thin route pages.
 
 - [ ] **Step 1: Add the new `auth.*` keys to `ro.json`**
 
@@ -1036,6 +1037,23 @@ const { locale, setLocale } = useI18n()
 </template>
 ```
 
+- [ ] **Step 3b: Create the auth card header**
+
+Create `D:\CODE\startica\app\src\shared\ui\AuthCardHeader.vue`:
+
+```vue
+<script setup lang="ts">
+defineProps<{ title: string }>()
+</script>
+
+<template>
+  <div>
+    <p class="text-xl font-semibold text-teal-700">Startica</p>
+    <h1 class="text-lg font-semibold text-neutral-800">{{ title }}</h1>
+  </div>
+</template>
+```
+
 - [ ] **Step 4: Create the `auth` layout**
 
 Create `D:\CODE\startica\app\src\layouts\auth.vue`:
@@ -1065,7 +1083,7 @@ Expected: `✨ Build complete!`, no i18n JSON parse errors.
 - Modify: `D:\CODE\startica\app\src\pages\index.vue`
 
 **Interfaces:**
-- Consumes: `useAuth()` (Task 5), `loginSchema` (Task 3), `LanguageSwitcher` (Task 7), `auth` layout (Task 7).
+- Consumes: `useAuth()` (Task 5), `loginSchema` (Task 3), `LanguageSwitcher`/`AuthCardHeader`/`auth` layout (Task 7).
 
 - [ ] **Step 1: Write `LoginPage.vue`**
 
@@ -1094,8 +1112,7 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
 <template>
   <UCard class="w-full max-w-md">
     <template #header>
-      <p class="text-xl font-semibold text-teal-700">Startica</p>
-      <h1 class="text-lg font-semibold text-neutral-800">{{ t('auth.loginTitle') }}</h1>
+      <AuthCardHeader :title="t('auth.loginTitle')" />
     </template>
 
     <UAlert v-if="error" color="error" variant="soft" :title="t('auth.invalidCredentials')" class="mb-4" />
@@ -1202,7 +1219,7 @@ Open `http://localhost:3000/` in a browser — expect a redirect to `http://loca
 - Create: `D:\CODE\startica\app\src\pages\reset-password.vue`
 
 **Interfaces:**
-- Consumes: `useAuth()` (Task 5), `requestPasswordResetSchema`/`updatePasswordSchema` (Task 3), `LanguageSwitcher`/`auth` layout (Task 7).
+- Consumes: `useAuth()` (Task 5), `requestPasswordResetSchema`/`updatePasswordSchema` (Task 3), `LanguageSwitcher`/`AuthCardHeader`/`auth` layout (Task 7).
 
 - [ ] **Step 1: Write `ForgotPasswordPage.vue`**
 
@@ -1230,8 +1247,7 @@ async function onSubmit(event: FormSubmitEvent<RequestPasswordResetInput>) {
 <template>
   <UCard class="w-full max-w-md">
     <template #header>
-      <p class="text-xl font-semibold text-teal-700">Startica</p>
-      <h1 class="text-lg font-semibold text-neutral-800">{{ t('auth.forgotPasswordTitle') }}</h1>
+      <AuthCardHeader :title="t('auth.forgotPasswordTitle')" />
     </template>
 
     <UAlert v-if="submitted" color="success" variant="soft" :title="t('auth.forgotPasswordSuccess')" />
@@ -1301,8 +1317,7 @@ async function onSubmit(event: FormSubmitEvent<UpdatePasswordInput>) {
 <template>
   <UCard class="w-full max-w-md">
     <template #header>
-      <p class="text-xl font-semibold text-teal-700">Startica</p>
-      <h1 class="text-lg font-semibold text-neutral-800">{{ t('auth.resetPasswordTitle') }}</h1>
+      <AuthCardHeader :title="t('auth.resetPasswordTitle')" />
     </template>
 
     <UAlert
