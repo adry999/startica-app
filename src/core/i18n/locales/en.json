@@ -12,6 +12,27 @@
     "login": "Login",
     "email": "Email",
     "password": "Password",
-    "forgotPassword": "Forgot password?"
+    "forgotPassword": "Forgot password?",
+    "loginTitle": "Log in",
+    "submit": "Log in",
+    "invalidCredentials": "Incorrect email or password.",
+    "forgotPasswordTitle": "Password recovery",
+    "forgotPasswordSubmit": "Send reset link",
+    "forgotPasswordSuccess": "If that address exists in the system, you'll receive an email with reset instructions.",
+    "backToLogin": "Back to login",
+    "resetPasswordTitle": "Set a new password",
+    "resetPasswordSubmit": "Save password",
+    "resetPasswordSuccess": "Your password has been changed successfully.",
+    "resetPasswordInvalidLink": "This reset link is invalid or has expired.",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords don't match.",
+    "logout": "Log out",
+    "welcomeBack": "Hi, {name}",
+    "role": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "educator": "Educator"
+    }
   }
 }
