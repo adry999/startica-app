@@ -1,0 +1,71 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/*
+ * Design tokens from docs/Startica_DesignPrompt.md.
+ * Source of truth for every hex value used in the UI — never hardcode a
+ * color, reference these tokens (bg-teal-500, text-neutral-600, bg-warning…).
+ */
+@theme {
+  /* Teal — primary/interactive (buttons, links, active nav, focus rings) */
+  --color-teal-50: #EAF3F2;
+  --color-teal-100: #D0E5E3;
+  --color-teal-200: #A3CCC8;
+  --color-teal-300: #6FB0AB;
+  --color-teal-400: #429089;
+  --color-teal-500: #1F706A;
+  --color-teal-600: #1A5F5A;
+  --color-teal-700: #154D49;
+
+  /*
+   * Neutral — slate family (text, borders, surfaces). Named "slate" rather
+   * than "neutral": Nuxt UI reserves the literal Tailwind color name
+   * "neutral" for its own built-in gray internally, so overriding it under
+   * that exact name gets bypassed. app.config.ts maps ui.colors.neutral to
+   * 'slate', and Nuxt UI bridges it back to the neutral-* utility classes
+   * (text-neutral-600 etc. still work and resolve to these hexes).
+   */
+  --color-slate-50: #F6F7F7;
+  --color-slate-100: #E8EAEA;
+  --color-slate-200: #D1D6D6;
+  --color-slate-300: #AEB6B7;
+  --color-slate-400: #7E898C;
+  --color-slate-500: #5C686C;
+  --color-slate-600: #434E53;
+  --color-slate-800: #282F32;
+
+  /* Brand colors (from the logo) — accents only, never primary buttons */
+  --color-brand-slate: #434E53;
+  --color-brand-yellow: #FAD25B;
+  --color-brand-gold: #D89B3F;
+  --color-brand-peach: #F2CAA7;
+  --color-brand-sage: #AFC1BE;
+  --color-brand-cream: #E8EAE0;
+
+  /* Semantic — single tone each per design prompt (not full ramps) */
+  --color-success: #3E8E7E;
+  --color-warning: #D89B3F;
+  --color-error: #C0492F;
+  --color-info: #3B7A9E;
+
+  /* Role badges */
+  --color-role-super-admin-bg: #1F706A;
+  --color-role-super-admin-text: #FFFFFF;
+  --color-role-admin-bg: #FAD25B;
+  --color-role-admin-text: #6B4E16;
+  --color-role-educator-bg: #AFC1BE;
+  --color-role-educator-text: #2A3B38;
+
+  /* Surfaces */
+  --color-surface: #FFFFFF;
+  --color-app-bg: #F6F7F7;
+  --color-sidebar-tint: #E8EAE0;
+  --color-border: #D1D6D6;
+
+  /* Typography */
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Layout */
+  --radius-card: 12px;
+  --radius-control: 8px;
+}

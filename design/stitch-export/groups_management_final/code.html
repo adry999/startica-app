@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Groups Management | Kindercare Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#745b00",
+                    "on-secondary-fixed-variant": "#584400",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#dae4e9",
+                    "primary-fixed-dim": "#89d4cc",
+                    "tertiary-container": "#93543b",
+                    "background": "#f2fbff",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-primary-fixed-variant": "#00504b",
+                    "on-secondary-fixed": "#241a00",
+                    "surface": "#f2fbff",
+                    "inverse-surface": "#283236",
+                    "outline-variant": "#bec9c6",
+                    "card-bg": "#FFFFFF",
+                    "surface-tint": "#156964",
+                    "on-error-container": "#93000a",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-container": "#ffdbce",
+                    "primary-fixed": "#a5f0e8",
+                    "primary-hover": "#18564F",
+                    "tertiary-fixed": "#ffdbce",
+                    "on-primary-fixed": "#00201e",
+                    "ink-400": "#889094",
+                    "error": "#ba1a1a",
+                    "primary-container": "#1f706a",
+                    "inverse-primary": "#89d4cc",
+                    "page-bg": "#F6F7F5",
+                    "surface-container-low": "#ebf5fa",
+                    "surface-bright": "#f2fbff",
+                    "on-secondary-container": "#755c00",
+                    "secondary-container": "#fed65f",
+                    "secondary-fixed": "#ffe08b",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6f7977",
+                    "on-error": "#ffffff",
+                    "on-background": "#131d21",
+                    "border": "#E3E7E5",
+                    "on-surface": "#131d21",
+                    "accent-soft": "#FDF6E1",
+                    "surface-container-highest": "#dae4e9",
+                    "warning": "#D89B3F",
+                    "success": "#3E8A6E",
+                    "primary-soft": "#E4F0EE",
+                    "surface-dim": "#d1dce1",
+                    "ink-700": "#434E53",
+                    "on-tertiary-fixed-variant": "#6f3720",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "primary": "#005752",
+                    "inverse-on-surface": "#e8f2f7",
+                    "surface-container-high": "#dfeaef",
+                    "ink-500": "#636C70",
+                    "tertiary-fixed-dim": "#ffb599",
+                    "on-primary-container": "#a5f0e8",
+                    "tertiary": "#763d26",
+                    "accent-deep": "#C98A2B",
+                    "danger": "#C0553D",
+                    "on-surface-variant": "#3f4947",
+                    "surface-container": "#e5f0f5",
+                    "secondary-fixed-dim": "#e9c24d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-padding": "32px",
+                    "stack-sm": "8px",
+                    "sidebar-width": "256px",
+                    "topbar-height": "64px",
+                    "gutter": "24px",
+                    "stack-md": "16px"
+            },
+            "fontFamily": {
+                    "small": ["Inter"],
+                    "h1": ["Inter"],
+                    "caption": ["Inter"],
+                    "h3": ["Inter"],
+                    "body-medium": ["Inter"],
+                    "h2": ["Inter"],
+                    "display": ["Inter"],
+                    "body": ["Inter"]
+            },
+            "fontSize": {
+                    "small": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                    "h3": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-medium": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F6F7F5; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+        .sidebar-active { border-right-width: 4px; }
+    </style>
+</head>
+<body class="text-on-surface antialiased">
+<!-- Side Navigation Bar -->
+<aside class="bg-[#2C363A] dark:bg-[#1A2124] w-sidebar-width h-screen fixed left-0 top-0 flex flex-col py-6 z-50">
+<div class="px-6 mb-10">
+<h1 class="font-h2 text-h2 text-white tracking-tight">Kindercare Pro</h1>
+<p class="text-white/50 font-caption text-caption uppercase tracking-wider">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-6 py-3 flex items-center gap-3 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">group</span> Students
+            </a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">event_available</span> Attendance
+            </a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">school</span> Teachers
+            </a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">payments</span> Billing
+            </a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+            </a>
+</nav>
+<div class="px-6 mt-auto pt-6 border-t border-white/10 space-y-1">
+<a class="text-white/70 py-2 flex items-center gap-3 hover:text-white transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">help</span> Support
+            </a>
+<a class="text-white/70 py-2 flex items-center gap-3 hover:text-white transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">logout</span> Log Out
+            </a>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="h-topbar-height fixed top-0 right-0 z-40 bg-surface border-b border-outline-variant flex items-center justify-between px-page-padding w-[calc(100%-256px)] ml-sidebar-width">
+<div class="flex items-center gap-8">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none w-80 text-body transition-all" placeholder="Search groups or students..." type="text"/>
+</div>
+<nav class="flex gap-6 items-center">
+<a class="text-ink-500 font-body-medium hover:text-primary transition-colors" href="#">Overview</a>
+<a class="text-primary font-h3 border-b-2 border-primary pb-2" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 pr-4 border-r border-outline-variant">
+<button class="p-2 text-ink-500 hover:bg-surface-container-high rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-ink-500 hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">language</span>
+</button>
+</div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right">
+<p class="font-body-medium text-ink-700 leading-none">Sarah Jenkins</p>
+<p class="font-caption text-ink-400">Administrator</p>
+</div>
+<img class="w-10 h-10 rounded-full border border-outline-variant" data-alt="A professional headshot of a middle-aged woman with a friendly and capable expression, wearing business casual attire. The lighting is soft and natural, suggesting a high-trust educational environment. The background is a blurred office with clean, minimalist lines and a palette of soft teals and whites, reflecting a modern SaaS interface aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAEqJWuiH73LsrB0JXj3Nb_kmh330cThOsyjhMXKoAClI9IicA28eeMdSxORhqDA0vn2rjmUG9uKE8ouyyA0DQ2pJdH63JLqZrQ_Tlcux0rdxGTeuG3-cYzWgklvOGPjoJxpRnFwz3HTb9YhRYuJpo4-IggBjbiw3wO_X_h_LD0TspE2P_BjCfBo3OxmluF_TkVMFm5pV3KZY7QanMOhhep_IdLtaojmhMFWW7ywxlGitvWbbzwkGodzedkus0iD9Gcc78cNFbRNM"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width pt-topbar-height min-h-screen">
+<div class="max-w-[1400px] mx-auto p-page-padding">
+<!-- Page Header Actions -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<nav class="flex items-center gap-2 text-ink-400 font-caption mb-1">
+<span>Students</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+<span class="text-ink-700">Group Management</span>
+</nav>
+<h2 class="font-display text-display text-on-background tracking-tight">Group Management</h2>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2.5 bg-white border border-border text-ink-900 rounded-[10px] font-body-medium hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">filter_list</span> Filter
+                    </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-[10px] font-h3 hover:bg-primary-hover shadow-sm transition-all active:scale-95">
+<span class="material-symbols-outlined">add</span> Create Group
+                    </button>
+</div>
+</div>
+<!-- Stats Row (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-10">
+<div class="bg-card-bg border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-soft rounded-lg text-primary">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<span class="text-success font-caption flex items-center">+2 this mo</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption uppercase tracking-wider">Total Groups</p>
+<h3 class="text-display font-display text-on-surface">14</h3>
+</div>
+</div>
+<div class="bg-card-bg border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-secondary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-container/20 rounded-lg text-secondary">
+<span class="material-symbols-outlined">child_care</span>
+</div>
+<span class="text-ink-400 font-caption">Avg 12 per group</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption uppercase tracking-wider">Total Enrollment</p>
+<h3 class="text-display font-display text-on-surface">168</h3>
+</div>
+</div>
+<div class="bg-card-bg border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-accent-soft rounded-lg text-accent-deep">
+<span class="material-symbols-outlined">person_pin</span>
+</div>
+<span class="text-warning font-caption">3 vacancies</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption uppercase tracking-wider">Assigned Educators</p>
+<h3 class="text-display font-display text-on-surface">22</h3>
+</div>
+</div>
+<div class="bg-card-bg border border-border rounded-xl p-6 flex flex-col justify-between group hover:border-primary-fixed-dim transition-colors">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-soft rounded-lg text-primary">
+<span class="material-symbols-outlined">pie_chart</span>
+</div>
+<span class="text-success font-caption">94% Occupancy</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption uppercase tracking-wider">Staff-to-Child Ratio</p>
+<h3 class="text-display font-display text-on-surface">1:8</h3>
+</div>
+</div>
+</div>
+<!-- Group Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Group Card 1 -->
+<div class="bg-card-bg border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all group flex flex-col">
+<div class="h-2 w-full bg-primary"></div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-h2 text-h2 text-on-surface mb-1">Little Explorers</h4>
+<span class="bg-primary-soft text-primary px-3 py-1 rounded-full font-caption uppercase">2 - 3 Years</span>
+</div>
+<button class="text-ink-400 hover:text-ink-700 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full" data-alt="A portrait of a cheerful educator with a warm smile, wearing a professional yet approachable teal-colored uniform. She is standing in a brightly lit, modern classroom with colorful educational posters in the background. The style is clean and professional, using high-key lighting to emphasize warmth and trust in a kindergarten setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqTWK_0QrvRM9UUpfP6WAcvAL1F_-YwcMWlU-SNpEWRy6W-HvenARwTxFul3iHCsRxHKRFzhxn2dETHzwDwSdDgyfVluVW-Qo_4hIst9spt8mOieMf8wR4N1ffuujqg7TPPRzdPnddEX9gPHenmOIWvmqbPkHp-WR2kAxqvXWGXJw84ocW03J5Es8Yz-AOf2jt5UDOK9OSbl4w4ZDG2X5gnJF9D-fnxKkwqUUvUp1UpUq84doRfPA75YBdN2EXJsEw9ka8qB28JHM"/>
+<div>
+<p class="text-ink-500 font-caption">Primary Educator</p>
+<p class="font-body-medium text-on-surface">Ms. Elena Rodriguez</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption">Capacity</p>
+<p class="font-body-medium text-on-surface">12 / 15 Children</p>
+</div>
+</div>
+</div>
+<!-- Mini Progress Bar -->
+<div class="mt-auto">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mb-2">
+<div class="bg-primary h-full rounded-full" style="width: 80%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-ink-500 font-caption">80% Full</span>
+<a class="text-primary font-body-medium hover:underline flex items-center gap-1" href="#">
+                                    View Details <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Group Card 2 -->
+<div class="bg-card-bg border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all group flex flex-col">
+<div class="h-2 w-full bg-secondary"></div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-h2 text-h2 text-on-surface mb-1">Bright Sprouts</h4>
+<span class="bg-accent-soft text-secondary px-3 py-1 rounded-full font-caption uppercase">3 - 4 Years</span>
+</div>
+<button class="text-ink-400 hover:text-ink-700 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full" data-alt="A portrait of a male teacher with a friendly expression, wearing a smart-casual shirt in muted tones. He is in a modern, organized learning space with wooden furniture and soft lighting. The image captures a sense of professional dedication and a calm, supportive environment for children, rendered in a clean, high-utility SaaS style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnDgMExlTtHQ4-i9OfeiM_Fa28wNsTXBFaSpGUmZoSfVN4MaTaYjLMVPjdAakIe20eyCZlj6P02ft8x3XI0fXpC0Vs8KqDMHAPVXsE2Vu7234BBPhGei1I_Got_ZUaoDYmymEZVWec2NDZOyGq4lwzWGYYBwpYC4ED3h38fLh2bUMxPPpeUeD8AVIXZ_1JAIQ_ld-vcQEebHwjnMYwvDOrLb_aM0ZyWrem6QFEJglBhnSzXaGLxpL4Ae9xe-xJQObEJCh7hvijYfc"/>
+<div>
+<p class="text-ink-500 font-caption">Primary Educator</p>
+<p class="font-body-medium text-on-surface">Mr. David Chen</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption">Capacity</p>
+<p class="font-body-medium text-on-surface">18 / 18 Children</p>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mb-2">
+<div class="bg-secondary h-full rounded-full" style="width: 100%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-warning font-caption font-bold">Group Full</span>
+<a class="text-primary font-body-medium hover:underline flex items-center gap-1" href="#">
+                                    View Details <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Group Card 3 -->
+<div class="bg-card-bg border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all group flex flex-col">
+<div class="h-2 w-full bg-tertiary"></div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-h2 text-h2 text-on-surface mb-1">Pre-School Owls</h4>
+<span class="bg-error-container/50 text-tertiary px-3 py-1 rounded-full font-caption uppercase">4 - 5 Years</span>
+</div>
+<button class="text-ink-400 hover:text-ink-700 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full" data-alt="A portrait of a confident educator with glasses and a kind smile, set against a backdrop of a modern library or reading nook. The lighting is crisp and the composition is balanced, showcasing a sophisticated and high-trust educational professional. The color palette is composed of soft oranges and browns, aligning with a professional preschool administration platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYTERt38lcCHCHziWrlCyWTU3D5fLcbewvhPVi4lLq-Nbb66APxZ2USzuG5hSX6xaI0mwsBPYTplHu7wI9sI2_fCrLq5lc31juUnE2p6_KLr5QEJ9zu02DecyY2y7BK89iCAUPbmKFyd4dh_5as2mOQ5SjYmk9YtJb9jt4S-xKCf0NkDjYOS1sBWqDrAVc5jd-8YzHC4rPUnUAunu39Uz4eUyX7jHYSISkEeZ_NT3VXxxIBwze1VK4p7JNGkeTG5nNClsWbBWbFdE"/>
+<div>
+<p class="text-ink-500 font-caption">Primary Educator</p>
+<p class="font-body-medium text-on-surface">Ms. Sarah Miller</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption">Capacity</p>
+<p class="font-body-medium text-on-surface">14 / 20 Children</p>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mb-2">
+<div class="bg-tertiary h-full rounded-full" style="width: 70%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-ink-500 font-caption">70% Full</span>
+<a class="text-primary font-body-medium hover:underline flex items-center gap-1" href="#">
+                                    View Details <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Group Card 4 -->
+<div class="bg-card-bg border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-all group flex flex-col">
+<div class="h-2 w-full bg-primary-container"></div>
+<div class="p-6 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h4 class="font-h2 text-h2 text-on-surface mb-1">Tiny Toddlers</h4>
+<span class="bg-primary-soft text-primary px-3 py-1 rounded-full font-caption uppercase">12 - 24 Months</span>
+</div>
+<button class="text-ink-400 hover:text-ink-700 transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="space-y-4 mb-6">
+<div class="flex items-center gap-3">
+<img class="w-8 h-8 rounded-full" data-alt="A warm portrait of a caregiver holding a colorful wooden toy, smiling warmly. The setting is a cozy, brightly lit nursery room with soft textures and a calm atmosphere. The visual style is crisp and professional, fitting a high-end management app, with a focus on trust and gentle care. The palette features soft teals and neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgWypLrIp8VmrSOt9-GMwR-ALx6vcB9PJXsmNUGyIvRjJJSldkO0RAB4X97MXrYrNRG3eoHmfgfXO1d2c78-51R6RhaC9k2KW5pTfc83pMoDIpAHJkSH5cNm1hd6FLSeULZoplGK9RCX5BmzWktJ0qdyJvce5xX1cH77-Jo2XkCtj6RlF3elxinP1vo9SjMEmNrLXKpaw5-OXZQ8MHJLI8xlyNZFCPUfx0KfFEqcNqZ9q0Wmvw5zFA-yST0Rr2Idd1CTzzsBCsb1s"/>
+<div>
+<p class="text-ink-500 font-caption">Primary Educator</p>
+<p class="font-body-medium text-on-surface">Ms. Jessica Long</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</div>
+<div>
+<p class="text-ink-500 font-caption">Capacity</p>
+<p class="font-body-medium text-on-surface">8 / 10 Children</p>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mb-2">
+<div class="bg-primary-container h-full rounded-full" style="width: 80%"></div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-ink-500 font-caption">80% Full</span>
+<a class="text-primary font-body-medium hover:underline flex items-center gap-1" href="#">
+                                    View Details <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Add New Group Placeholder Card -->
+<div class="border-2 border-dashed border-outline-variant rounded-2xl flex flex-col items-center justify-center p-8 hover:border-primary hover:bg-primary-soft/30 transition-all cursor-pointer group text-center">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-ink-400 group-hover:bg-primary-soft group-hover:text-primary transition-all mb-4">
+<span class="material-symbols-outlined text-[32px]">add_circle</span>
+</div>
+<h4 class="font-h3 text-h3 text-on-surface mb-1">Add New Group</h4>
+<p class="text-ink-500 font-body max-w-[200px]">Define a new classroom, age range, and educator.</p>
+</div>
+</div>
+<!-- Detailed Table View (Alternative High-Density Pattern) -->
+<div class="mt-12 bg-white border border-border rounded-2xl overflow-hidden shadow-sm">
+<div class="px-6 py-4 border-b border-border flex justify-between items-center">
+<h3 class="font-h3 text-h3 text-on-surface">Recent Activity &amp; Waitlist</h3>
+<button class="text-primary font-body-medium hover:text-primary-hover">View All Logs</button>
+</div>
+<table class="w-full text-left">
+<thead class="bg-page-bg">
+<tr>
+<th class="px-6 py-3 font-caption text-ink-500 uppercase tracking-widest text-[10px]">Group</th>
+<th class="px-6 py-3 font-caption text-ink-500 uppercase tracking-widest text-[10px]">Request Type</th>
+<th class="px-6 py-3 font-caption text-ink-500 uppercase tracking-widest text-[10px]">Child Name</th>
+<th class="px-6 py-3 font-caption text-ink-500 uppercase tracking-widest text-[10px]">Status</th>
+<th class="px-6 py-3 font-caption text-ink-500 uppercase tracking-widest text-[10px] text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-body-medium">Little Explorers</td>
+<td class="px-6 py-4 text-ink-700">New Enrollment</td>
+<td class="px-6 py-4">Liam Wilson</td>
+<td class="px-6 py-4">
+<span class="bg-primary-soft text-primary px-2 py-1 rounded-full text-caption">Pending Approval</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary-soft p-1 rounded transition-colors"><span class="material-symbols-outlined">check_circle</span></button>
+<button class="text-error hover:bg-error-container p-1 rounded transition-colors ml-2"><span class="material-symbols-outlined">cancel</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-lowest transition-colors">
+<td class="px-6 py-4 font-body-medium">Bright Sprouts</td>
+<td class="px-6 py-4 text-ink-700">Transfer Request</td>
+<td class="px-6 py-4">Sophia Garcia</td>
+<td class="px-6 py-4">
+<span class="bg-accent-soft text-secondary px-2 py-1 rounded-full text-caption">Under Review</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary-soft p-1 rounded transition-colors"><span class="material-symbols-outlined">check_circle</span></button>
+<button class="text-error hover:bg-error-container p-1 rounded transition-colors ml-2"><span class="material-symbols-outlined">cancel</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only for main landing state) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-[28px]">chat</span>
+</button>
+<script>
+        // Simple interactivity for demonstration
+        document.querySelectorAll('.group').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('border-primary');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('border-primary');
+            });
+        });
+    </script>
+</body></html>

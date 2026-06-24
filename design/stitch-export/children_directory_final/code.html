@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Children Directory - Kindercare Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#745b00",
+                        "on-secondary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae4e9",
+                        "primary-fixed-dim": "#89d4cc",
+                        "tertiary-container": "#93543b",
+                        "background": "#f2fbff",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-primary-fixed-variant": "#00504b",
+                        "on-secondary-fixed": "#241a00",
+                        "surface": "#f2fbff",
+                        "inverse-surface": "#283236",
+                        "outline-variant": "#bec9c6",
+                        "card-bg": "#FFFFFF",
+                        "surface-tint": "#156964",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffdbce",
+                        "primary-fixed": "#a5f0e8",
+                        "primary-hover": "#18564F",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary-fixed": "#00201e",
+                        "ink-400": "#889094",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1f706a",
+                        "inverse-primary": "#89d4cc",
+                        "page-bg": "#F6F7F5",
+                        "surface-container-low": "#ebf5fa",
+                        "surface-bright": "#f2fbff",
+                        "on-secondary-container": "#755c00",
+                        "secondary-container": "#fed65f",
+                        "secondary-fixed": "#ffe08b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "on-error": "#ffffff",
+                        "on-background": "#131d21",
+                        "border": "#E3E7E5",
+                        "on-surface": "#131d21",
+                        "accent-soft": "#FDF6E1",
+                        "surface-container-highest": "#dae4e9",
+                        "warning": "#D89B3F",
+                        "success": "#3E8A6E",
+                        "primary-soft": "#E4F0EE",
+                        "surface-dim": "#d1dce1",
+                        "ink-700": "#434E53",
+                        "on-tertiary-fixed-variant": "#6f3720",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#005752",
+                        "inverse-on-surface": "#e8f2f7",
+                        "surface-container-high": "#dfeaef",
+                        "ink-500": "#636C70",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#a5f0e8",
+                        "tertiary": "#763d26",
+                        "accent-deep": "#C98A2B",
+                        "danger": "#C0553D",
+                        "on-surface-variant": "#3f4947",
+                        "surface-container": "#e5f0f5",
+                        "secondary-fixed-dim": "#e9c24d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-padding": "32px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "256px",
+                        "topbar-height": "64px",
+                        "gutter": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "small": ["Inter"],
+                        "h1": ["Inter"],
+                        "caption": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-medium": ["Inter"],
+                        "h2": ["Inter"],
+                        "display": ["Inter"],
+                        "body": ["Inter"]
+                    },
+                    "fontSize": {
+                        "small": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "h3": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-medium": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #F6F7F5;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .sidebar-active {
+            color: #005752;
+            background-color: rgba(31, 112, 106, 0.1);
+            border-right: 4px solid #005752;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Sidebar Component -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-[#2C363A] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-h2 text-h2 text-white">Kindercare Pro</h1>
+<p class="font-caption text-caption text-white/50">Admin Portal</p>
+</div>
+<nav class="flex-grow">
+<ul class="space-y-1">
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-4 py-3 flex items-center gap-3 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">group</span>
+                        Students
+                    </a>
+</li>
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">event_available</span>
+                        Attendance
+                    </a>
+</li>
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">school</span>
+                        Teachers
+                    </a>
+</li>
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">payments</span>
+                        Billing
+                    </a>
+</li>
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined">settings</span>
+                        Settings
+                    </a>
+</li>
+</ul>
+</nav>
+<div class="mt-auto px-6 mb-8">
+<button class="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-[10px] font-body-medium text-body-medium flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                New Registration
+            </button>
+</div>
+<div class="border-t border-white/10 pt-4">
+<ul class="space-y-1">
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">help</span>
+                        Support
+                    </a>
+</li>
+<li>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors font-body-medium text-body-medium" href="#">
+<span class="material-symbols-outlined">logout</span>
+                        Log Out
+                    </a>
+</li>
+</ul>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="h-topbar-height bg-surface border-b border-outline-variant flex items-center justify-between px-page-padding sticky top-0 z-40">
+<div class="flex items-center gap-8">
+<div class="relative">
+<span class="absolute inset-y-0 left-3 flex items-center text-ink-400">
+<span class="material-symbols-outlined">search</span>
+</span>
+<input class="pl-10 pr-4 py-2 bg-page-bg border-none rounded-lg w-64 focus:ring-2 focus:ring-primary text-body-medium font-body" placeholder="Search students..." type="text"/>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-ink-500 font-body-medium pb-4 border-b-2 border-transparent hover:text-primary transition-colors" href="#">Overview</a>
+<a class="text-primary font-h3 border-b-2 border-primary pb-4" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-[10px] hover:bg-primary-hover transition-all active:opacity-80">
+<span class="material-symbols-outlined">person_add</span>
+<span class="font-body-medium text-body-medium">Add Student</span>
+</button>
+<div class="flex items-center gap-3 border-l border-outline-variant pl-4">
+<button class="p-2 text-ink-700 hover:bg-surface-container-low rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-ink-700 hover:bg-surface-container-low rounded-full transition-colors">
+<span class="material-symbols-outlined">language</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant cursor-pointer">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a female administrator in a modern educational environment, soft daylighting, clean minimalist backdrop, high-resolution photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDntlVirbABS_KtNUZKIRDn8xvt3injQub-0A0cwHciZYWPTF6GQSXCYu22JNHkPvgEYujn8IOadZuhh-Sn3VteksBanbYuOKDOJL6eAJQ0FJvtsJQ2SXQK27l8aqSdrCQwa1MfxB3Z-29bDoTT_3XB584Zo9eqERIySkW-_-h5W3dvz5d6FwQIdCtyTK1Zk6SG_QH24N6SePiQ6jdj7AH0xPTgWvzitixYfTUKQcS6AAcjQMtSriYFcxSwpEAbXfvGg4tcqL687qY"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Dashboard Canvas -->
+<div class="p-page-padding flex-grow overflow-y-auto">
+<!-- Filter & Search Section -->
+<section class="mb-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h2 class="font-display text-display text-on-surface mb-1">Children Directory</h2>
+<p class="font-body text-body text-ink-500">Manage student profiles, enrollment status, and medical requirements.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="flex flex-col gap-1">
+<label class="font-small text-small text-ink-700">Group</label>
+<select class="bg-white border border-border rounded-[10px] px-4 py-2 min-w-[140px] font-body-medium text-body-medium focus:ring-2 focus:ring-primary outline-none">
+<option>All Groups</option>
+<option>Tigers (Infant)</option>
+<option>Bears (Toddler)</option>
+<option>Eagles (Pre-K)</option>
+</select>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-small text-small text-ink-700">Age Range</label>
+<select class="bg-white border border-border rounded-[10px] px-4 py-2 min-w-[140px] font-body-medium text-body-medium focus:ring-2 focus:ring-primary outline-none">
+<option>All Ages</option>
+<option>0 - 12 Months</option>
+<option>1 - 3 Years</option>
+<option>3 - 5 Years</option>
+</select>
+</div>
+<button class="mt-auto bg-white border border-border p-2 rounded-[10px] text-ink-700 hover:bg-surface-container-low transition-colors flex items-center">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Data Table Card -->
+<div class="bg-white rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-page-bg">
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">
+<div class="flex items-center gap-2">
+<input class="rounded text-primary focus:ring-primary border-border" type="checkbox"/>
+                                    Child Name
+                                </div>
+</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Group</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Age</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Guardian</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded text-primary focus:ring-primary border-border" type="checkbox"/>
+<div class="h-10 w-10 rounded-full bg-primary-soft flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of a cheerful toddler with curly hair, natural classroom lighting, bokeh background of educational toys, professional photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqxzpMAM7j4c29wuibXsyFq80zCTGlyXawxgBJXVbNqNkeq-ApnLLLnVP_vGAJnrbKcgxeByIjSgFRCbLRnODE4u_VjQTBsYIcV7SL8jW9LnCmeJjbjHhDxyIRQUV15DVHEJIb4ycDFBnVdIXXVmTFuKd7nz1w7aUHOcSf2edDnMfcJdJAcK0tgQgTPsaOZBDSHZyxIpzrOzMz-dz_aBVAfxHT6HU5pOvcW6h0-FDk1L_zCQV0MJmsYK-qNmJYXHuvnFh9Levk3KU"/>
+</div>
+<div>
+<p class="font-h3 text-h3 text-on-surface">Ethan Walker</p>
+<p class="font-small text-small text-ink-400">ID: #KC-1042</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-soft text-primary">
+                                    Tigers
+                                </span>
+</td>
+<td class="px-6 py-4 font-body text-body tabular-nums">2.4 Years</td>
+<td class="px-6 py-4">
+<p class="font-body-medium text-body-medium">Sarah Walker</p>
+<p class="font-small text-small text-ink-400">+1 555-0123</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-success">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="font-body-medium text-body-medium">Present</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<button class="text-ink-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded text-primary focus:ring-primary border-border" type="checkbox"/>
+<div class="h-10 w-10 rounded-full bg-accent-soft flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young girl with pigtails smiling at the camera, bright indoor lighting, soft focus educational setting, warm and friendly atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBBI8ipftgWjWsbxpquZzj8ZgfUftzCE0p88ey3W5aecTxgWwre6Vxk7ha3A29XTjUo7nIV1gWBCK8Zuky-L3-ceT6nTtUOPeS7GTPbLKdUVDU3I72aJmD9YoUe_KWKDqNyvdJaverg7H8YX03ah9EnE6QE_NTwKk6NE__HV-MqRGMePw9IfdzossT_VkplmrL2BHKR2ksgbpRvmYDcv0dWI3x4rwaC5OVe9XtByRA-WOIOd0CE-saFM0UKXXVZAQSVJZcssYsJNx4"/>
+</div>
+<div>
+<p class="font-h3 text-h3 text-on-surface">Maya Rodriguez</p>
+<p class="font-small text-small text-ink-400">ID: #KC-1045</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container/20 text-on-secondary-container">
+                                    Bears
+                                </span>
+</td>
+<td class="px-6 py-4 font-body text-body tabular-nums">4.1 Years</td>
+<td class="px-6 py-4">
+<p class="font-body-medium text-body-medium">David Rodriguez</p>
+<p class="font-small text-small text-ink-400">+1 555-0199</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-ink-400">
+<span class="w-2 h-2 rounded-full bg-ink-400"></span>
+<span class="font-body-medium text-body-medium">Absent</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<button class="text-ink-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded text-primary focus:ring-primary border-border" type="checkbox"/>
+<div class="h-10 w-10 rounded-full bg-error-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Detailed portrait of a little boy wearing glasses, curious expression, high quality digital photography, soft natural lighting in a modern kindergarten classroom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDKUPHXlPtzhRdr_6ClBAKTvL4jRE7wzevGNkKxnYneBVldk6V-ZpCtZjzR6NG9bB-wWPGvQUN0g3KO4sIV9i1vFz4FiwOXqXZ-FfCUN9pE0bWcrKLIj5sxIP3iWBUuuPt7giS6ZiYw2N7x1hUmXFG6WUGFli1OfoZLULvPTTWj2apIRF8e93cVEexJv91j0NVXVHg5GYIKOdU-ag9Gk0ql6g8rNxlqezdqOkBbB6zp63Ygy6o2jYoUughiMqTXNuZ3Hq6LDRPm46s"/>
+</div>
+<div>
+<p class="font-h3 text-h3 text-on-surface">Leo Kim</p>
+<p class="font-small text-small text-ink-400">ID: #KC-1049</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-soft text-primary">
+                                    Tigers
+                                </span>
+</td>
+<td class="px-6 py-4 font-body text-body tabular-nums">1.8 Years</td>
+<td class="px-6 py-4">
+<p class="font-body-medium text-body-medium">Ji-Soo Kim</p>
+<p class="font-small text-small text-ink-400">+1 555-0155</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-warning">
+<span class="w-2 h-2 rounded-full bg-warning"></span>
+<span class="font-body-medium text-body-medium">Excused</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-danger text-[20px]" title="Medical Alert">medical_services</span>
+<button class="text-ink-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-lowest transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded text-primary focus:ring-primary border-border" type="checkbox"/>
+<div class="h-10 w-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close up of a young child laughing, vibrant colors, clear skin textures, cinematic lighting, modern pedagogical environment background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCcakpy52LGi04usGHOHXo7BqBE7GqKX1JDA7xzFrHOMh7S6880y2Jt2Qlsl66IzPne3hwBmuOKoOCSPxDC4-fuEbWJzBE5rkwM-VsQaa2pn7GQMaoumyGng3AFPqMPUJVBVS9dJjHLaIuM0hnTelkrxkSRAG4OEUo-I4HNldMbcMUda3m8YCoWYPGyTjYNTL7tzRniv2nztEKqSi3gG3GXz4bk3a2d-GbutTuulFQjlvvK8y9ZFNm-lgt0mvSyc8rNIlXfv1A4Sk"/>
+</div>
+<div>
+<p class="font-h3 text-h3 text-on-surface">Sophie Chen</p>
+<p class="font-small text-small text-ink-400">ID: #KC-1052</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-tertiary-container/20 text-on-tertiary-fixed-variant">
+                                    Eagles
+                                </span>
+</td>
+<td class="px-6 py-4 font-body text-body tabular-nums">4.8 Years</td>
+<td class="px-6 py-4">
+<p class="font-body-medium text-body-medium">Liling Chen</p>
+<p class="font-small text-small text-ink-400">+1 555-0188</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-success">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+<span class="font-body-medium text-body-medium">Present</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<button class="text-ink-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination Footer -->
+<div class="px-6 py-4 border-t border-border bg-page-bg flex items-center justify-between">
+<p class="font-body text-body text-ink-500">Showing <span class="font-semibold text-on-surface">1-4</span> of <span class="font-semibold text-on-surface">128</span> children</p>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 border border-border rounded-lg bg-white text-ink-400 hover:bg-surface-container-low transition-colors disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<button class="px-3 py-1.5 border border-primary bg-primary text-white rounded-lg font-body-medium text-body-medium">1</button>
+<button class="px-3 py-1.5 border border-border rounded-lg bg-white text-ink-700 hover:bg-surface-container-low transition-colors font-body-medium text-body-medium">2</button>
+<button class="px-3 py-1.5 border border-border rounded-lg bg-white text-ink-700 hover:bg-surface-container-low transition-colors font-body-medium text-body-medium">3</button>
+<span class="px-2 text-ink-400">...</span>
+<button class="px-3 py-1.5 border border-border rounded-lg bg-white text-ink-700 hover:bg-surface-container-low transition-colors font-body-medium text-body-medium">12</button>
+<button class="px-3 py-1.5 border border-border rounded-lg bg-white text-ink-700 hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Summary Stats Bottom Section -->
+<section class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Stat 1 -->
+<div class="bg-white p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-start justify-between">
+<div>
+<p class="font-small text-small text-ink-500 mb-1">Total Enrolled</p>
+<h3 class="font-display text-display text-on-surface tabular-nums">128</h3>
+<p class="mt-2 text-success flex items-center gap-1 font-small text-small">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                            +4 this month
+                        </p>
+</div>
+<div class="w-12 h-12 rounded-full bg-primary-soft flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="bg-white p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-start justify-between">
+<div>
+<p class="font-small text-small text-ink-500 mb-1">Today's Attendance</p>
+<h3 class="font-display text-display text-on-surface tabular-nums">94.2%</h3>
+<p class="mt-2 text-ink-400 flex items-center gap-1 font-small text-small">
+                            112 / 128 present
+                        </p>
+</div>
+<div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center text-accent-deep">
+<span class="material-symbols-outlined">how_to_reg</span>
+</div>
+</div>
+<!-- Stat 3 -->
+<div class="bg-white p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-start justify-between">
+<div>
+<p class="font-small text-small text-ink-500 mb-1">Pending Forms</p>
+<h3 class="font-display text-display text-on-surface tabular-nums">12</h3>
+<p class="mt-2 text-warning flex items-center gap-1 font-small text-small">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                            8 Urgent updates
+                        </p>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">description</span>
+</div>
+</div>
+<!-- Stat 4 -->
+<div class="bg-white p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-start justify-between">
+<div>
+<p class="font-small text-small text-ink-500 mb-1">Medical Alerts</p>
+<h3 class="font-display text-display text-danger tabular-nums">3</h3>
+<p class="mt-2 text-ink-400 flex items-center gap-1 font-small text-small">
+                            Requires supervision
+                        </p>
+</div>
+<div class="w-12 h-12 rounded-full bg-error-container flex items-center justify-center text-error">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer / Credits -->
+<footer class="mt-auto px-page-padding py-6 text-center">
+<p class="font-caption text-caption text-ink-400">© 2024 Kindercare Pro Management System. All rights reserved.</p>
+</footer>
+</main>
+<script>
+        // Micro-interactions
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = !checkbox.checked;
+                }
+            });
+        });
+
+        // Simple Search Filter Logic (Visual only)
+        const searchInput = document.querySelector('input[placeholder="Search students..."]');
+        searchInput.addEventListener('input', (e) => {
+            console.log('Filtering for:', e.target.value);
+            // Dynamic filtering would happen here in a real app
+        });
+    </script>
+</body></html>

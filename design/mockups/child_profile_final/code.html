@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kindercare Pro - Child Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#745b00",
+                        "on-secondary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae4e9",
+                        "primary-fixed-dim": "#89d4cc",
+                        "tertiary-container": "#93543b",
+                        "background": "#f2fbff",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-primary-fixed-variant": "#00504b",
+                        "on-secondary-fixed": "#241a00",
+                        "surface": "#f2fbff",
+                        "inverse-surface": "#283236",
+                        "outline-variant": "#bec9c6",
+                        "card-bg": "#FFFFFF",
+                        "surface-tint": "#156964",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffdbce",
+                        "primary-fixed": "#a5f0e8",
+                        "primary-hover": "#18564F",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary-fixed": "#00201e",
+                        "ink-400": "#889094",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1f706a",
+                        "inverse-primary": "#89d4cc",
+                        "page-bg": "#F6F7F5",
+                        "surface-container-low": "#ebf5fa",
+                        "surface-bright": "#f2fbff",
+                        "on-secondary-container": "#755c00",
+                        "secondary-container": "#fed65f",
+                        "secondary-fixed": "#ffe08b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "on-error": "#ffffff",
+                        "on-background": "#131d21",
+                        "border": "#E3E7E5",
+                        "on-surface": "#131d21",
+                        "accent-soft": "#FDF6E1",
+                        "surface-container-highest": "#dae4e9",
+                        "warning": "#D89B3F",
+                        "success": "#3E8A6E",
+                        "primary-soft": "#E4F0EE",
+                        "surface-dim": "#d1dce1",
+                        "ink-700": "#434E53",
+                        "on-tertiary-fixed-variant": "#6f3720",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#005752",
+                        "inverse-on-surface": "#e8f2f7",
+                        "surface-container-high": "#dfeaef",
+                        "ink-500": "#636C70",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#a5f0e8",
+                        "tertiary": "#763d26",
+                        "accent-deep": "#C98A2B",
+                        "danger": "#C0553D",
+                        "on-surface-variant": "#3f4947",
+                        "surface-container": "#e5f0f5",
+                        "secondary-fixed-dim": "#e9c24d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "10px",
+                        "2xl": "16px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-padding": "32px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "256px",
+                        "topbar-height": "64px",
+                        "gutter": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "small": ["Inter"],
+                        "h1": ["Inter"],
+                        "caption": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-medium": ["Inter"],
+                        "h2": ["Inter"],
+                        "display": ["Inter"],
+                        "body": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #F6F7F5; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #bec9c6; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-on-surface overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-[#2C363A] dark:bg-[#1A2124] flex flex-col py-6 z-50">
+<div class="px-6 mb-10">
+<h1 class="font-h2 text-h2 text-white tracking-tight">Kindercare Pro</h1>
+<p class="text-white/50 font-caption">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active Tab: Students -->
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body-medium text-body-medium">Dashboard</span>
+</a>
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-4 py-3 flex items-center gap-3 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined text-primary" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-body-medium text-body-medium">Students</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span class="font-body-medium text-body-medium">Attendance</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-body-medium text-body-medium">Teachers</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-body-medium text-body-medium">Billing</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-medium text-body-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-1">
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-body-medium text-body-medium">Support</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-body-medium text-body-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width min-h-screen flex flex-col bg-page-bg">
+<!-- Top Navigation Bar -->
+<header class="h-topbar-height w-full bg-surface border-b border-outline-variant flex items-center justify-between px-page-padding sticky top-0 z-40">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="text-ink-500 font-body-medium">Students</span>
+<span class="material-symbols-outlined text-ink-400 text-[18px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary font-h3">Leo Anderson</span>
+</div>
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" data-icon="search">search</span>
+<input class="pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-small focus:ring-2 focus:ring-primary focus:border-primary transition-all w-64" placeholder="Search records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 border-r border-outline-variant pr-6">
+<button class="text-ink-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-ink-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="language">language</span>
+</button>
+</div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right">
+<p class="font-body-medium text-on-surface">Sarah Mitchell</p>
+<p class="font-caption text-ink-500">Administrator</p>
+</div>
+<div class="w-10 h-10 rounded-full border border-outline-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio headshot of a female school administrator in her late 30s, wearing a smart teal blazer. She has a warm, confident expression. The background is a soft-focus office environment with natural lighting and professional tones, aligning with a high-trust corporate education aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJ38NGu_VFi2AGWxoibWSlF79doV0x92k7HshVhNFTg-5eLjwKa-PSQTLExXCILza0qoGBML6nCdWA4l3FwBxcPHfmqVazlocMrGp1tYqJ3yME1ZWy0ME_ASes-BFvM72c_99ocyKjlXcAPXa81VtmnNn965Jff1HzHG8YSADBrJvhk7fag1uY0dTgdTwkwUfMD8eECSjkL0T_T_3v9MUFBiEkAWhYskileUWJbCRs2UMgyRnnRG_RD_XrTB_PtAMfwsu-cjqTxdc"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-page-padding flex gap-gutter overflow-y-auto custom-scrollbar h-[calc(100vh-64px)]">
+<!-- Left Column: Personal Details -->
+<div class="w-1/3 flex flex-col gap-6">
+<div class="bg-card-bg border border-border rounded-2xl p-6 flex flex-col items-center text-center">
+<div class="relative mb-4">
+<div class="w-32 h-32 rounded-2xl overflow-hidden border-4 border-white shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A high-quality, professional portrait of a cheerful 5-year-old boy with curly blond hair and bright blue eyes, wearing a clean white polo shirt. The lighting is bright and cheerful, using high-key studio techniques. The background is a soft, solid mint green, creating a warm and safe kindergarten feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTPH7i7xx2xdA2purQHpuC3XS0zL4dOBUmy6OWyZ5XCf0QzQqTlnPZr_Li9m3QWdk8O1Zs8kyc2O0BQQj_KAwcYAKUdyA6DXpPWfQELdcSXFFfRD9AR-D-kyOBP2EN3U0K9z65nX__fblOvHj44h087y511H7N_tqyfDhoePs7cz8OTIOmMF_ALgKACdG8FoIkWhJWVYvE8Fo7oi-H-SLLxui6cSZwsbhJ4hVguoUZD1PJNN8G6TmQq_3gosEADCJZeq4ba0hm1qo"/>
+</div>
+<button class="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-lg shadow-md hover:bg-primary-hover transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+</div>
+<h2 class="font-h2 text-h2 text-on-surface mb-1">Leo Anderson</h2>
+<span class="px-3 py-1 bg-primary-soft text-primary font-caption rounded-full mb-6">Class 2-B (Sunflowers)</span>
+<div class="w-full space-y-4 text-left pt-6 border-t border-border">
+<div>
+<p class="font-caption text-ink-500 uppercase tracking-wider mb-1">Student ID</p>
+<p class="font-body-medium text-on-surface">STU-2024-0482</p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<p class="font-caption text-ink-500 uppercase tracking-wider mb-1">Date of Birth</p>
+<p class="font-body-medium text-on-surface">Oct 12, 2018</p>
+</div>
+<div>
+<p class="font-caption text-ink-500 uppercase tracking-wider mb-1">Gender</p>
+<p class="font-body-medium text-on-surface">Male</p>
+</div>
+</div>
+<div>
+<p class="font-caption text-ink-500 uppercase tracking-wider mb-1">Home Address</p>
+<p class="font-body-medium text-on-surface leading-relaxed">482 Oakwood Ave, Apt 4C<br/>Riverdale, NY 10471</p>
+</div>
+<div class="pt-4">
+<button class="w-full py-2.5 px-4 bg-white border border-border text-ink-700 font-body-medium rounded-xl hover:bg-page-bg transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="file_download">file_download</span>
+                                Export Enrollment Form
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-card-bg border border-border rounded-2xl p-6">
+<h3 class="font-h3 text-h3 mb-4">Enrollment Stats</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-3 bg-page-bg rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-success/10 text-success rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div>
+<p class="font-body-medium text-on-surface">Attendance</p>
+<p class="text-small text-ink-500">Last 30 days</p>
+</div>
+</div>
+<p class="font-h3 text-success">96%</p>
+</div>
+<div class="flex items-center justify-between p-3 bg-page-bg rounded-xl">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-secondary/10 text-secondary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<div>
+<p class="font-body-medium text-on-surface">Activity Score</p>
+<p class="text-small text-ink-500">Social Development</p>
+</div>
+</div>
+<p class="font-h3 text-secondary">A+</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Column -->
+<div class="flex-1 flex flex-col gap-6">
+<!-- Medical Alerts Card (Gold Gold Soft Background) -->
+<div class="bg-accent-soft border border-secondary/20 rounded-2xl p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-[80px]" data-icon="medical_services">medical_services</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-secondary" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h3 class="font-h3 text-h3 text-on-secondary-fixed-variant">Medical Alerts &amp; Allergies</h3>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 border border-error rounded-full">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-body-medium text-error font-bold">Severe Peanut Allergy</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 border border-warning rounded-full">
+<span class="material-symbols-outlined text-warning text-[18px]" data-icon="info">info</span>
+<span class="font-body-medium text-on-secondary-fixed-variant">Lactose Intolerant</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-white/60 border border-outline rounded-full">
+<span class="material-symbols-outlined text-ink-500 text-[18px]" data-icon="medication">medication</span>
+<span class="font-body-medium text-ink-700">Carries EpiPen (Classroom Box)</span>
+</div>
+</div>
+<p class="mt-4 text-small text-ink-700 max-w-2xl">
+                        Requires immediate adrenaline administration if accidental exposure occurs. Emergency protocol is signed and on file in the main office.
+                    </p>
+</div>
+<!-- Guardian Contacts Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-h3 text-h3">Guardian Contacts</h3>
+<button class="text-primary font-body-medium flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                            Add Guardian
+                        </button>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Primary Contact -->
+<div class="bg-card-bg border border-primary/30 rounded-2xl p-5 relative ring-1 ring-primary/10">
+<div class="absolute top-5 right-5">
+<span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Primary</span>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden bg-page-bg">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a woman in her 30s with dark wavy hair, wearing a high-quality cream sweater. She has a friendly, professional smile. The background is a clean, minimalist interior with warm ambient lighting, fitting the high-trust corporate design aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDh7GmLCcPzLfgtL8OLOjbk0PKq-VFngr9vfLNguDb4AB8g5CEYnV1kfRdnrU0Ql2mCWQ8uxuuW_5DIhLZEGVVxakOBLCZaFlwVkP16TTkkI4dEm93OoioH-yht_rSrdc4ZJf4vYTLraxp4u-WmXzf9XyXjJLxaRfD_cqOiffO65eCH-DCwmY21oqeCYjTnImOqSrmW1wstHTa0WCS5sVaC2oqFFOZdAK8EEr8lN8p0xlput6NE9dUDoxpAXe-Cx3YiG4dOSXs68jw"/>
+</div>
+<div>
+<h4 class="font-h3 text-h3 text-on-surface">Elena Anderson</h4>
+<p class="text-small text-ink-500">Mother / Legal Guardian</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 text-ink-700">
+<span class="material-symbols-outlined text-[20px] text-primary" data-icon="call">call</span>
+<span class="font-body-medium">(555) 124-9082</span>
+</div>
+<div class="flex items-center gap-3 text-ink-700">
+<span class="material-symbols-outlined text-[20px] text-primary" data-icon="mail">mail</span>
+<span class="font-body-medium">elena.a@company.com</span>
+</div>
+</div>
+</div>
+<!-- Secondary Contact -->
+<div class="bg-card-bg border border-border rounded-2xl p-5">
+<div class="flex items-start gap-4 mb-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden bg-page-bg">
+<img class="w-full h-full object-cover" data-alt="A portrait of a man in his late 30s with short-cropped hair and glasses, wearing a structured navy polo shirt. He looks responsible and approachable. The lighting is soft and professional, against a neutral, high-end office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqftn4yF7lQLJZVhYkM5Qh6EnT_cfAUvdfHoMONaFKa-myhcoyPZVn5yGDzOenAJKwDl1abrnybfvHXfn0-DnpTb3CGRy8-Dm34Jv5Djv1mpQ8I6CwvIUf0awzVaVzqSvnyGBhpNG4KyMfq_7wFwHgzHveSFDL4Oe5x0vgnupHFTf3pUbr21ymgMMC6B4Ozq0EasUgI0Wic7ZKM8WQpwXgy6_snGu79_3kZKMD5kSaqCh6qOAT6qMIQviR8XXfKRKLSOfLXTVrji8"/>
+</div>
+<div>
+<h4 class="font-h3 text-h3 text-on-surface">Mark Anderson</h4>
+<p class="text-small text-ink-500">Father</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-3 text-ink-700">
+<span class="material-symbols-outlined text-[20px] text-ink-400" data-icon="call">call</span>
+<span class="font-body-medium">(555) 124-9083</span>
+</div>
+<div class="flex items-center gap-3 text-ink-700">
+<span class="material-symbols-outlined text-[20px] text-ink-400" data-icon="mail">mail</span>
+<span class="font-body-medium">m.anderson@email.com</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Recent Activity Log -->
+<section class="bg-card-bg border border-border rounded-2xl overflow-hidden flex flex-col">
+<div class="p-6 border-b border-border flex items-center justify-between">
+<h3 class="font-h3 text-h3">Recent Activity</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-border text-small font-body-medium hover:bg-page-bg transition-colors">Today</button>
+<button class="px-3 py-1.5 rounded-lg border border-border text-small font-body-medium bg-page-bg">Weekly</button>
+</div>
+</div>
+<div class="divide-y divide-border">
+<!-- Activity Item -->
+<div class="p-4 flex items-start gap-4 hover:bg-page-bg/50 transition-colors">
+<div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="nutrition">nutrition</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<p class="font-body-medium text-on-surface">Lunch Report - Completed</p>
+<span class="text-caption text-ink-400">12:30 PM</span>
+</div>
+<p class="text-small text-ink-500">Finished full meal (Pasta &amp; Veggies). Stayed hydrated.</p>
+</div>
+</div>
+<!-- Activity Item -->
+<div class="p-4 flex items-start gap-4 hover:bg-page-bg/50 transition-colors">
+<div class="w-10 h-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="brush">brush</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<p class="font-body-medium text-on-surface">Creative Arts Activity</p>
+<span class="text-caption text-ink-400">10:15 AM</span>
+</div>
+<p class="text-small text-ink-500">Participated in finger painting. Displayed excellent color matching skills.</p>
+</div>
+</div>
+<!-- Activity Item -->
+<div class="p-4 flex items-start gap-4 hover:bg-page-bg/50 transition-colors">
+<div class="w-10 h-10 rounded-full bg-success/10 text-success flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined" data-icon="login">login</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between mb-1">
+<p class="font-body-medium text-on-surface">Check-in Process</p>
+<span class="text-caption text-ink-400">08:42 AM</span>
+</div>
+<p class="text-small text-ink-500">Checked in by Elena Anderson. Temperature: 98.6°F.</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-page-bg/30 text-center">
+<button class="text-primary font-body-medium hover:underline text-small">View Full Activity History</button>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) - For Home/Dashboard Screens, suppressed here by logic, but added as per primary intent of Child Page action -->
+<div class="fixed bottom-8 right-8 flex flex-col gap-3">
+<button class="bg-primary text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:bg-primary-hover hover:scale-110 transition-all group relative">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span class="absolute right-full mr-4 bg-ink-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none">New Entry</span>
+</button>
+</div>
+<script>
+        // Simple micro-interaction for hover states
+        document.querySelectorAll('.bg-card-bg').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = '#156964';
+                card.style.transition = 'border-color 0.3s ease';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = '#E3E7E5';
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kindercare Pro | Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F6F7F5;
+            color: #131d21;
+        }
+        .sidebar-active {
+            background-color: rgba(31, 112, 106, 0.1);
+            border-right: 4px solid #005752;
+            color: #005752;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bec9c6;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#745b00",
+                        "on-secondary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae4e9",
+                        "primary-fixed-dim": "#89d4cc",
+                        "tertiary-container": "#93543b",
+                        "background": "#f2fbff",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-primary-fixed-variant": "#00504b",
+                        "on-secondary-fixed": "#241a00",
+                        "surface": "#f2fbff",
+                        "inverse-surface": "#283236",
+                        "outline-variant": "#bec9c6",
+                        "card-bg": "#FFFFFF",
+                        "surface-tint": "#156964",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffdbce",
+                        "primary-fixed": "#a5f0e8",
+                        "primary-hover": "#18564F",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary-fixed": "#00201e",
+                        "ink-400": "#889094",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1f706a",
+                        "inverse-primary": "#89d4cc",
+                        "page-bg": "#F6F7F5",
+                        "surface-container-low": "#ebf5fa",
+                        "surface-bright": "#f2fbff",
+                        "on-secondary-container": "#755c00",
+                        "secondary-container": "#fed65f",
+                        "secondary-fixed": "#ffe08b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "on-error": "#ffffff",
+                        "on-background": "#131d21",
+                        "border": "#E3E7E5",
+                        "on-surface": "#131d21",
+                        "accent-soft": "#FDF6E1",
+                        "surface-container-highest": "#dae4e9",
+                        "warning": "#D89B3F",
+                        "success": "#3E8A6E",
+                        "primary-soft": "#E4F0EE",
+                        "surface-dim": "#d1dce1",
+                        "ink-700": "#434E53",
+                        "on-tertiary-fixed-variant": "#6f3720",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#005752",
+                        "inverse-on-surface": "#e8f2f7",
+                        "surface-container-high": "#dfeaef",
+                        "ink-500": "#636C70",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#a5f0e8",
+                        "tertiary": "#763d26",
+                        "accent-deep": "#C98A2B",
+                        "danger": "#C0553D",
+                        "on-surface-variant": "#3f4947",
+                        "surface-container": "#e5f0f5",
+                        "secondary-fixed-dim": "#e9c24d"
+                    },
+                    "spacing": {
+                        "page-padding": "32px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "256px",
+                        "topbar-height": "64px",
+                        "gutter": "24px",
+                        "stack-md": "16px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-page-bg text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="bg-[#2C363A] dark:bg-[#1A2124] w-sidebar-width h-screen fixed left-0 top-0 flex flex-col py-6 z-50">
+<div class="px-6 mb-10 flex flex-col gap-1">
+<h1 class="font-h2 text-h2 text-white font-extrabold tracking-tight">Kindercare Pro</h1>
+<p class="text-white/50 text-[12px] font-medium uppercase tracking-widest">Admin Portal</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1 px-2">
+<!-- Active State Dashboard -->
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-4 py-3 flex items-center gap-3 transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-body-medium text-body-medium">Dashboard</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body-medium text-body-medium">Students</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="event_available">event_available</span>
+<span class="font-body-medium text-body-medium">Attendance</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-body-medium text-body-medium">Teachers</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-body-medium text-body-medium">Billing</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body-medium text-body-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4">
+<button class="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-[10px] font-body-medium transition-all active:scale-95 shadow-sm">
+                New Registration
+            </button>
+</div>
+<div class="px-2 pt-4 border-t border-white/10 flex flex-col gap-1">
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-body-medium text-body-medium">Support</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors text-error" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-body-medium text-body-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Top Bar Navigation -->
+<header class="h-topbar-height fixed top-0 right-0 z-40 bg-surface dark:bg-surface-dim border-b border-outline-variant flex items-center justify-between px-page-padding w-[calc(100%-256px)] ml-sidebar-width">
+<div class="flex items-center gap-8">
+<div class="relative w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" data-icon="search">search</span>
+<input class="w-full bg-page-bg border border-border rounded-[10px] pl-10 pr-4 py-2 text-small focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Search student or parent..." type="text"/>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="text-primary font-h3 border-b-2 border-primary pb-5 mt-5" href="#">Overview</a>
+<a class="text-ink-500 font-body-medium pb-5 mt-5 hover:text-primary-hover transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<button class="bg-primary-soft text-primary font-body-medium px-4 py-2 rounded-[10px] hover:bg-primary/20 transition-all active:opacity-80">
+                Add Student
+            </button>
+<div class="flex items-center gap-4 text-ink-700">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors" data-icon="language">language</span>
+<div class="flex items-center gap-3 cursor-pointer group">
+<img class="w-8 h-8 rounded-full border border-border object-cover" data-alt="A professional headshot of a middle-aged woman with a warm, welcoming smile, dressed in a professional business-casual outfit. She has a clean, polished appearance suitable for a senior kindergarten administrator. The lighting is soft and natural, against a minimalist corporate office backdrop with soft-focus greenery. High-quality editorial style with a calm, professional aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOY8NssWaLMVIocjJd1Hdi0bZG1CBGec0J2H94nZ5sXaENRPwJTiZ29xGVKKlXPWIh4Kq04H9tq3Z4_YO7XTwuW2GmpYmYbU2axH4v4C_ioW-mVelbSEEIYgxQtP3j6LgDCWHkzCy7K2Aq2_BinS3fngTpKftdvs20Aq0plCnjwbJlbeDJcZ4iA22BOVbaYRDFAJmfhsVkKQbpaVAVEbIHPs3WVGL-weQ2Z13a3wL48bZYEx2wG9bckrkq43JtZ8o4hFsMJmwhPjU"/>
+<span class="font-body-medium text-on-surface group-hover:text-primary transition-colors">Admin Profile</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width pt-topbar-height min-h-screen">
+<div class="p-page-padding max-w-[1400px] mx-auto">
+<!-- Summary Stats Section -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-8">
+<div class="bg-card-bg p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-primary-soft flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="child_care">child_care</span>
+</div>
+<div>
+<p class="text-caption text-ink-500 font-bold uppercase tracking-wider">Total Children</p>
+<h3 class="text-display font-display text-on-surface">124</h3>
+</div>
+</div>
+<div class="bg-card-bg p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<div>
+<p class="text-caption text-ink-500 font-bold uppercase tracking-wider">Groups</p>
+<h3 class="text-display font-display text-on-surface">8</h3>
+</div>
+</div>
+<div class="bg-card-bg p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-tertiary-container/10 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+</div>
+<div>
+<p class="text-caption text-ink-500 font-bold uppercase tracking-wider">Staff Members</p>
+<h3 class="text-display font-display text-on-surface">22</h3>
+</div>
+</div>
+<div class="bg-card-bg p-6 rounded-xl border border-border shadow-[0_1px_3px_rgba(16,24,40,0.06)] flex items-center gap-5">
+<div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center text-success">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+</div>
+<div>
+<p class="text-caption text-ink-500 font-bold uppercase tracking-wider">Attendance</p>
+<h3 class="text-display font-display text-on-surface">94%</h3>
+</div>
+</div>
+</div>
+<!-- Bento Layout Content -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Recent Activity Timeline (8 Cols) -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-gutter">
+<div class="bg-card-bg rounded-2xl border border-border overflow-hidden">
+<div class="px-6 py-4 border-b border-border flex items-center justify-between">
+<h2 class="text-h2 font-h2 text-on-surface">Recent Activity</h2>
+<button class="text-primary text-small font-bold hover:underline">View all log</button>
+</div>
+<div class="p-6">
+<div class="flex flex-col gap-6 relative">
+<div class="absolute left-4 top-2 bottom-2 w-px bg-border"></div>
+<div class="relative flex gap-4">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white z-10">
+<span class="material-symbols-outlined text-[18px]" data-icon="login">login</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-body-medium text-on-surface"><span class="font-bold">Leo Martinez</span> was checked in by parent.</p>
+<span class="text-caption text-ink-400">08:12 AM</span>
+</div>
+<p class="text-small text-ink-500">Group: Little Explorers • Staff: Emily Chen</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-secondary-fixed-dim z-10">
+<span class="material-symbols-outlined text-[18px]" data-icon="restaurant" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-body-medium text-on-surface"><span class="font-bold">Meal Update</span> for Toddler Group A.</p>
+<span class="text-caption text-ink-400">11:30 AM</span>
+</div>
+<p class="text-small text-ink-500">Morning snack served: Fruit slices and whole grain crackers.</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="w-8 h-8 rounded-full bg-ink-400 flex items-center justify-center text-white z-10">
+<span class="material-symbols-outlined text-[18px]" data-icon="emergency_home">emergency_home</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start mb-1">
+<p class="font-body-medium text-on-surface"><span class="font-bold">Sophie Williams</span> check-out by authorized guardian.</p>
+<span class="text-caption text-ink-400">12:15 PM</span>
+</div>
+<p class="text-small text-ink-500">Reason: Medical appointment (Pre-notified).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Groups Status Table -->
+<div class="bg-card-bg rounded-2xl border border-border overflow-hidden">
+<div class="px-6 py-4 border-b border-border flex items-center justify-between bg-page-bg/50">
+<h2 class="text-h2 font-h2 text-on-surface">Active Groups Status</h2>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-success/10 text-success rounded-full text-caption">All Normal</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-page-bg">
+<tr>
+<th class="px-6 py-3 text-caption text-ink-500 font-bold uppercase">Group Name</th>
+<th class="px-6 py-3 text-caption text-ink-500 font-bold uppercase">Staff Lead</th>
+<th class="px-6 py-3 text-caption text-ink-500 font-bold uppercase text-center">Ratio</th>
+<th class="px-6 py-3 text-caption text-ink-500 font-bold uppercase">Attendance</th>
+<th class="px-6 py-3 text-caption text-ink-500 font-bold uppercase">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<tr class="hover:bg-primary-soft/30 transition-colors">
+<td class="px-6 py-4 font-body-medium">Little Explorers</td>
+<td class="px-6 py-4 text-body text-ink-700">Sarah Jenkins</td>
+<td class="px-6 py-4 text-center tabular-nums">1:5</td>
+<td class="px-6 py-4 tabular-nums">14 / 15</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-success/10 text-success rounded-full text-[12px] font-semibold">Healthy</span>
+</td>
+</tr>
+<tr class="hover:bg-primary-soft/30 transition-colors">
+<td class="px-6 py-4 font-body-medium">Tiny Tots</td>
+<td class="px-6 py-4 text-body text-ink-700">Michael Ross</td>
+<td class="px-6 py-4 text-center tabular-nums">1:4</td>
+<td class="px-6 py-4 tabular-nums">8 / 8</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-success/10 text-success rounded-full text-[12px] font-semibold">Healthy</span>
+</td>
+</tr>
+<tr class="hover:bg-primary-soft/30 transition-colors">
+<td class="px-6 py-4 font-body-medium">Preschool Stars</td>
+<td class="px-6 py-4 text-body text-ink-700">Elena Gilbert</td>
+<td class="px-6 py-4 text-center tabular-nums">1:10</td>
+<td class="px-6 py-4 tabular-nums">18 / 20</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-warning/10 text-warning rounded-full text-[12px] font-semibold">Check Ratio</span>
+</td>
+</tr>
+<tr class="hover:bg-primary-soft/30 transition-colors">
+<td class="px-6 py-4 font-body-medium">Busy Bees</td>
+<td class="px-6 py-4 text-body text-ink-700">Tom Hardy</td>
+<td class="px-6 py-4 text-center tabular-nums">1:6</td>
+<td class="px-6 py-4 tabular-nums">11 / 12</td>
+<td class="px-6 py-4">
+<span class="px-2 py-0.5 bg-success/10 text-success rounded-full text-[12px] font-semibold">Healthy</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Quick Actions Sidebar (4 Cols) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-gutter">
+<!-- Quick Actions Card -->
+<div class="bg-card-bg rounded-2xl border border-border p-6 shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
+<h2 class="text-h2 font-h2 text-on-surface mb-4">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 bg-primary-soft hover:bg-primary/10 rounded-xl transition-all border border-transparent hover:border-primary/20">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="person_add">person_add</span>
+<span class="text-small font-bold text-primary">New Student</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-accent-soft hover:bg-secondary-container/10 rounded-xl transition-all border border-transparent hover:border-secondary/20">
+<span class="material-symbols-outlined text-secondary mb-2" data-icon="post_add">post_add</span>
+<span class="text-small font-bold text-secondary">Broad Cast</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-tertiary-container/5 hover:bg-tertiary-container/10 rounded-xl transition-all border border-transparent hover:border-tertiary/20">
+<span class="material-symbols-outlined text-tertiary mb-2" data-icon="inventory">inventory</span>
+<span class="text-small font-bold text-tertiary">Inventory</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 bg-ink-400/5 hover:bg-ink-400/10 rounded-xl transition-all border border-transparent hover:border-ink-400/20">
+<span class="material-symbols-outlined text-ink-700 mb-2" data-icon="event">event</span>
+<span class="text-small font-bold text-ink-700">Schedule</span>
+</button>
+</div>
+</div>
+<!-- Daily Inspiration/Alerts -->
+<div class="bg-[#2C363A] rounded-2xl p-6 text-white overflow-hidden relative group">
+<div class="relative z-10">
+<h3 class="text-h3 font-h3 mb-2">Facility Reminder</h3>
+<p class="text-body text-white/80 leading-relaxed mb-4">Fire safety inspection scheduled for tomorrow at 10:00 AM. Please ensure all corridors are clear.</p>
+<button class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-small transition-colors flex items-center gap-2">
+                                Acknowledge <span class="material-symbols-outlined text-[16px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Subtle Pattern Decoration -->
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[120px]" data-icon="shield">shield</span>
+</div>
+</div>
+<!-- Staff On Duty -->
+<div class="bg-card-bg rounded-2xl border border-border p-6 shadow-[0_1px_3px_rgba(16,24,40,0.06)]">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-h2 font-h2 text-on-surface">Staff on Duty</h2>
+<span class="text-caption text-success font-bold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-success"></span> 18 Active
+                            </span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A close-up portrait of a young male educator with a friendly and professional demeanor, wearing a simple blue polo shirt. He is set against a brightly lit, clean preschool classroom with educational toys in the soft-focus background. High-quality corporate photography, bright and optimistic mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9_48w9WW9PD4Sv4uH9Gir0YLjB0999TPxP8FzVUw_xmal-PqtdJSE5DJiAymPnqXvkvge9Rq2JmNRUQ9miF9-n6UnTKPS0MrrOT5LCeSvSaQebQgRwxiHl-0xnSqohac1DA39kv_Fe4QnaaigSnbD3PG0atPaPU6TDQVqYr0bPJ_wJvCu7lsIrHOnMsOpqsZ706aIw_cWj9eR-1jf5eJUPTaprvHPK_plc7OSgiqxQYj9AuvR32VTzcWV5N0zZGLGsW7EGjLDW5M"/>
+<div class="flex-1">
+<p class="text-body-medium font-bold text-on-surface">Julian Weber</p>
+<p class="text-caption text-ink-500">Supervisor • Floor 1</p>
+</div>
+<span class="material-symbols-outlined text-ink-400 text-[20px] cursor-pointer hover:text-primary" data-icon="chat">chat</span>
+</div>
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A portrait of a cheerful African American woman educator, her hair styled professionally, wearing a warm yellow sweater. She has a kind and engaging expression. The setting is a modern, clean daycare environment with soft natural lighting and a minimalist aesthetic. High-resolution commercial style photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdf-Z-yvOcUvf1h5vghNigjiTseKWk9dEXNa_H4jWRi_cKfAKfBOkxMhZ3z_L9m5GviZiTXlOp9U_2B4MaZZxstRze6PhK_F_3j_h-KaBFDapUDu-EkuVj9CK0bw4wgNco-I4e4V7IU-8c0uDFoi7NI05GNhiqehOVoRzszFVLDeCOvP-tQ0g9m3Gtl3OJ35KMnSh_f67SkRMWtH27fcHMYNlmCvEsP01LLC2hpdOy1brvsLk6vyW4N2ykscczXnTS0SEOvFkVdqU"/>
+<div class="flex-1">
+<p class="text-body-medium font-bold text-on-surface">Maya Angelou</p>
+<p class="text-caption text-ink-500">Lead Teacher • Toddlers</p>
+</div>
+<span class="material-symbols-outlined text-ink-400 text-[20px] cursor-pointer hover:text-primary" data-icon="chat">chat</span>
+</div>
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A professional portrait of a senior male administrator with a gentle and trustworthy look, wearing a grey vest over a white shirt. He stands in a well-lit, professional education center office. The aesthetic is clean, professional, and trustworthy, with high-key lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp0_7wAz4k0WgkdTTMhITafKSHpriNE_RkqPLdrSCUdPVRxqxf48RZo1_3QGxksG11xAG9ltorqMoaI6S7iHm4sXCWCAVJ2kh0wZdRqsCmKxaDYMf3TV5eIThoqe5KJ0_dH2lMzXfoENG4SzIANDor-0JsC4DvL8iiu5YfpZlceqP0CjPzCpmE0djEVpBSAiJ_UEpgsYRjz4EI-1uDTZ7-CRsk46XMmbYDF-OFhiVHmEkR2FFT9VR67apTGo8X5ZIVbRRWOPqfml0"/>
+<div class="flex-1">
+<p class="text-body-medium font-bold text-on-surface">Marcus Thorne</p>
+<p class="text-caption text-ink-500">Security Head</p>
+</div>
+<span class="material-symbols-outlined text-ink-400 text-[20px] cursor-pointer hover:text-primary" data-icon="chat">chat</span>
+</div>
+</div>
+<button class="w-full mt-6 py-2 text-ink-500 text-small font-bold hover:text-primary transition-colors border-t border-border pt-4">View All Staff</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Micro-interaction Scripts -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Simple hover animation for the quick action buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    // Micro-scale effect handled by Tailwind classes usually,
+                    // but we can add more specific JS logic here if needed.
+                });
+            });
+
+            // Smooth dashboard entry effect
+            const mainContent = document.querySelector('main');
+            mainContent.style.opacity = '0';
+            mainContent.style.transform = 'translateY(10px)';
+            mainContent.style.transition = 'all 0.6s ease-out';
+            
+            setTimeout(() => {
+                mainContent.style.opacity = '1';
+                mainContent.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+</body></html>

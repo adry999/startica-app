@@ -1,0 +1,17 @@
+{
+  "common": {
+    "appName": "Startica",
+    "save": "Salvează",
+    "cancel": "Anulează",
+    "delete": "Șterge",
+    "edit": "Editează",
+    "loading": "Se încarcă...",
+    "search": "Caută"
+  },
+  "auth": {
+    "login": "Autentificare",
+    "email": "Email",
+    "password": "Parolă",
+    "forgotPassword": "Ai uitat parola?"
+  }
+}

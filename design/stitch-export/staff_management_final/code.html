@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Staff Management | Kindercare Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#745b00",
+                        "on-secondary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae4e9",
+                        "primary-fixed-dim": "#89d4cc",
+                        "tertiary-container": "#93543b",
+                        "background": "#f2fbff",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-primary-fixed-variant": "#00504b",
+                        "on-secondary-fixed": "#241a00",
+                        "surface": "#f2fbff",
+                        "inverse-surface": "#283236",
+                        "outline-variant": "#bec9c6",
+                        "card-bg": "#FFFFFF",
+                        "surface-tint": "#156964",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffdbce",
+                        "primary-fixed": "#a5f0e8",
+                        "primary-hover": "#18564F",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary-fixed": "#00201e",
+                        "ink-400": "#889094",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1f706a",
+                        "inverse-primary": "#89d4cc",
+                        "page-bg": "#F6F7F5",
+                        "surface-container-low": "#ebf5fa",
+                        "surface-bright": "#f2fbff",
+                        "on-secondary-container": "#755c00",
+                        "secondary-container": "#fed65f",
+                        "secondary-fixed": "#ffe08b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "on-error": "#ffffff",
+                        "on-background": "#131d21",
+                        "border": "#E3E7E5",
+                        "on-surface": "#131d21",
+                        "accent-soft": "#FDF6E1",
+                        "surface-container-highest": "#dae4e9",
+                        "warning": "#D89B3F",
+                        "success": "#3E8A6E",
+                        "primary-soft": "#E4F0EE",
+                        "surface-dim": "#d1dce1",
+                        "ink-700": "#434E53",
+                        "on-tertiary-fixed-variant": "#6f3720",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#005752",
+                        "inverse-on-surface": "#e8f2f7",
+                        "surface-container-high": "#dfeaef",
+                        "ink-500": "#636C70",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#a5f0e8",
+                        "tertiary": "#763d26",
+                        "accent-deep": "#C98A2B",
+                        "danger": "#C0553D",
+                        "on-surface-variant": "#3f4947",
+                        "surface-container": "#e5f0f5",
+                        "secondary-fixed-dim": "#e9c24d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "page-padding": "32px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "256px",
+                        "topbar-height": "64px",
+                        "gutter": "24px",
+                        "stack-md": "16px"
+                    },
+                    "fontFamily": {
+                        "small": ["Inter"],
+                        "h1": ["Inter"],
+                        "caption": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-medium": ["Inter"],
+                        "h2": ["Inter"],
+                        "display": ["Inter"],
+                        "body": ["Inter"]
+                    },
+                    "fontSize": {
+                        "small": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "h3": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-medium": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F6F7F5;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .sidebar-active {
+            color: #005752;
+            background-color: rgba(31, 112, 106, 0.1);
+            border-right: 4px solid #005752;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #E3E7E5;
+            border-radius: 10px;
+        }
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="flex">
+<!-- SideNavBar (Predicted Component) -->
+<aside class="bg-[#2C363A] dark:bg-[#1A2124] w-sidebar-width h-screen fixed left-0 top-0 flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-h2 text-h2 text-white">Kindercare Pro</h1>
+<p class="text-white/50 text-small">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-medium text-body-medium">Dashboard</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-medium text-body-medium">Students</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined">event_available</span>
+<span class="font-body-medium text-body-medium">Attendance</span>
+</a>
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-4 py-3 flex items-center gap-3 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-body-medium text-body-medium">Teachers</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-medium text-body-medium">Billing</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-medium text-body-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 border-t border-white/10 pt-6 space-y-1">
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-medium text-body-medium">Support</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white hover:bg-white/5 transition-colors" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-body-medium text-body-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-sidebar-width flex-1 min-h-screen">
+<!-- TopNavBar (Predicted Component) -->
+<header class="h-topbar-height fixed top-0 right-0 w-[calc(100%-256px)] bg-surface border-b border-outline-variant flex items-center justify-between px-page-padding z-40">
+<div class="flex items-center gap-8">
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-500 text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-[10px] text-body-medium focus:ring-2 focus:ring-primary outline-none transition-all" placeholder="Search staff or groups..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-ink-500 font-body-medium hover:text-primary-hover transition-colors" href="#">Overview</a>
+<a class="text-primary font-h3 border-b-2 border-primary pb-1" href="#">Staff Directory</a>
+<a class="text-ink-500 font-body-medium hover:text-primary-hover transition-colors" href="#">Performance</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 pr-4 border-r border-outline-variant">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high text-ink-700 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high text-ink-700 transition-colors">
+<span class="material-symbols-outlined">language</span>
+</button>
+</div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right">
+<p class="font-body-medium text-ink-700 leading-none">Sarah Jenkins</p>
+<p class="text-caption text-ink-500 leading-none mt-1">Administrator</p>
+</div>
+<img class="w-10 h-10 rounded-full border border-outline-variant object-cover group-hover:opacity-90 transition-opacity" data-alt="A professional headshot of a middle-aged woman with a warm, confident smile, wearing a dark blazer over a teal blouse. The background is a clean, bright minimalist office with soft natural lighting and subtle green plants, reflecting a professional high-trust educational environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuerDpn9yX7P5xcKLwXwiPIEq3QB73MvmO6a2nwIY1jCoxLl85zs1a-IxWAYR_YjWI4Ckc5Fqk7BikBlAsz7w-U-tVHIau-4yQwao17SJltBGO7zU27ZHrYK154GvNtICjeipD3QkfCnOYwRXNsXWkmyARLkfnsUJHA916qmP0MUd1NUSM6wF61vcknKy-UJ95ni-cJxVfpwE1F5cirwMKojxjxRy6GC1k9dqw3Egh7D143DYkvYtOv3orbZ-VC5y1Lm4LF1YFZmQ"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="mt-topbar-height p-page-padding space-y-8">
+<!-- Page Header -->
+<div class="flex items-end justify-between">
+<div>
+<nav class="flex text-caption text-ink-500 mb-2 gap-2 items-center">
+<span>Management</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary">Staff Directory</span>
+</nav>
+<h2 class="font-display text-display text-on-surface">Staff &amp; Educators</h2>
+<p class="text-body text-ink-500 mt-1">Manage employee records, roles, and classroom assignments.</p>
+</div>
+<button class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-[10px] font-h3 flex items-center gap-2 shadow-sm transition-all active:scale-95">
+<span class="material-symbols-outlined">person_add</span>
+                    Add Staff Member
+                </button>
+</div>
+<!-- Stats Overview (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col gap-2">
+<span class="text-ink-500 font-caption uppercase">Total Personnel</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-display tabular-nums">48</span>
+<span class="text-success text-small font-body-medium">+3 this month</span>
+</div>
+</div>
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col gap-2">
+<span class="text-ink-500 font-caption uppercase">Active Educators</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-display tabular-nums">32</span>
+<span class="text-ink-400 text-small">Across 12 groups</span>
+</div>
+</div>
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col gap-2">
+<span class="text-ink-500 font-caption uppercase">On Leave</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-display tabular-nums text-warning">04</span>
+<span class="text-ink-400 text-small">Returning soon</span>
+</div>
+</div>
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col gap-2">
+<span class="text-ink-500 font-caption uppercase">Training Compliance</span>
+<div class="flex items-baseline gap-2">
+<span class="font-display text-display tabular-nums">98%</span>
+<div class="w-full bg-surface-container-highest h-2 rounded-full mt-2">
+<div class="bg-primary h-2 rounded-full w-[98%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Filters Bar -->
+<div class="bg-card-bg border border-border p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex bg-surface-container-low p-1 rounded-lg border border-border">
+<button class="px-4 py-1.5 text-body-medium font-body-medium bg-white shadow-sm rounded-md text-primary">All Staff</button>
+<button class="px-4 py-1.5 text-body-medium font-body-medium text-ink-500 hover:text-ink-700">Educators</button>
+<button class="px-4 py-1.5 text-body-medium font-body-medium text-ink-500 hover:text-ink-700">Administration</button>
+</div>
+<div class="h-8 w-[1px] bg-border"></div>
+<div class="flex items-center gap-2 px-3 py-1.5 border border-border rounded-lg text-body-medium text-ink-700 cursor-pointer hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+                        More Filters
+                    </div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-small text-ink-500">Sorted by: <span class="text-on-surface font-body-medium">Recently Added</span></span>
+<span class="material-symbols-outlined text-ink-400">expand_more</span>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="bg-card-bg border border-border rounded-xl overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead class="bg-page-bg border-b border-border">
+<tr>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">
+<div class="flex items-center gap-2">
+<input class="rounded border-outline text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+                                    Name
+                                </div>
+</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Role</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Groups Managed</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Contact Info</th>
+<th class="px-6 py-4 font-caption text-caption text-ink-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<img class="w-10 h-10 rounded-full border border-border object-cover" data-alt="A close-up portrait of a cheerful male teacher in his late 20s with short hair, wearing a high-quality teal polo shirt. He is in a brightly lit kindergarten classroom with soft-focus children's artwork in the background. The style is modern, professional, and warm, featuring high clarity and a natural color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3p_6Ce8bI_C-82pOJ5_F7I910aLMzpxZlB3C2cznesphygGOp54twLJqOBGzy92OJaLv_is25q4e-z-U2Z1tswwcfCInf-L-x0-aSJKtoyTlH0WB8Bi1csrDIQcntZqyi0KXjDTaImmPVVjmaF10Js7Wz7OHpm1s_Zj608hOxpeZI-Zt5LptB7xOoPTE520uOdH2LOQ6extkPzKmD4W8v3eVRz1aI7atUIdJK8SSOIx5kOpnFBdXrgwkJiAotHLyg7djxX41LJms"/>
+<div>
+<p class="font-h3 text-on-surface">Benjamin Thorne</p>
+<p class="text-caption text-ink-500">ID: KF-00234</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-caption font-caption bg-primary-soft text-primary border border-primary/20">Lead Educator</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded bg-accent-soft text-on-secondary-fixed-variant text-[11px] font-bold uppercase">Little Bears</span>
+<span class="px-2 py-0.5 rounded bg-accent-soft text-on-secondary-fixed-variant text-[11px] font-bold uppercase">Sunflowers</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-body-medium text-ink-700">b.thorne@kindercare.pro</p>
+<p class="text-small text-ink-400 tabular-nums">+1 (555) 012-3456</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-body-medium text-success font-body-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-ink-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<img class="w-10 h-10 rounded-full border border-border object-cover" data-alt="A portrait of a senior female educator with graying hair tied in a professional bun, wearing a smart charcoal blazer over a cream-colored top. She has a gentle, experienced expression. The background is a clean, modern school hallway with minimalist decor and high-key soft lighting, emphasizing trust and professionalism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuARS-58jXixVpdz3FfEYUFcmwZA4iMlC-TIriF6kjww5qddeRYN3m011AW-LaVmf4hc1mRDWhLa0wEd7Prsbk21L768-7hboVccPUGGHuCT44lvZS810BF-NCwy8hQAPRAXZCHgtTefJOgYftnkl85rmIMbJU4MYowiU5JZjZoYC1amf7IGfyzAvrhcFlk4rHdkSHeLs7PkMibOEhWTdJTLpudnJdm6cdp3_CqKSSeNTDx8hXqbNbMKeSP5N5AtjQ21ZR58uvzOLSU"/>
+<div>
+<p class="font-h3 text-on-surface">Eleanor Vance</p>
+<p class="text-caption text-ink-500">ID: KF-00102</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-caption font-caption bg-secondary-container text-on-secondary-container border border-secondary/20">Admin Director</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-small text-ink-500 italic">Global Oversight</span>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-body-medium text-ink-700">e.vance@kindercare.pro</p>
+<p class="text-small text-ink-400 tabular-nums">+1 (555) 012-9876</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-body-medium text-success font-body-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-ink-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<img class="w-10 h-10 rounded-full border border-border object-cover" data-alt="A professional headshot of a young woman with curly hair and glasses, wearing a soft teal cardigan. She looks approachable and friendly. The lighting is bright and even, against a pristine white studio wall. This image reflects a modern, warm, and professional childcare employee profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7RZpPv2mYBiClwruwmkD82UHPFR9KpIINHUNsr9dTs064quZHKOP8A0rl8fZmDtpi99-MVRTBUff-Z2NOnFG5HqnnVnStG89DjCXYgyTmt2xJaucoNkgtQdtqIK6SyTPLrz3fxnUpEXsnV7ePvz7uKq8rmRqbpiPpVjQsdNZwdejATA8-sYeNCDrojMneUYisEeNr9DZnavRn61XzhXOlEEoV7njBPT1LhbJqSoPgzrEXz_OxLwayVIA7lLuZLqRIbbiymCKZcjo"/>
+<div>
+<p class="font-h3 text-on-surface">Maya Rodriguez</p>
+<p class="text-caption text-ink-500">ID: KF-00356</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-caption font-caption bg-primary-soft text-primary border border-primary/20">Assistant Educator</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex gap-2">
+<span class="px-2 py-0.5 rounded bg-accent-soft text-on-secondary-fixed-variant text-[11px] font-bold uppercase">Blue Jays</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-body-medium text-ink-700">m.rodriguez@kindercare.pro</p>
+<p class="text-small text-ink-400 tabular-nums">+1 (555) 012-5566</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-warning"></div>
+<span class="text-body-medium text-warning font-body-medium">On Leave</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-ink-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<input class="rounded border-outline text-primary focus:ring-primary h-4 w-4" type="checkbox"/>
+<img class="w-10 h-10 rounded-full border border-border object-cover" data-alt="A portrait of a male administrative professional in his 40s, wearing a crisp white dress shirt and a dark tie. He has a clean-shaven, focused look. The setting is a contemporary office reception with high-end furniture and a soft, professional light-mode aesthetic. High visual fidelity and high-utility professional vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAwJObudp2DZNyHiUFmbPfIgPXgdOxeC0DiDuE2gEdHRFd1HqNRiT0SQRNiL9v9b2tapdBPs970D7DVqRgFLzqW-qhanwpZZw47PqiOC6zIH-EO7AmDK3Fxt3_0GwaaAN5VxqGFA_Q3HCua06ujF4OfQlYKel00-5Bei6KqVkZYrzGxVdHm0E2RsDRQosfcWNL4iuXUWLpCeNOhWRf3Adpilk5nyt4X6JIMbESWwp9CR4REzcd1nRwPaXtUjHIynq4WEmwCksh21c"/>
+<div>
+<p class="font-h3 text-on-surface">David Chen</p>
+<p class="text-caption text-ink-500">ID: KF-00129</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-3 py-1 rounded-full text-caption font-caption bg-secondary-container text-on-secondary-container border border-secondary/20">Operations</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-small text-ink-500 italic">Facility Management</span>
+</td>
+<td class="px-6 py-4">
+<div>
+<p class="text-body-medium text-ink-700">d.chen@kindercare.pro</p>
+<p class="text-small text-ink-400 tabular-nums">+1 (555) 012-7788</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-success"></div>
+<span class="text-body-medium text-success font-body-medium">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-2 rounded-full hover:bg-surface-container-high text-ink-400 hover:text-primary transition-all">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-page-bg flex items-center justify-between border-t border-border">
+<span class="text-small text-ink-500">Showing 1 to 4 of 48 entries</span>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-border text-ink-400 hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white font-body-medium text-small">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-border text-ink-700 hover:bg-white font-body-medium text-small transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-border text-ink-700 hover:bg-white font-body-medium text-small transition-colors">3</button>
+<span class="px-1 text-ink-400">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-border text-ink-700 hover:bg-white font-body-medium text-small transition-colors">12</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-border text-ink-400 hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick Action Cards (Bento Extension) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mt-8">
+<div class="bg-primary-container p-6 rounded-xl text-white flex flex-col justify-between h-48 relative overflow-hidden group">
+<div class="z-10">
+<h3 class="font-h2 text-h2 mb-2">Staff Training</h3>
+<p class="text-on-primary-container/80 text-body">3 educators need first-aid certification renewals this month.</p>
+</div>
+<button class="z-10 mt-4 bg-white/20 hover:bg-white/30 backdrop-blur-md px-4 py-2 rounded-lg text-small font-h3 transition-all flex items-center gap-2 w-fit">
+                        Review Schedule
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<!-- Background Pattern/Atmosphere -->
+<div class="absolute -right-8 -bottom-8 opacity-10 group-hover:scale-110 transition-transform duration-700">
+<span class="material-symbols-outlined text-[160px]" style="font-variation-settings: 'FILL' 1;">history_edu</span>
+</div>
+</div>
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col justify-between h-48 group hover:border-primary transition-colors">
+<div>
+<div class="w-10 h-10 rounded-lg bg-accent-soft flex items-center justify-center mb-4 text-accent-deep">
+<span class="material-symbols-outlined">event_note</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface">Time-off Requests</h3>
+<p class="text-ink-500 text-body">2 pending requests for the upcoming holiday break.</p>
+</div>
+<a class="text-primary font-h3 text-body-medium flex items-center gap-1 group-hover:gap-2 transition-all" href="#">
+                        View Requests
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</a>
+</div>
+<div class="bg-card-bg border border-border p-6 rounded-xl flex flex-col justify-between h-48 group hover:border-primary transition-colors">
+<div>
+<div class="w-10 h-10 rounded-lg bg-primary-soft flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined">assignment_ind</span>
+</div>
+<h3 class="font-h3 text-h3 text-on-surface">Role Assignments</h3>
+<p class="text-ink-500 text-body">Configure classroom permissions and access levels.</p>
+</div>
+<a class="text-primary font-h3 text-body-medium flex items-center gap-1 group-hover:gap-2 transition-all" href="#">
+                        Edit Permissions
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</a>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Micro-interaction for table rows
+        document.querySelectorAll('tr').forEach(row => {
+            row.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                    console.log('Row clicked, navigating to profile...');
+                    // In a real app: window.location.href = `/staff/${id}`;
+                }
+            });
+        });
+
+        // Search bar focus effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('w-96');
+            searchInput.parentElement.classList.remove('w-72');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.add('w-72');
+            searchInput.parentElement.classList.remove('w-96');
+        });
+    </script>
+</body></html>

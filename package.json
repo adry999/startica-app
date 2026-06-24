@@ -1,0 +1,32 @@
+{
+  "name": "startica",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-tenant kindergarten management SaaS — V1 admin panel (Nuxt 3 + Supabase + PowerSync).",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck",
+    "postinstall": "nuxt prepare"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@nuxt/ui": "^3.3.7",
+    "@nuxtjs/i18n": "^10.4.0",
+    "@supabase/ssr": "^0.12.0",
+    "@supabase/supabase-js": "^2.108.2",
+    "nuxt": "^3.21.8",
+    "tailwindcss": "^4.3.1",
+    "vue": "^3.5.38",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.5"
+  }
+}

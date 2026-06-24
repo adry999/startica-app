@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Settings &amp; Profile | Kindercare Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #E3E7E5;
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 32px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#745b00",
+                        "on-secondary-fixed-variant": "#584400",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#dae4e9",
+                        "primary-fixed-dim": "#89d4cc",
+                        "tertiary-container": "#93543b",
+                        "background": "#f2fbff",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-primary-fixed-variant": "#00504b",
+                        "on-secondary-fixed": "#241a00",
+                        "surface": "#f2fbff",
+                        "inverse-surface": "#283236",
+                        "outline-variant": "#bec9c6",
+                        "card-bg": "#FFFFFF",
+                        "surface-tint": "#156964",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#ffdbce",
+                        "primary-fixed": "#a5f0e8",
+                        "primary-hover": "#18564F",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary-fixed": "#00201e",
+                        "ink-400": "#889094",
+                        "error": "#ba1a1a",
+                        "primary-container": "#1f706a",
+                        "inverse-primary": "#89d4cc",
+                        "page-bg": "#F6F7F5",
+                        "surface-container-low": "#ebf5fa",
+                        "surface-bright": "#f2fbff",
+                        "on-secondary-container": "#755c00",
+                        "secondary-container": "#fed65f",
+                        "secondary-fixed": "#ffe08b",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "on-error": "#ffffff",
+                        "on-background": "#131d21",
+                        "border": "#E3E7E5",
+                        "on-surface": "#131d21",
+                        "accent-soft": "#FDF6E1",
+                        "surface-container-highest": "#dae4e9",
+                        "warning": "#D89B3F",
+                        "success": "#3E8A6E",
+                        "primary-soft": "#E4F0EE",
+                        "surface-dim": "#d1dce1",
+                        "ink-700": "#434E53",
+                        "on-tertiary-fixed-variant": "#6f3720",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "primary": "#005752",
+                        "inverse-on-surface": "#e8f2f7",
+                        "surface-container-high": "#dfeaef",
+                        "ink-500": "#636C70",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary-container": "#a5f0e8",
+                        "tertiary": "#763d26",
+                        "accent-deep": "#C98A2B",
+                        "danger": "#C0553D",
+                        "on-surface-variant": "#3f4947",
+                        "surface-container": "#e5f0f5",
+                        "secondary-fixed-dim": "#e9c24d"
+                    },
+                    "spacing": {
+                        "page-padding": "32px",
+                        "stack-sm": "8px",
+                        "sidebar-width": "256px",
+                        "topbar-height": "64px",
+                        "gutter": "24px",
+                        "stack-md": "16px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-page-bg text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-[#2C363A] dark:bg-[#1A2124] flex flex-col py-6 z-50">
+<div class="px-6 mb-10">
+<h1 class="text-white font-bold text-xl tracking-tight">Kindercare Pro</h1>
+<p class="text-white/50 text-xs font-medium uppercase tracking-widest mt-1">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="font-medium text-sm">Students</span>
+</a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">event_available</span>
+<span class="font-medium text-sm">Attendance</span>
+</a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">school</span>
+<span class="font-medium text-sm">Teachers</span>
+</a>
+<a class="text-white/70 px-6 py-3 flex items-center gap-3 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+<span class="font-medium text-sm">Billing</span>
+</a>
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-6 py-3 flex items-center gap-3 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-2 space-y-1 border-t border-white/10 pt-4">
+<a class="text-white/70 px-4 py-2 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-medium text-sm">Support</span>
+</a>
+<a class="text-white/70 px-4 py-2 flex items-center gap-3 hover:bg-white/5 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-medium text-sm">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Top Bar -->
+<header class="h-topbar-height fixed top-0 right-0 z-40 bg-white border-b border-outline-variant flex items-center justify-between px-page-padding w-[calc(100%-256px)] ml-sidebar-width">
+<div class="flex items-center gap-4">
+<nav class="flex items-center gap-2 text-sm">
+<span class="text-ink-500">Settings</span>
+<span class="material-symbols-outlined text-[16px] text-ink-400">chevron_right</span>
+<span class="text-ink-700 font-semibold">Account Profile</span>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-ink-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-px bg-outline-variant"></div>
+<div class="flex items-center gap-3 cursor-pointer group">
+<div class="text-right">
+<p class="text-sm font-semibold text-ink-900 group-hover:text-primary transition-colors">Elena Dumitrescu</p>
+<p class="text-[11px] font-medium text-ink-500">Super Admin</p>
+</div>
+<div class="h-10 w-10 rounded-full border-2 border-primary-soft overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional studio portrait of a woman in her 40s with a kind and intelligent expression. She is wearing a soft teal blazer that matches the professional corporate aesthetic. The lighting is soft and even, creating a clean, high-trust atmosphere consistent with a modern educational administration portal. The background is a minimalist, out-of-focus office space with neutral tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA44SigbAs66UxSDYxCz1SSUZe6btsfWfqQFsyw2g0H9jYpo-eSxZ7cp-JMgsn9_1w-iG-NvrEjkrpA3js8fyxrEGuBLgcuwo9prEwcebr2Qq1zjzf9CnCy-_NMi3G40wsKa5OYKPjmPNiOitTd6BvBr4diVLgit62lVJO-1m9Rh3_nUGHaW-wwVCKeWiCu85Te35MdrFpC5mA3s0t9hl38u75R-8CL51S9OBqBQ7c5bQThm1kfRC7V0Vf7OC4YJcnOcYYe6nHrKTk"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-sidebar-width pt-[64px] min-h-screen">
+<div class="max-w-6xl mx-auto p-page-padding">
+<div class="mb-8">
+<h2 class="text-display font-display text-ink-900">Workspace Settings</h2>
+<p class="text-ink-500 mt-1">Manage your personal account and preferences for Kindercare Pro.</p>
+</div>
+<div class="settings-grid">
+<!-- Sub Navigation -->
+<aside class="space-y-1">
+<button class="tab-btn w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-3 bg-white border border-border text-primary shadow-sm" id="btn-profile" onclick="switchTab('profile')">
+<span class="material-symbols-outlined text-[20px]">person</span>
+                        Profile
+                    </button>
+<button class="tab-btn w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-3 text-ink-700 hover:bg-surface-container-low" id="btn-security" onclick="switchTab('security')">
+<span class="material-symbols-outlined text-[20px]">security</span>
+                        Security
+                    </button>
+<button class="tab-btn w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-3 text-ink-700 hover:bg-surface-container-low" id="btn-preferences" onclick="switchTab('preferences')">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+                        Preferences
+                    </button>
+<button class="tab-btn w-full text-left px-4 py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-3 text-ink-700 hover:bg-surface-container-low" id="btn-billing" onclick="switchTab('billing')">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                        Billing
+                    </button>
+</aside>
+<!-- Settings Content Panes -->
+<div class="space-y-8">
+<!-- Profile Section -->
+<section class="settings-section space-y-6" id="section-profile">
+<div class="bg-white border border-border rounded-xl p-6 shadow-sm overflow-hidden relative">
+<div class="flex items-start justify-between mb-8">
+<div>
+<h3 class="text-h3 text-ink-900 mb-1">Personal Profile</h3>
+<p class="text-sm text-ink-500">This information will be displayed on reports and staff directories.</p>
+</div>
+<button class="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-[10px] text-sm font-semibold transition-all active:scale-95">Save Changes</button>
+</div>
+<div class="flex gap-10 items-center mb-8 pb-8 border-b border-outline-variant">
+<div class="relative group">
+<div class="w-32 h-32 rounded-2xl bg-surface-container-highest overflow-hidden border-4 border-white shadow-md">
+<img class="w-full h-full object-cover" data-alt="A high-quality profile photo of a professional female educator with a warm, welcoming smile. The background is a blurred classroom setting with soft natural light streaming in, emphasizing a high-trust, professional kindergarten environment. The color scheme is grounded in professional teal and neutral ink tones, creating a polished and modern corporate feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbWbRZUOjJ2aNfNGyzMru6o4_5xGA1juLW7z3LPCl3yYMzXGLrxpkXLUhrvttygIXZkKX1HgEHdnG7M_qIPDTl_FB4cr5xP6RgKsB8Jqgd5hafNm5T2x4KuWOiLOLOOPSd7eRrMSIQkwZweN0QEOSaUGnGf02du0CYiim__tFN0kiYeqmAfQDTHkuBCIsGG2Qb6GFUzWBVB6V6rlb224rux0sj6yaOrdgbs_p6e8-PgBVpF1CMfd67S-O8EnZulYr0YdnZEKo9ucg"/>
+</div>
+<button class="absolute -bottom-3 -right-3 bg-white border border-border p-2 rounded-xl shadow-lg hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">photo_camera</span>
+</button>
+</div>
+<div class="flex-1 space-y-2">
+<p class="text-sm font-semibold text-ink-900">Profile Photo</p>
+<p class="text-xs text-ink-500 leading-relaxed max-w-sm">Upload a high-resolution portrait. JPG or PNG, max 5MB. This photo helps parents and staff identify you.</p>
+<div class="flex gap-3 pt-2">
+<button class="text-sm font-semibold text-primary px-4 py-2 border border-primary/20 rounded-lg bg-primary-soft/30 hover:bg-primary-soft transition-colors">Upload New</button>
+<button class="text-sm font-semibold text-danger px-4 py-2 hover:bg-error-container/20 rounded-lg transition-colors">Remove</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-[13px] font-medium text-ink-700">First Name</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="Elena"/>
+</div>
+<div class="space-y-2">
+<label class="text-[13px] font-medium text-ink-700">Last Name</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="Dumitrescu"/>
+</div>
+<div class="space-y-2 col-span-2">
+<label class="text-[13px] font-medium text-ink-700">Email Address</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" type="email" value="elena.d@kindercarepro.com"/>
+<p class="text-[11px] text-success flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                        Verified Primary Email
+                                    </p>
+</div>
+<div class="space-y-2 col-span-2">
+<label class="text-[13px] font-medium text-ink-700">Job Title</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none" type="text" value="Administrator &amp; Head Teacher"/>
+</div>
+</div>
+</div>
+</section>
+<!-- Security Section (Hidden by default) -->
+<section class="settings-section space-y-6 hidden" id="section-security">
+<div class="bg-white border border-border rounded-xl p-6 shadow-sm">
+<h3 class="text-h3 text-ink-900 mb-6">Security &amp; Password</h3>
+<div class="space-y-6 max-w-lg">
+<div class="space-y-2">
+<label class="text-[13px] font-medium text-ink-700">Current Password</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm outline-none focus:ring-2 focus:ring-primary" type="password"/>
+</div>
+<div class="h-px bg-outline-variant my-2"></div>
+<div class="space-y-2">
+<label class="text-[13px] font-medium text-ink-700">New Password</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm outline-none focus:ring-2 focus:ring-primary" type="password"/>
+<div class="flex gap-1 mt-2">
+<div class="h-1.5 flex-1 bg-success rounded-full"></div>
+<div class="h-1.5 flex-1 bg-success rounded-full"></div>
+<div class="h-1.5 flex-1 bg-success rounded-full"></div>
+<div class="h-1.5 flex-1 bg-outline-variant rounded-full"></div>
+</div>
+<p class="text-[11px] text-ink-500">Strength: Strong (Password must be 8+ chars with symbols)</p>
+</div>
+<div class="space-y-2">
+<label class="text-[13px] font-medium text-ink-700">Confirm New Password</label>
+<input class="w-full px-4 py-2.5 bg-white border border-border rounded-[10px] text-sm outline-none focus:ring-2 focus:ring-primary" type="password"/>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-[10px] text-sm font-semibold transition-all">Update Password</button>
+</div>
+</div>
+<div class="bg-accent-soft border border-secondary/20 rounded-xl p-6">
+<div class="flex gap-4">
+<div class="h-12 w-12 bg-secondary/10 rounded-full flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+</div>
+<div>
+<h4 class="font-semibold text-secondary-container-on">Two-Factor Authentication</h4>
+<p class="text-sm text-on-secondary-fixed-variant mt-1 mb-4">Add an extra layer of security to your account by requiring more than just a password to log in.</p>
+<button class="bg-secondary text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all hover:brightness-110">Enable 2FA</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Preferences Section (Hidden by default) -->
+<section class="settings-section space-y-6 hidden" id="section-preferences">
+<div class="bg-white border border-border rounded-xl p-6 shadow-sm">
+<h3 class="text-h3 text-ink-900 mb-6">Localization</h3>
+<div class="flex items-center justify-between p-4 bg-page-bg rounded-xl border border-border">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-ink-500">language</span>
+<div>
+<p class="text-sm font-semibold text-ink-900">Interface Language</p>
+<p class="text-xs text-ink-500">Choose your preferred system language.</p>
+</div>
+</div>
+<div class="flex bg-white p-1 rounded-lg border border-border">
+<button class="px-4 py-1.5 rounded-md text-xs font-bold bg-primary text-white">EN</button>
+<button class="px-4 py-1.5 rounded-md text-xs font-bold text-ink-500 hover:bg-surface-container-low transition-colors">RO</button>
+</div>
+</div>
+</div>
+<div class="bg-white border border-border rounded-xl p-6 shadow-sm">
+<h3 class="text-h3 text-ink-900 mb-4">Notification Settings</h3>
+<div class="divide-y divide-outline-variant">
+<div class="py-4 flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold text-ink-900">Email Digest</p>
+<p class="text-xs text-ink-500">Receive a weekly summary of attendance and billing reports.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="py-4 flex items-center justify-between">
+<div>
+<p class="text-sm font-semibold text-ink-900">Browser Push Notifications</p>
+<p class="text-xs text-ink-500">Alerts for new student registrations or teacher requests.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Billing Section (Placeholder) -->
+<section class="settings-section space-y-6 hidden" id="section-billing">
+<div class="bg-white border border-border rounded-xl p-10 shadow-sm text-center">
+<div class="h-20 w-20 bg-primary-soft mx-auto rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-primary text-4xl">credit_card</span>
+</div>
+<h3 class="text-h2 text-ink-900">Manage Subscription</h3>
+<p class="text-ink-500 max-w-sm mx-auto mt-2 mb-8">You are currently on the Professional Tier (up to 100 students). Next billing cycle starts Oct 15, 2023.</p>
+<button class="bg-primary text-white px-8 py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-primary/20">View Billing History</button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</main>
+<script>
+        function switchTab(tabId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.settings-section');
+            sections.forEach(section => section.classList.add('hidden'));
+
+            // Show selected section
+            document.getElementById('section-' + tabId).classList.remove('hidden');
+
+            // Reset all buttons
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-white', 'border', 'border-border', 'text-primary', 'shadow-sm');
+                btn.classList.add('text-ink-700', 'hover:bg-surface-container-low');
+            });
+
+            // Set active button
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.remove('text-ink-700', 'hover:bg-surface-container-low');
+            activeBtn.classList.add('bg-white', 'border', 'border-border', 'text-primary', 'shadow-sm');
+        }
+    </script>
+</body></html>

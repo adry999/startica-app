@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Localization Management | Kindercare Pro</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-active {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for a cleaner SaaS look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E3E7E5;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bec9c6;
+        }
+        .bento-card {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+        }
+        .bento-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#745b00",
+                      "on-secondary-fixed-variant": "#584400",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-variant": "#dae4e9",
+                      "primary-fixed-dim": "#89d4cc",
+                      "tertiary-container": "#93543b",
+                      "background": "#f2fbff",
+                      "on-tertiary-fixed": "#370e00",
+                      "on-primary-fixed-variant": "#00504b",
+                      "on-secondary-fixed": "#241a00",
+                      "surface": "#f2fbff",
+                      "inverse-surface": "#283236",
+                      "outline-variant": "#bec9c6",
+                      "card-bg": "#FFFFFF",
+                      "surface-tint": "#156964",
+                      "on-error-container": "#93000a",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#ffdbce",
+                      "primary-fixed": "#a5f0e8",
+                      "primary-hover": "#18564F",
+                      "tertiary-fixed": "#ffdbce",
+                      "on-primary-fixed": "#00201e",
+                      "ink-400": "#889094",
+                      "error": "#ba1a1a",
+                      "primary-container": "#1f706a",
+                      "inverse-primary": "#89d4cc",
+                      "page-bg": "#F6F7F5",
+                      "surface-container-low": "#ebf5fa",
+                      "surface-bright": "#f2fbff",
+                      "on-secondary-container": "#755c00",
+                      "secondary-container": "#fed65f",
+                      "secondary-fixed": "#ffe08b",
+                      "on-secondary": "#ffffff",
+                      "outline": "#6f7977",
+                      "on-error": "#ffffff",
+                      "on-background": "#131d21",
+                      "border": "#E3E7E5",
+                      "on-surface": "#131d21",
+                      "accent-soft": "#FDF6E1",
+                      "surface-container-highest": "#dae4e9",
+                      "warning": "#D89B3F",
+                      "success": "#3E8A6E",
+                      "primary-soft": "#E4F0EE",
+                      "surface-dim": "#d1dce1",
+                      "ink-700": "#434E53",
+                      "on-tertiary-fixed-variant": "#6f3720",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "primary": "#005752",
+                      "inverse-on-surface": "#e8f2f7",
+                      "surface-container-high": "#dfeaef",
+                      "ink-500": "#636C70",
+                      "tertiary-fixed-dim": "#ffb599",
+                      "on-primary-container": "#a5f0e8",
+                      "tertiary": "#763d26",
+                      "accent-deep": "#C98A2B",
+                      "danger": "#C0553D",
+                      "on-surface-variant": "#3f4947",
+                      "surface-container": "#e5f0f5",
+                      "secondary-fixed-dim": "#e9c24d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "10px",
+                      "2xl": "16px",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "page-padding": "32px",
+                      "stack-sm": "8px",
+                      "sidebar-width": "256px",
+                      "topbar-height": "64px",
+                      "gutter": "24px",
+                      "stack-md": "16px"
+              },
+              "fontFamily": {
+                      "small": ["Inter"],
+                      "h1": ["Inter"],
+                      "caption": ["Inter"],
+                      "h3": ["Inter"],
+                      "body-medium": ["Inter"],
+                      "h2": ["Inter"],
+                      "display": ["Inter"],
+                      "body": ["Inter"]
+              },
+              "fontSize": {
+                      "small": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "h1": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                      "h3": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-medium": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "h2": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "display": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "body": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-page-bg font-body text-on-surface selection:bg-primary-soft selection:text-primary">
+<!-- Sidebar Navigation -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-[#2C363A] dark:bg-[#1A2124] flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="font-h2 text-h2 text-white tracking-tight">Kindercare Pro</h1>
+<p class="font-caption text-white/50">Admin Portal</p>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Navigation Items Mapping from JSON -->
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-medium text-body-medium">Dashboard</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-medium text-body-medium">Students</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">event_available</span>
+<span class="font-body-medium text-body-medium">Attendance</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body-medium text-body-medium">Teachers</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-medium text-body-medium">Billing</span>
+</a>
+<!-- Active State: Settings covers Localization -->
+<a class="text-primary bg-primary-container/10 border-r-4 border-primary px-4 py-3 flex items-center gap-3 transition-colors active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined sidebar-active">settings</span>
+<span class="font-body-medium text-body-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-4 space-y-1">
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="font-body-medium text-body-medium">Support</span>
+</a>
+<a class="text-white/70 px-4 py-3 flex items-center gap-3 hover:text-white transition-colors hover:bg-white/5" href="#">
+<span class="material-symbols-outlined text-danger">logout</span>
+<span class="font-body-medium text-body-medium">Log Out</span>
+</a>
+</div>
+</aside>
+<!-- Top Navigation Bar -->
+<header class="h-topbar-height fixed top-0 right-0 z-40 bg-surface border-b border-outline-variant flex items-center justify-between px-page-padding w-[calc(100%-256px)] ml-sidebar-width">
+<div class="flex items-center gap-8">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-ink-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-page-bg border-none rounded-xl text-body-medium w-64 focus:ring-2 focus:ring-primary focus:bg-white transition-all" placeholder="Search strings..." type="text"/>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-ink-500 font-body-medium pb-4 border-b-2 border-transparent hover:text-primary transition-colors mt-4" href="#">Overview</a>
+<a class="text-primary font-h3 border-b-2 border-primary pb-4 mt-4" href="#">Localization</a>
+<a class="text-ink-500 font-body-medium pb-4 border-b-2 border-transparent hover:text-primary transition-colors mt-4" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-ink-500 hover:text-primary transition-colors cursor-pointer active:opacity-80">notifications</button>
+<button class="material-symbols-outlined text-ink-500 hover:text-primary transition-colors cursor-pointer active:opacity-80">language</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a female school administrator in her late 30s, wearing a smart charcoal blazer and a friendly expression. The background is a softly blurred modern office interior with warm lighting and teal accents, creating a high-trust, corporate yet approachable look consistent with a premium educational management platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXTefBwn5hcLLyCtxeUYZOGlo35v1t7iti8RKvPk884o5S2N3Z56QpkF_pmHgV3aruMLEhGugY0W6ZKqoU2bDxM1ZEcEAZL6kyNec3uI3Jq-_dFJTGMeOMM_YD-IdCLSjltDAySv6gnAzlC9CS3c04xqeMbh4GbHEyvjMQZ4Hjinlhfpit4_X3Rwm1ysCiUoCZESCWSDr1ikAlpH3Qq-oj3YChv8VLS2ZOmh6l7PdoVVY0JUrXKcxmX4cbbQWJcY_vFVnkzpYFKgA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width pt-topbar-height min-h-screen">
+<div class="max-w-[1400px] mx-auto p-page-padding">
+<!-- Page Header & Stats -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+<div>
+<h2 class="font-display text-display text-on-surface">Localization Management</h2>
+<p class="font-body text-ink-500 mt-1">Manage global translation strings for Romanian market expansion.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 bg-white border border-border text-ink-700 font-body-medium rounded-xl hover:bg-page-bg transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                        Export JSON
+                    </button>
+<button class="px-6 py-2 bg-primary text-white font-body-medium rounded-xl hover:bg-primary-hover transition-all shadow-sm active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">save</span>
+                        Save Changes
+                    </button>
+</div>
+</div>
+<!-- Bento Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter mb-8">
+<div class="bento-card bg-white p-6 rounded-2xl border border-border">
+<p class="font-caption text-ink-500 uppercase tracking-wider">Total Strings</p>
+<h3 class="font-display text-display text-on-surface mt-2">1,284</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="w-full bg-page-bg h-1.5 rounded-full overflow-hidden">
+<span class="block bg-primary h-full w-[100%]"></span>
+</span>
+</div>
+</div>
+<div class="bento-card bg-white p-6 rounded-2xl border border-border">
+<p class="font-caption text-ink-500 uppercase tracking-wider">Verified (RO)</p>
+<h3 class="font-display text-display text-success mt-2">942</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="w-full bg-page-bg h-1.5 rounded-full overflow-hidden">
+<span class="block bg-success h-full w-[73%]"></span>
+</span>
+<span class="text-caption text-success">73%</span>
+</div>
+</div>
+<div class="bento-card bg-white p-6 rounded-2xl border border-border">
+<p class="font-caption text-ink-500 uppercase tracking-wider">Missing Strings</p>
+<h3 class="font-display text-display text-danger mt-2">156</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="w-full bg-page-bg h-1.5 rounded-full overflow-hidden">
+<span class="block bg-danger h-full w-[12%]"></span>
+</span>
+<span class="text-caption text-danger">12%</span>
+</div>
+</div>
+<div class="bento-card bg-accent-soft p-6 rounded-2xl border border-secondary/10">
+<p class="font-caption text-secondary uppercase tracking-wider">In Review</p>
+<h3 class="font-display text-display text-secondary mt-2">186</h3>
+<div class="mt-4 flex items-center gap-2">
+<span class="w-full bg-white/50 h-1.5 rounded-full overflow-hidden">
+<span class="block bg-secondary h-full w-[15%]"></span>
+</span>
+</div>
+</div>
+</div>
+<!-- Filters & Table Section -->
+<div class="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+<div class="p-6 border-b border-border flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-page-bg rounded-lg border border-border">
+<span class="font-caption text-ink-500">Section:</span>
+<select class="bg-transparent border-none text-body-medium font-body-medium focus:ring-0 cursor-pointer text-ink-700 p-0 pr-8">
+<option>All Sections</option>
+<option>Dashboard</option>
+<option>Billing</option>
+<option>User Profile</option>
+<option>Onboarding</option>
+</select>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-page-bg rounded-lg border border-border">
+<span class="font-caption text-ink-500">Status:</span>
+<select class="bg-transparent border-none text-body-medium font-body-medium focus:ring-0 cursor-pointer text-ink-700 p-0 pr-8">
+<option>All Statuses</option>
+<option>Verified</option>
+<option>Missing</option>
+<option>Review Required</option>
+</select>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-caption text-ink-500">Showing 1-15 of 1,284 strings</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-page-bg">
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border">String ID</th>
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border">English (Base)</th>
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border">Romanian (Target)</th>
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border">Section</th>
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border">Status</th>
+<th class="px-6 py-4 font-caption text-ink-500 uppercase tracking-wider border-b border-border text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border">
+<!-- Row 1 -->
+<tr class="hover:bg-primary-soft/30 transition-colors group">
+<td class="px-6 py-4">
+<span class="font-mono text-small text-ink-700">dashboard.welcome_back</span>
+</td>
+<td class="px-6 py-4 text-body text-on-surface">Welcome back, {name}!</td>
+<td class="px-6 py-4">
+<input class="w-full px-3 py-2 border border-border rounded-lg text-body focus:ring-2 focus:ring-primary focus:border-primary bg-transparent group-hover:bg-white transition-all" type="text" value="Bine ai revenit, {name}!"/>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-low text-ink-500 rounded-full text-caption">Dashboard</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-caption font-semibold bg-[#E4F0EE] text-[#156964]">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                        Verified
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-ink-400 hover:text-primary transition-colors">history</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-primary-soft/30 transition-colors group">
+<td class="px-6 py-4">
+<span class="font-mono text-small text-ink-700">billing.invoice_overdue</span>
+</td>
+<td class="px-6 py-4 text-body text-on-surface">Your invoice is overdue.</td>
+<td class="px-6 py-4">
+<input class="w-full px-3 py-2 border border-danger/30 rounded-lg text-body focus:ring-2 focus:ring-primary focus:border-primary bg-transparent group-hover:bg-white transition-all" placeholder="Add Romanian translation..." type="text"/>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-low text-ink-500 rounded-full text-caption">Billing</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-caption font-semibold bg-error-container text-error">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                        Missing
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-ink-400 hover:text-primary transition-colors">translate</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-primary-soft/30 transition-colors group">
+<td class="px-6 py-4">
+<span class="font-mono text-small text-ink-700">auth.reset_password_cta</span>
+</td>
+<td class="px-6 py-4 text-body text-on-surface">Click here to reset your password</td>
+<td class="px-6 py-4">
+<input class="w-full px-3 py-2 border border-border rounded-lg text-body focus:ring-2 focus:ring-primary focus:border-primary bg-transparent group-hover:bg-white transition-all" type="text" value="Apasă aici pentru a reseta parola"/>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-low text-ink-500 rounded-full text-caption">Authentication</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-caption font-semibold bg-accent-soft text-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                                        Review Required
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-ink-400 hover:text-primary transition-colors">history</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-primary-soft/30 transition-colors group">
+<td class="px-6 py-4">
+<span class="font-mono text-small text-ink-700">settings.language_label</span>
+</td>
+<td class="px-6 py-4 text-body text-on-surface">Choose your language</td>
+<td class="px-6 py-4">
+<input class="w-full px-3 py-2 border border-border rounded-lg text-body focus:ring-2 focus:ring-primary focus:border-primary bg-transparent group-hover:bg-white transition-all" type="text" value="Alege limba preferată"/>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-low text-ink-500 rounded-full text-caption">Settings</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-caption font-semibold bg-[#E4F0EE] text-[#156964]">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                        Verified
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-ink-400 hover:text-primary transition-colors">history</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-primary-soft/30 transition-colors group">
+<td class="px-6 py-4">
+<span class="font-mono text-small text-ink-700">common.save_changes</span>
+</td>
+<td class="px-6 py-4 text-body text-on-surface">Save Changes</td>
+<td class="px-6 py-4">
+<input class="w-full px-3 py-2 border border-border rounded-lg text-body focus:ring-2 focus:ring-primary focus:border-primary bg-transparent group-hover:bg-white transition-all" type="text" value="Salvează modificările"/>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-surface-container-low text-ink-500 rounded-full text-caption">Shared</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-caption font-semibold bg-[#E4F0EE] text-[#156964]">
+<span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                        Verified
+                                    </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-ink-400 hover:text-primary transition-colors">history</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-page-bg/50 border-t border-border flex items-center justify-between">
+<button class="px-3 py-1 bg-white border border-border rounded-lg text-body-medium text-ink-700 hover:bg-page-bg transition-colors flex items-center gap-1 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        Previous
+                    </button>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white text-body-medium font-bold">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-primary-soft text-ink-700 transition-colors">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-primary-soft text-ink-700 transition-colors">3</button>
+<span class="text-ink-400">...</span>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-primary-soft text-ink-700 transition-colors">86</button>
+</div>
+<button class="px-3 py-1 bg-white border border-border rounded-lg text-body-medium text-ink-700 hover:bg-page-bg transition-colors flex items-center gap-1">
+                        Next
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Contextual Help / AI Translation Assistant -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="p-8 rounded-2xl bg-[#1F706A] text-white relative overflow-hidden">
+<!-- Subtle background decoration -->
+<div class="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-4">
+<span class="material-symbols-outlined text-[32px] text-primary-fixed">auto_awesome</span>
+<h4 class="font-h2 text-h2">AI Translation Assistant</h4>
+</div>
+<p class="font-body opacity-90 max-w-md mb-6">Need help with Romanian phrasing? Our engine can auto-suggest contextually accurate translations for children-focused interfaces.</p>
+<button class="px-6 py-2.5 bg-primary-fixed text-on-primary-fixed font-h3 rounded-xl hover:bg-white transition-all">Auto-fill Missing Strings</button>
+</div>
+</div>
+<div class="p-8 rounded-2xl border border-border bg-white flex items-center gap-6">
+<div class="w-24 h-24 rounded-2xl bg-page-bg flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[48px] text-ink-400" style="font-variation-settings: 'wght' 200;">info</span>
+</div>
+<div>
+<h4 class="font-h3 text-h3 mb-2">Translation Guidelines</h4>
+<ul class="space-y-2">
+<li class="flex items-start gap-2 text-small text-ink-700">
+<span class="material-symbols-outlined text-[16px] mt-0.5 text-primary">check_circle</span>
+                                Use the formal 'dumneavoastră' for administrative views.
+                            </li>
+<li class="flex items-start gap-2 text-small text-ink-700">
+<span class="material-symbols-outlined text-[16px] mt-0.5 text-primary">check_circle</span>
+                                Keep button labels under 20 characters if possible.
+                            </li>
+<li class="flex items-start gap-2 text-small text-ink-700">
+<span class="material-symbols-outlined text-[16px] mt-0.5 text-primary">check_circle</span>
+                                Don't translate variable placeholders like {name}.
+                            </li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button - Only for Dashboard/Primary contexts as per guidelines, but here it fits as "New String" -->
+<div class="fixed bottom-8 right-8 z-50">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary-hover hover:scale-110 active:scale-95 transition-all group">
+<span class="material-symbols-outlined text-[28px] group-hover:rotate-90 transition-transform">add</span>
+</button>
+</div>
+<script>
+        // Micro-interactions for table inputs
+        const inputs = document.querySelectorAll('input[type="text"]');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.closest('tr').classList.add('bg-primary-soft/50');
+            });
+            input.addEventListener('blur', () => {
+                input.closest('tr').classList.remove('bg-primary-soft/50');
+            });
+        });
+
+        // Simple feedback for Save button
+        const saveBtn = document.querySelector('button.bg-primary');
+        saveBtn.addEventListener('click', () => {
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Saving...`;
+            saveBtn.classList.add('opacity-80');
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = `<span class="material-symbols-outlined text-[20px]">done</span> Saved!`;
+                saveBtn.classList.remove('bg-primary');
+                saveBtn.classList.add('bg-success');
+                
+                setTimeout(() => {
+                    saveBtn.innerHTML = originalContent;
+                    saveBtn.classList.remove('bg-success');
+                    saveBtn.classList.add('bg-primary');
+                    saveBtn.classList.remove('opacity-80');
+                }, 2000);
+            }, 1000);
+        });
+    </script>
+</body></html>
