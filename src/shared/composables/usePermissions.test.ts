@@ -13,14 +13,14 @@ describe('usePermissions', () => {
     setActivePinia(createPinia())
   })
 
-  it('lets a super_admin create, read, update, and delete a kindergarten', () => {
+  it('lets a super_admin create, read, and update a kindergarten but not delete', () => {
     setUserRole('super_admin')
     const { can } = usePermissions()
 
     expect(can('create', 'kindergarten')).toBe(true)
     expect(can('read', 'kindergarten')).toBe(true)
     expect(can('update', 'kindergarten')).toBe(true)
-    expect(can('delete', 'kindergarten')).toBe(true)
+    expect(can('delete', 'kindergarten')).toBe(false)
   })
 
   it('lets an admin read but not create/update/delete a kindergarten', () => {
