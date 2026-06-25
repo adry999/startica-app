@@ -59,4 +59,46 @@ describe('useAuthStore', () => {
 
     expect(store.user).toBeNull()
   })
+
+  it('signs the session back out when the post-login profile fetch fails', async () => {
+    vi.mocked(authService.signInWithPassword).mockResolvedValue({
+      success: true,
+      data: { userId: 'user-1' },
+    })
+    vi.mocked(authService.fetchCurrentUserProfile).mockResolvedValue({
+      success: false,
+      error: 'not_found',
+    })
+    vi.mocked(authService.signOut).mockResolvedValue({ success: true, data: null })
+
+    const store = useAuthStore()
+    const result = await store.login('a@b.com', 'pw')
+
+    expect(result).toBe(false)
+    expect(store.user).toBeNull()
+    expect(authService.signOut).toHaveBeenCalledTimes(1)
+  })
+
+  it('captures the error and clears the user when fetchCurrentUser cannot load the profile', async () => {
+    vi.mocked(authService.getCurrentUserId).mockResolvedValue('user-1')
+    vi.mocked(authService.fetchCurrentUserProfile).mockResolvedValue({
+      success: false,
+      error: 'network_error',
+    })
+
+    const store = useAuthStore()
+    await store.fetchCurrentUser()
+
+    expect(store.user).toBeNull()
+    expect(store.error).toBe('network_error')
+  })
+
+  it('defaults isPasswordRecovery to false and toggles it via setPasswordRecovery', () => {
+    const store = useAuthStore()
+
+    expect(store.isPasswordRecovery).toBe(false)
+
+    store.setPasswordRecovery(true)
+    expect(store.isPasswordRecovery).toBe(true)
+  })
 })

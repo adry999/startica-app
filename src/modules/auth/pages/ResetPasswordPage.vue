@@ -3,7 +3,7 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import { updatePasswordSchema, type UpdatePasswordInput } from '~/shared/schemas/auth.schema'
 
 const { t } = useI18n()
-const { isAuthenticated, updatePassword, loading } = useAuth()
+const { isPasswordRecovery, updatePassword, loading } = useAuth()
 
 const state = reactive<Partial<UpdatePasswordInput>>({ password: undefined, confirmPassword: undefined })
 const success = ref(false)
@@ -24,7 +24,7 @@ async function onSubmit(event: FormSubmitEvent<UpdatePasswordInput>) {
     </template>
 
     <UAlert
-      v-if="!isAuthenticated && !success"
+      v-if="!isPasswordRecovery && !success"
       color="error"
       variant="soft"
       :title="t('auth.resetPasswordInvalidLink')"

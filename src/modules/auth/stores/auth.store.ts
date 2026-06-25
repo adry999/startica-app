@@ -22,6 +22,7 @@ export const useAuthStore = defineStore('auth', {
     user: null as AuthUser | null,
     loading: false,
     error: null as string | null,
+    isPasswordRecovery: false,
   }),
 
   getters: {
@@ -42,12 +43,18 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const profileResult = await authService.fetchCurrentUserProfile(client, signInResult.data.userId)
-      this.loading = false
       if (!profileResult.success) {
+        // A live Supabase session with no usable profile (e.g. the user was
+        // soft-deleted/deactivated after they last set their password) must
+        // not be left dangling — roll it back so the browser holds no
+        // authenticated session the app itself doesn't recognize.
+        await authService.signOut(client)
+        this.loading = false
         this.error = profileResult.error
         return false
       }
 
+      this.loading = false
       this.user = toAuthUser(profileResult.data)
       return true
     },
@@ -68,7 +75,17 @@ export const useAuthStore = defineStore('auth', {
       }
 
       const profileResult = await authService.fetchCurrentUserProfile(client, userId)
-      this.user = profileResult.success ? toAuthUser(profileResult.data) : null
+      if (!profileResult.success) {
+        this.error = profileResult.error
+        this.user = null
+        return
+      }
+
+      this.user = toAuthUser(profileResult.data)
+    },
+
+    setPasswordRecovery(value: boolean) {
+      this.isPasswordRecovery = value
     },
 
     async requestPasswordReset(email: string) {

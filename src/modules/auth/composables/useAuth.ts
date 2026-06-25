@@ -7,6 +7,7 @@ export function useAuth() {
   return {
     user: computed(() => store.user),
     isAuthenticated: computed(() => store.isAuthenticated),
+    isPasswordRecovery: computed(() => store.isPasswordRecovery),
     loading: computed(() => store.loading),
     error: computed(() => store.error),
     login: (email: string, password: string) => store.login(email, password),
