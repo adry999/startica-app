@@ -51,7 +51,10 @@ function openEdit(kindergarten: Kindergarten) {
 async function onEditDetailsSubmit(event: FormSubmitEvent<KindergartenDetailsInput>) {
   if (!editTarget.value) return
   const ok = await updateDetails(editTarget.value.id, event.data)
-  if (ok) toast.add({ title: t('kindergartens.updateSuccess'), color: 'success' })
+  if (ok) {
+    editModalOpen.value = false
+    toast.add({ title: t('kindergartens.updateSuccess'), color: 'success' })
+  }
 }
 
 async function onEditSettingsSubmit(event: FormSubmitEvent<KindergartenSettingsInput>) {
