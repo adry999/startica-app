@@ -39,4 +39,34 @@ describe('usePermissions', () => {
     expect(can('read', 'kindergarten')).toBe(false)
     expect(can('create', 'kindergarten')).toBe(false)
   })
+
+  it('lets a super_admin do all staff actions', () => {
+    setUserRole('super_admin')
+    const { can } = usePermissions()
+
+    expect(can('create', 'staff')).toBe(true)
+    expect(can('read', 'staff')).toBe(true)
+    expect(can('update', 'staff')).toBe(true)
+    expect(can('delete', 'staff')).toBe(true)
+  })
+
+  it('lets an admin do all staff actions', () => {
+    setUserRole('admin')
+    const { can } = usePermissions()
+
+    expect(can('create', 'staff')).toBe(true)
+    expect(can('read', 'staff')).toBe(true)
+    expect(can('update', 'staff')).toBe(true)
+    expect(can('delete', 'staff')).toBe(true)
+  })
+
+  it('denies all staff actions for an educator', () => {
+    setUserRole('educator')
+    const { can } = usePermissions()
+
+    expect(can('create', 'staff')).toBe(false)
+    expect(can('read', 'staff')).toBe(false)
+    expect(can('update', 'staff')).toBe(false)
+    expect(can('delete', 'staff')).toBe(false)
+  })
 })

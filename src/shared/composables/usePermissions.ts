@@ -1,7 +1,7 @@
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
 export type PermissionAction = 'create' | 'read' | 'update' | 'delete'
-export type PermissionResource = 'kindergarten'
+export type PermissionResource = 'kindergarten' | 'staff'
 
 export function usePermissions() {
   const authStore = useAuthStore()
@@ -18,6 +18,10 @@ export function usePermissions() {
       // off this check against an operation the DB will always reject.
       if (action === 'delete') return false
       return role === 'super_admin'
+    }
+
+    if (resource === 'staff') {
+      return role === 'super_admin' || role === 'admin'
     }
 
     return false
