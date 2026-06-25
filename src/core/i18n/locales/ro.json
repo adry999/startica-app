@@ -45,5 +45,42 @@
   },
   "tenant": {
     "all": "Toate grădinițele"
+  },
+  "kindergartens": {
+    "pageTitle": "Grădinițe",
+    "new": "Grădiniță nouă",
+    "empty": "Nu există grădinițe.",
+    "table": {
+      "name": "Nume",
+      "city": "Oraș",
+      "status": "Stare",
+      "createdAt": "Creat la",
+      "actions": "Acțiuni"
+    },
+    "status": {
+      "active": "Activă",
+      "suspended": "Suspendată"
+    },
+    "createTitle": "Grădiniță nouă",
+    "editTitle": "Editează grădinița",
+    "detailsSection": "Detalii",
+    "settingsSection": "Setări",
+    "name": "Nume",
+    "address": "Adresă",
+    "city": "Oraș",
+    "phone": "Telefon",
+    "timezone": "Fus orar",
+    "defaultLocale": "Limbă implicită",
+    "workingHoursStart": "Program - început",
+    "workingHoursEnd": "Program - sfârșit",
+    "suspend": "Suspendă",
+    "reactivate": "Reactivează",
+    "confirmSuspendTitle": "Suspendă grădinița?",
+    "confirmSuspendBody": "Personalul asociat nu va mai putea accesa această grădiniță cât timp este suspendată.",
+    "confirmReactivateTitle": "Reactivează grădinița?",
+    "confirmReactivateBody": "Grădinița va fi din nou accesibilă.",
+    "confirm": "Confirmă",
+    "createSuccess": "Grădinița a fost creată.",
+    "updateSuccess": "Modificările au fost salvate."
   }
 }

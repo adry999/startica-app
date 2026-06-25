@@ -45,5 +45,42 @@
   },
   "tenant": {
     "all": "All kindergartens"
+  },
+  "kindergartens": {
+    "pageTitle": "Kindergartens",
+    "new": "New kindergarten",
+    "empty": "No kindergartens yet.",
+    "table": {
+      "name": "Name",
+      "city": "City",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "createTitle": "New kindergarten",
+    "editTitle": "Edit kindergarten",
+    "detailsSection": "Details",
+    "settingsSection": "Settings",
+    "name": "Name",
+    "address": "Address",
+    "city": "City",
+    "phone": "Phone",
+    "timezone": "Timezone",
+    "defaultLocale": "Default locale",
+    "workingHoursStart": "Working hours - start",
+    "workingHoursEnd": "Working hours - end",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "confirmSuspendTitle": "Suspend this kindergarten?",
+    "confirmSuspendBody": "Associated staff will no longer be able to access it while suspended.",
+    "confirmReactivateTitle": "Reactivate this kindergarten?",
+    "confirmReactivateBody": "The kindergarten will be accessible again.",
+    "confirm": "Confirm",
+    "createSuccess": "Kindergarten created.",
+    "updateSuccess": "Changes saved."
   }
 }
