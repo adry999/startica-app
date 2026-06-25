@@ -34,5 +34,16 @@
       "admin": "Admin",
       "educator": "Educator"
     }
+  },
+  "nav": {
+    "overview": "Prezentare generală",
+    "kindergartens": "Grădinițe",
+    "staff": "Personal",
+    "groups": "Grupe",
+    "children": "Copii",
+    "comingSoon": "În curând"
+  },
+  "tenant": {
+    "all": "Toate grădinițele"
   }
 }

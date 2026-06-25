@@ -34,5 +34,16 @@
       "admin": "Admin",
       "educator": "Educator"
     }
+  },
+  "nav": {
+    "overview": "Overview",
+    "kindergartens": "Kindergartens",
+    "staff": "Staff",
+    "groups": "Groups",
+    "children": "Children",
+    "comingSoon": "Coming soon"
+  },
+  "tenant": {
+    "all": "All kindergartens"
   }
 }
