@@ -12,6 +12,27 @@
     "login": "Autentificare",
     "email": "Email",
     "password": "Parolă",
-    "forgotPassword": "Ai uitat parola?"
+    "forgotPassword": "Ai uitat parola?",
+    "loginTitle": "Autentificare",
+    "submit": "Autentificare",
+    "invalidCredentials": "Email sau parolă incorectă.",
+    "forgotPasswordTitle": "Recuperare parolă",
+    "forgotPasswordSubmit": "Trimite link de resetare",
+    "forgotPasswordSuccess": "Dacă adresa există în sistem, vei primi un email cu instrucțiuni de resetare.",
+    "backToLogin": "Înapoi la autentificare",
+    "resetPasswordTitle": "Setează o parolă nouă",
+    "resetPasswordSubmit": "Salvează parola",
+    "resetPasswordSuccess": "Parola a fost schimbată cu succes.",
+    "resetPasswordInvalidLink": "Linkul de resetare este invalid sau a expirat.",
+    "newPassword": "Parolă nouă",
+    "confirmPassword": "Confirmă parola",
+    "passwordMismatch": "Parolele nu coincid.",
+    "logout": "Deconectare",
+    "welcomeBack": "Salut, {name}",
+    "role": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "educator": "Educator"
+    }
   }
 }

@@ -51,3 +51,21 @@ export function createSupabaseAdminClient() {
     },
   })
 }
+
+/**
+ * Picks the right Supabase client for the current execution context.
+ * Use this everywhere instead of calling the two factories above directly —
+ * middleware and stores run during SSR (server) and during client-side
+ * navigation (browser), and the two contexts need different clients.
+ */
+export function useSupabaseClient() {
+  if (import.meta.server) {
+    const event = useRequestEvent()
+    if (!event) {
+      throw new Error('useSupabaseClient() called server-side without a request event')
+    }
+    return createSupabaseServerClient(event)
+  }
+
+  return createSupabaseBrowserClient()
+}
