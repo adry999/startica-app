@@ -20,6 +20,9 @@ const sampleRow = {
   deleted_at: null,
 }
 
+let mockIs: ReturnType<typeof vi.fn>
+let mockNeq: ReturnType<typeof vi.fn>
+
 function createMockClient(opts: {
   memberships?: Array<{ user_id: string }>
   users?: typeof sampleRow[]
@@ -32,6 +35,11 @@ function createMockClient(opts: {
     mutationResult = sampleRow,
     deleteError = null,
   } = opts
+
+  mockNeq = vi.fn().mockReturnValue({
+    order: vi.fn().mockResolvedValue({ data: users, error: null }),
+  })
+  mockIs = vi.fn().mockReturnValue({ neq: mockNeq })
 
   return {
     from: vi.fn().mockImplementation((table: string) => {
@@ -47,16 +55,9 @@ function createMockClient(opts: {
           }),
         }
       }
-      // users table
       return {
         select: vi.fn().mockReturnValue({
-          in: vi.fn().mockReturnValue({
-            is: vi.fn().mockReturnValue({
-              neq: vi.fn().mockReturnValue({
-                order: vi.fn().mockResolvedValue({ data: users, error: null }),
-              }),
-            }),
-          }),
+          in: vi.fn().mockReturnValue({ is: mockIs }),
         }),
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
@@ -86,6 +87,14 @@ describe('listStaff', () => {
     const result = await listStaff(client, 'kg-1')
 
     expect(result).toEqual({ success: true, data: [] })
+  })
+
+  it('filters out soft-deleted rows and super_admin accounts', async () => {
+    const client = createMockClient()
+    await listStaff(client, 'kg-1')
+
+    expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
+    expect(mockNeq).toHaveBeenCalledWith('role', 'super_admin')
   })
 })
 
