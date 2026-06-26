@@ -125,12 +125,101 @@ describe('POST /api/staff/invite', () => {
 
     mockAdminClient.from
       .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))       // role check
-      .mockReturnValueOnce(makeQuery({ data: { id: EXISTING_USER_ID }, error: null }))      // existing user → found
+      .mockReturnValueOnce(makeQuery({ data: { id: EXISTING_USER_ID, role: 'educator' }, error: null }))      // existing user → found (non-super_admin)
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                          // upsert membership
 
     const result = await ((handler as unknown) as RouteHandler)({})
 
     expect(result).toEqual({ success: true })
+    expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
+  })
+
+  it('returns 500 when inviteUserByEmail fails', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY)
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null })) // no existing user
+
+    mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'smtp_error' },
+    })
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 500 })
+  })
+
+  it('returns 500 when profile insert fails', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY)
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                       // no existing user
+      .mockReturnValueOnce(makeQuery({ data: null, error: { message: 'db_error' } }))   // profile insert fails
+
+    mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 500 })
+  })
+
+  it('returns 500 when membership upsert fails', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY)
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = 'ffffffff-ffff-4fff-8fff-ffffffffffff'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert ok
+      .mockReturnValueOnce(makeQuery({ data: null, error: { message: 'fk_error' } }))  // membership fails
+
+    mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 500 })
+  })
+
+  it('admin who belongs to the kindergarten can invite an educator', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY)
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = '11111111-1111-4111-8111-111111111111'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin' }, error: null }))         // caller role
+      .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))    // membership check → member
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // membership upsert
+
+    mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+    expect(result).toEqual({ success: true })
+  })
+
+  it('returns 403 when trying to add an existing super_admin to a kindergarten', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY)
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))  // caller is super_admin
+      .mockReturnValueOnce(makeQuery({ data: { id: 'target-id', role: 'super_admin' }, error: null })) // target is also super_admin
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
     expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
   })
 })
