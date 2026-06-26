@@ -14,6 +14,19 @@
 -- Using existing seed users is simpler and avoids the FK bootstrapping entirely.
 -- Both approaches test the same trigger behaviour; this is the only deviation.
 
+-- Guard: fail fast with a clear message if seed users are missing.
+-- Run 'supabase db reset' before 'supabase test db' if this fires.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM public.users WHERE id = '11111111-1111-4111-8111-111111111111'
+  ) OR NOT EXISTS (
+    SELECT 1 FROM public.users WHERE id = '22222222-2222-4222-8222-222222222222'
+  ) THEN
+    RAISE EXCEPTION 'Seed users missing — run "supabase db reset" before "supabase test db"';
+  END IF;
+END $$;
+
 BEGIN;
 SELECT plan(8);
 
