@@ -14,6 +14,10 @@ const toast = useToast()
 const { can } = usePermissions()
 const { items, loading, fetchAll, create, updateDetails, updateSettings, setStatus } = useKindergartens()
 
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const canUpdateKindergarten = computed(() => can('update', 'kindergarten'))
+
 useLazyAsyncData('kindergartens', () => fetchAll())
 
 const createModalOpen = ref(false)
@@ -89,7 +93,7 @@ const columns = computed<TableColumn<Kindergarten>[]>(() => [
     header: t('kindergartens.table.status'),
     cell: ({ row }) =>
       h(
-        resolveComponent('UBadge'),
+        UBadge,
         { color: row.original.status === 'active' ? 'success' : 'neutral', variant: 'soft' },
         () => t(`kindergartens.status.${row.original.status}`),
       ),
@@ -104,16 +108,16 @@ const columns = computed<TableColumn<Kindergarten>[]>(() => [
     header: t('kindergartens.table.actions'),
     cell: ({ row }) =>
       h('div', { class: 'flex gap-2' }, [
-        can('update', 'kindergarten')
+        canUpdateKindergarten.value
           ? h(
-              resolveComponent('UButton'),
+              UButton,
               { size: 'xs', color: 'neutral', variant: 'soft', onClick: () => openEdit(row.original) },
               () => t('common.edit'),
             )
           : null,
-        can('update', 'kindergarten')
+        canUpdateKindergarten.value
           ? h(
-              resolveComponent('UButton'),
+              UButton,
               { size: 'xs', color: 'neutral', variant: 'soft', onClick: () => openConfirm(row.original) },
               () => t(row.original.status === 'active' ? 'kindergartens.suspend' : 'kindergartens.reactivate'),
             )

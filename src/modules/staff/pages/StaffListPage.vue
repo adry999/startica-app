@@ -16,6 +16,11 @@ const { user } = useAuth()
 const tenantStore = useTenantStore()
 const { items, loading, fetchAll, invite, updateProfile, setStatus, remove } = useStaff()
 
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const canUpdateStaff = computed(() => can('update', 'staff'))
+const canDeleteStaff = computed(() => can('delete', 'staff'))
+
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData(
@@ -150,7 +155,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     header: t('staff.table.role'),
     cell: ({ row }) =>
       h(
-        resolveComponent('UBadge'),
+        UBadge,
         { color: roleBadgeColor(row.original.role), variant: 'soft' },
         () => t(`staff.role.${row.original.role}`),
       ),
@@ -160,7 +165,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     header: t('staff.table.status'),
     cell: ({ row }) =>
       h(
-        resolveComponent('UBadge'),
+        UBadge,
         { color: row.original.status === 'active' ? 'success' : 'neutral', variant: 'soft' },
         () => t(`staff.status.${row.original.status}`),
       ),
@@ -170,23 +175,23 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     header: t('staff.table.actions'),
     cell: ({ row }) =>
       h('div', { class: 'flex gap-2' }, [
-        can('update', 'staff')
+        canUpdateStaff.value
           ? h(
-              resolveComponent('UButton'),
+              UButton,
               { size: 'xs', color: 'neutral', variant: 'soft', onClick: () => openEdit(row.original) },
               () => t('common.edit'),
             )
           : null,
-        can('update', 'staff')
+        canUpdateStaff.value
           ? h(
-              resolveComponent('UButton'),
+              UButton,
               { size: 'xs', color: 'neutral', variant: 'soft', onClick: () => openStatusConfirm(row.original) },
               () => row.original.status === 'active' ? t('staff.deactivate') : t('staff.reactivate'),
             )
           : null,
-        can('delete', 'staff')
+        canDeleteStaff.value
           ? h(
-              resolveComponent('UButton'),
+              UButton,
               { size: 'xs', color: 'error', variant: 'soft', onClick: () => openRemoveConfirm(row.original) },
               () => t('staff.remove'),
             )
