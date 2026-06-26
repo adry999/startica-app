@@ -231,7 +231,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UFormField :label="t('staff.name')" name="fullName">
             <UInput v-model="inviteState.fullName" class="w-full" />
           </UFormField>
-          <UFormField :label="t('staff.role')" name="role">
+          <UFormField :label="t('staff.roleLabel')" name="role">
             <USelect v-model="inviteState.role" :items="roleOptions" class="w-full" />
           </UFormField>
           <UButton type="submit" color="primary" block loading-auto :loading="loading">
@@ -251,7 +251,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UFormField :label="t('staff.name')" name="fullName">
             <UInput v-model="editState.fullName" class="w-full" />
           </UFormField>
-          <UFormField v-if="user?.role === 'super_admin'" :label="t('staff.role')" name="role">
+          <UFormField v-if="user?.role === 'super_admin'" :label="t('staff.roleLabel')" name="role">
             <USelect
               v-model="editState.role"
               :items="[

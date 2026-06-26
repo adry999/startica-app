@@ -96,7 +96,7 @@
     "inviteTitle": "Invite a new member",
     "name": "Full name",
     "email": "Email",
-    "role": "Role",
+    "roleLabel": "Role",
     "table": {
       "name": "Name",
       "email": "Email",

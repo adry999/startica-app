@@ -96,7 +96,7 @@
     "inviteTitle": "Invită un membru nou",
     "name": "Nume complet",
     "email": "Email",
-    "role": "Rol",
+    "roleLabel": "Rol",
     "table": {
       "name": "Nume",
       "email": "Email",
