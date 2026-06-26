@@ -12,6 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "postinstall": "nuxt prepare"
   },
   "keywords": [],
@@ -30,8 +32,10 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@nuxt/eslint": "^1.16.0",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.0",
+    "eslint": "^10.5.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.9",
     "vue-tsc": "^3.3.5"

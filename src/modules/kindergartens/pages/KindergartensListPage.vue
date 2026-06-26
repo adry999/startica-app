@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { h, reactive, ref, computed, onMounted } from 'vue'
-import type { TableColumn } from '@nuxt/ui'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import {
   kindergartenDetailsSchema,
   kindergartenSettingsSchema,

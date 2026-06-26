@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { h, reactive, ref, computed, onMounted, watch } from 'vue'
-import type { TableColumn } from '@nuxt/ui'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import {
   inviteStaffSchema,
   updateStaffSchema,
