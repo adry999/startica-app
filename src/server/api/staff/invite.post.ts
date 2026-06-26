@@ -40,10 +40,14 @@ export default defineEventHandler(async (event) => {
 
   const { data: existing } = await adminClient
     .from('users')
-    .select('id')
+    .select('id, role')
     .eq('email', email)
     .is('deleted_at', null)
     .maybeSingle()
+
+  if (existing?.role === 'super_admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
 
   let userId: string
 
@@ -60,7 +64,8 @@ export default defineEventHandler(async (event) => {
       },
     )
     if (inviteError || !inviteData.user) {
-      throw createError({ statusCode: 500, statusMessage: inviteError?.message ?? 'invite_failed' })
+      console.error('[invite] inviteUserByEmail failed:', inviteError?.message)
+      throw createError({ statusCode: 500, statusMessage: 'invite_failed' })
     }
     userId = inviteData.user.id
 
@@ -74,7 +79,8 @@ export default defineEventHandler(async (event) => {
       updated_by: caller.id,
     })
     if (profileError) {
-      throw createError({ statusCode: 500, statusMessage: profileError.message })
+      console.error('[invite] profile insert failed:', profileError.message)
+      throw createError({ statusCode: 500, statusMessage: 'profile_insert_failed' })
     }
   }
 
@@ -85,7 +91,8 @@ export default defineEventHandler(async (event) => {
       { onConflict: 'user_id,kindergarten_id' },
     )
   if (memberError) {
-    throw createError({ statusCode: 500, statusMessage: memberError.message })
+    console.error('[invite] membership upsert failed:', memberError.message)
+    throw createError({ statusCode: 500, statusMessage: 'membership_failed' })
   }
 
   return { success: true }
