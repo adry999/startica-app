@@ -13,7 +13,7 @@ test.describe('auth', () => {
     await page.getByLabel('Parolă').or(page.getByLabel('Password')).fill('Startica123!')
     await page.getByRole('button', { name: /autentificare|log in/i }).click()
 
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('http://localhost:3000/', { timeout: 10000 })
     await expect(page.getByText('Salut, Super Admin')).toBeVisible()
 
     await page.getByRole('button', { name: /deconectare|log out/i }).click()

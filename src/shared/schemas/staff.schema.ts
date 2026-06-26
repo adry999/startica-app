@@ -9,7 +9,9 @@ export const inviteStaffSchema = z.object({
 
 export const updateStaffSchema = z.object({
   fullName: z.string().min(2),
-  role: z.enum(['super_admin', 'admin', 'educator']).optional(),
+  // super_admin is excluded: that role can only be granted via seed SQL (V1 bootstrap).
+  // The DB trigger enforces this at the DB level too.
+  role: z.enum(['admin', 'educator']).optional(),
 })
 
 export type InviteStaffInput = z.infer<typeof inviteStaffSchema>

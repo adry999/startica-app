@@ -71,7 +71,8 @@ const editState = reactive<Partial<UpdateStaffInput>>({})
 function openEdit(member: StaffMember) {
   editTarget.value = member
   editState.fullName = member.fullName
-  editState.role = member.role
+  // super_admin cannot be set via this form (schema allows only admin|educator)
+  editState.role = member.role === 'super_admin' ? undefined : member.role
   editModalOpen.value = true
 }
 
@@ -255,7 +256,6 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
             <USelect
               v-model="editState.role"
               :items="[
-                { label: t('staff.role.super_admin'), value: 'super_admin' },
                 { label: t('staff.role.admin'), value: 'admin' },
                 { label: t('staff.role.educator'), value: 'educator' },
               ]"

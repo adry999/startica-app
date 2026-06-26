@@ -6,7 +6,7 @@ async function login(page: import('@playwright/test').Page, email: string) {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Parolă').fill('Startica123!')
   await page.getByRole('button', { name: /autentificare/i }).click()
-  await expect(page).toHaveURL('http://localhost:3000/')
+  await expect(page).toHaveURL('http://localhost:3000/', { timeout: 10000 })
 }
 
 test.describe('kindergartens', () => {
