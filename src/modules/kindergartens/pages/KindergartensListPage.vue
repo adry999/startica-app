@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, reactive, ref, computed, onMounted } from 'vue'
+import { h, reactive, ref, computed } from 'vue'
 import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import {
   kindergartenDetailsSchema,
@@ -14,9 +14,7 @@ const toast = useToast()
 const { can } = usePermissions()
 const { items, loading, fetchAll, create, updateDetails, updateSettings, setStatus } = useKindergartens()
 
-onMounted(() => {
-  fetchAll()
-})
+useLazyAsyncData('kindergartens', () => fetchAll())
 
 const createModalOpen = ref(false)
 const createState = reactive<Partial<KindergartenDetailsInput>>({ name: undefined, address: undefined, city: undefined, phone: undefined })

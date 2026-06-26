@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, reactive, ref, computed, onMounted, watch } from 'vue'
+import { h, reactive, ref, computed } from 'vue'
 import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import {
   inviteStaffSchema,
@@ -18,14 +18,11 @@ const { items, loading, fetchAll, invite, updateProfile, setStatus, remove } = u
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-async function loadStaff() {
-  if (selectedKgId.value !== 'ALL') {
-    await fetchAll(selectedKgId.value)
-  }
-}
-
-onMounted(loadStaff)
-watch(selectedKgId, loadStaff)
+useLazyAsyncData(
+  'staff',
+  () => selectedKgId.value !== 'ALL' ? fetchAll(selectedKgId.value) : Promise.resolve(),
+  { watch: [selectedKgId] },
+)
 
 // ── Invite modal ───────────────────────────────────────────────────────────
 const inviteModalOpen = ref(false)
