@@ -27,6 +27,8 @@ vi.mock('~/core/supabase/client', () => ({
 
 import handler from './invite.post'
 
+type RouteHandler = (event: Record<string, unknown>) => Promise<unknown>
+
 // ── helpers ────────────────────────────────────────────────────────────────
 
 const VALID_BODY = {
@@ -60,14 +62,14 @@ describe('POST /api/staff/invite', () => {
   it('returns 400 when body fails schema validation', async () => {
     mockReadBody.mockResolvedValue({ email: 'not-an-email' })
 
-    await expect((handler as Function)({})).rejects.toMatchObject({ statusCode: 400 })
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 400 })
   })
 
   it('returns 401 when caller is not authenticated', async () => {
     mockReadBody.mockResolvedValue(VALID_BODY)
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: null } })
 
-    await expect((handler as Function)({})).rejects.toMatchObject({ statusCode: 401 })
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 401 })
   })
 
   it('returns 403 when caller is an educator', async () => {
@@ -75,7 +77,7 @@ describe('POST /api/staff/invite', () => {
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
     mockAdminClient.from.mockReturnValue(makeQuery({ data: { role: 'educator' }, error: null }))
 
-    await expect((handler as Function)({})).rejects.toMatchObject({ statusCode: 403 })
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('returns 403 when admin invites to a kindergarten they do not belong to', async () => {
@@ -86,7 +88,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { role: 'admin' }, error: null }))  // role check
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))               // membership → not a member
 
-    await expect((handler as Function)({})).rejects.toMatchObject({ statusCode: 403 })
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('invites new user and inserts their profile when called by super_admin', async () => {
@@ -106,7 +108,7 @@ describe('POST /api/staff/invite', () => {
       error: null,
     })
 
-    const result = await (handler as Function)({})
+    const result = await ((handler as unknown) as RouteHandler)({})
 
     expect(result).toEqual({ success: true })
     expect(mockAdminClient.auth.admin.inviteUserByEmail).toHaveBeenCalledWith(
@@ -126,7 +128,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { id: EXISTING_USER_ID }, error: null }))      // existing user → found
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                          // upsert membership
 
-    const result = await (handler as Function)({})
+    const result = await ((handler as unknown) as RouteHandler)({})
 
     expect(result).toEqual({ success: true })
     expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
