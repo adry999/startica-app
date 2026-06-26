@@ -19,9 +19,9 @@
 DO $$
 BEGIN
   IF NOT EXISTS (
-    SELECT 1 FROM public.users WHERE id = '11111111-1111-4111-8111-111111111111'
+    SELECT 1 FROM public.users WHERE id = '11111111-1111-1111-1111-111111111111'
   ) OR NOT EXISTS (
-    SELECT 1 FROM public.users WHERE id = '22222222-2222-4222-8222-222222222222'
+    SELECT 1 FROM public.users WHERE id = '22222222-2222-2222-2222-222222222222'
   ) THEN
     RAISE EXCEPTION 'Seed users missing — run "supabase db reset" before "supabase test db"';
   END IF;
