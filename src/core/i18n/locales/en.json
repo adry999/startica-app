@@ -33,6 +33,11 @@
       "super_admin": "Super Admin",
       "admin": "Admin",
       "educator": "Educator"
+    },
+    "acceptInvite": {
+      "title": "Welcome to Startica",
+      "subtitle": "Set a password for your account.",
+      "success": "Password set. Redirecting..."
     }
   },
   "nav": {
@@ -82,5 +87,47 @@
     "confirm": "Confirm",
     "createSuccess": "Kindergarten created.",
     "updateSuccess": "Changes saved."
+  },
+  "staff": {
+    "pageTitle": "Staff",
+    "selectKindergarten": "Select a kindergarten to view staff.",
+    "empty": "No staff in this kindergarten.",
+    "invite": "Invite",
+    "inviteTitle": "Invite a new member",
+    "name": "Full name",
+    "email": "Email",
+    "role": "Role",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "role": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "educator": "Educator"
+    },
+    "editTitle": "Edit member",
+    "inviteSuccess": "Invitation sent.",
+    "updateSuccess": "Changes saved.",
+    "confirmDeactivateTitle": "Deactivate member?",
+    "confirmDeactivateBody": "The member will no longer be able to access the application.",
+    "deactivateSuccess": "Member deactivated.",
+    "confirmReactivateTitle": "Reactivate member?",
+    "confirmReactivateBody": "The member will be able to access the application again.",
+    "reactivateSuccess": "Member reactivated.",
+    "confirmRemoveTitle": "Remove from kindergarten?",
+    "confirmRemoveBody": "The member will lose access to this kindergarten. Their account remains active.",
+    "removeSuccess": "Member removed from kindergarten.",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "remove": "Remove",
+    "confirm": "Confirm"
   }
 }

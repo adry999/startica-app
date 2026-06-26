@@ -33,6 +33,11 @@
       "super_admin": "Super Admin",
       "admin": "Admin",
       "educator": "Educator"
+    },
+    "acceptInvite": {
+      "title": "Bun venit în Startica",
+      "subtitle": "Setează o parolă pentru contul tău.",
+      "success": "Parola a fost setată. Redirecționare..."
     }
   },
   "nav": {
@@ -82,5 +87,47 @@
     "confirm": "Confirmă",
     "createSuccess": "Grădinița a fost creată.",
     "updateSuccess": "Modificările au fost salvate."
+  },
+  "staff": {
+    "pageTitle": "Personal",
+    "selectKindergarten": "Selectează o grădiniță pentru a vedea personalul.",
+    "empty": "Nu există personal în această grădiniță.",
+    "invite": "Invită",
+    "inviteTitle": "Invită un membru nou",
+    "name": "Nume complet",
+    "email": "Email",
+    "role": "Rol",
+    "table": {
+      "name": "Nume",
+      "email": "Email",
+      "role": "Rol",
+      "status": "Stare",
+      "actions": "Acțiuni"
+    },
+    "status": {
+      "active": "Activ",
+      "inactive": "Inactiv"
+    },
+    "role": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "educator": "Educator"
+    },
+    "editTitle": "Editează membrul",
+    "inviteSuccess": "Invitația a fost trimisă.",
+    "updateSuccess": "Modificările au fost salvate.",
+    "confirmDeactivateTitle": "Dezactivează membrul?",
+    "confirmDeactivateBody": "Membrul nu va mai putea accesa aplicația.",
+    "deactivateSuccess": "Membrul a fost dezactivat.",
+    "confirmReactivateTitle": "Reactivează membrul?",
+    "confirmReactivateBody": "Membrul va putea accesa din nou aplicația.",
+    "reactivateSuccess": "Membrul a fost reactivat.",
+    "confirmRemoveTitle": "Elimină din grădiniță?",
+    "confirmRemoveBody": "Membrul va pierde accesul la această grădiniță. Contul rămâne activ.",
+    "removeSuccess": "Membrul a fost eliminat din grădiniță.",
+    "deactivate": "Dezactivează",
+    "reactivate": "Reactivează",
+    "remove": "Elimină",
+    "confirm": "Confirmă"
   }
 }

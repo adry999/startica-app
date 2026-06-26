@@ -1,12 +1,39 @@
 <script setup lang="ts">
+import { onMounted, computed } from 'vue'
+
 const { t } = useI18n()
 const { user, logout } = useAuth()
 const tenantStore = useTenantStore()
+const kindergartensStore = useKindergartensStore()
+
+onMounted(async () => {
+  await kindergartensStore.fetchAll()
+  // Auto-select the first kindergarten for Admin users (they don't need the ALL view)
+  if (user.value?.role === 'admin' && tenantStore.selectedKindergartenId === 'ALL') {
+    const first = kindergartensStore.items[0]
+    if (first) tenantStore.selectKindergarten(first.id)
+  }
+})
+
+const tenantOptions = computed(() => {
+  const options = []
+  if (user.value?.role === 'super_admin') {
+    options.push({ label: t('tenant.all'), value: 'ALL' })
+  }
+  for (const kg of kindergartensStore.items) {
+    options.push({ label: kg.name, value: kg.id })
+  }
+  return options
+})
 
 const navItems = computed(() => [
   { label: t('nav.overview'), to: '/', enabled: true },
   { label: t('nav.kindergartens'), to: '/kindergartens', enabled: user.value?.role === 'super_admin' },
-  { label: t('nav.staff'), to: '/staff', enabled: false },
+  {
+    label: t('nav.staff'),
+    to: '/staff',
+    enabled: user.value?.role === 'super_admin' || user.value?.role === 'admin',
+  },
   { label: t('nav.groups'), to: '/groups', enabled: false },
   { label: t('nav.children'), to: '/children', enabled: false },
 ])
@@ -44,7 +71,7 @@ async function onLogout() {
         <USelect
           v-if="user?.role === 'super_admin' || user?.role === 'admin'"
           :model-value="tenantStore.selectedKindergartenId"
-          :items="[{ label: t('tenant.all'), value: 'ALL' }]"
+          :items="tenantOptions"
           class="w-56"
           @update:model-value="(value) => tenantStore.selectKindergarten(value as string)"
         />
