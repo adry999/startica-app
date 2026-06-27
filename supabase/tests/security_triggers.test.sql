@@ -28,7 +28,7 @@ BEGIN
 END $$;
 
 BEGIN;
-SELECT plan(9);
+SELECT plan(10);
 
 -- ── Test 1: service_role can change role (trigger bypass) ────────────────────
 -- auth.uid() IS NULL for service_role → trigger allows the update.
@@ -91,8 +91,19 @@ SET LOCAL "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222"
 SELECT throws_ok(
   $$UPDATE public.users SET role = 'super_admin' WHERE id = '33333333-3333-3333-3333-333333333333'$$,
   '42501',
-  'only super_admin may grant or revoke the super_admin role',
+  'only super_admin may change user roles',
   'admin cannot promote another user to super_admin (proxy-escalation blocked)'
+);
+
+-- ── Test 10: admin cannot change another user's role to a non-super_admin role ──
+-- The original guard only blocked super_admin promotion; this verifies the
+-- new blanket rule: only super_admin may change role at all.
+-- Context is still the admin user (22222222) from the SET LOCAL above.
+SELECT throws_ok(
+  $$UPDATE public.users SET role = 'admin' WHERE id = '33333333-3333-3333-3333-333333333333'$$,
+  '42501',
+  'only super_admin may change user roles',
+  'admin cannot change another user role even to a non-super_admin role'
 );
 
 -- ── Switch to super_admin session for audit tests ────────────────────────────
