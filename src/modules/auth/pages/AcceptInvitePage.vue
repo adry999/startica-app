@@ -2,6 +2,7 @@
 import { onMounted, ref, reactive } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updatePasswordSchema, type UpdatePasswordInput } from '~/shared/schemas/auth.schema'
+import { createSupabaseBrowserClient } from '~/core/supabase/client'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
@@ -11,8 +12,25 @@ const ready = ref(false)
 const state = reactive<Partial<UpdatePasswordInput>>({ password: undefined, confirmPassword: undefined })
 
 onMounted(async () => {
-  // Supabase auto-exchanges the invite ?code= before this runs.
-  // fetchCurrentUser() ensures the resulting session is applied to the store.
+  // @supabase/ssr hard-codes flowType:'pkce', but Supabase's invite email uses
+  // implicit flow (#access_token=…). Detect and exchange the hash manually so
+  // the PKCE client never sees the implicit token and doesn't throw.
+  if (window.location.hash.includes('access_token=')) {
+    const params = new URLSearchParams(window.location.hash.slice(1))
+    const accessToken = params.get('access_token')
+    const refreshToken = params.get('refresh_token')
+    if (accessToken && refreshToken) {
+      const supabase = createSupabaseBrowserClient()
+      const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      // Clean the hash so a page refresh doesn't re-attempt token exchange
+      history.replaceState(null, '', window.location.pathname)
+      if (error) {
+        await navigateTo('/login')
+        return
+      }
+    }
+  }
+
   if (!authStore.user) {
     await authStore.fetchCurrentUser()
   }
