@@ -43,6 +43,12 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Admin callers may only invite educators — role escalation via invite is a
+  // server-enforced rule, not just a UI constraint.
+  if (callerProfile.role === 'admin' && role !== 'educator') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
+
   const { data: existing } = await adminClient
     .from('users')
     .select('id, role')
@@ -98,6 +104,19 @@ export default defineEventHandler(async (event) => {
   if (memberError) {
     console.error('[invite] membership upsert failed:', memberError.message)
     throw createError({ statusCode: 500, statusMessage: 'membership_failed' })
+  }
+
+  // Audit: write_audit_log trigger fires only for auth.uid() !== NULL;
+  // the service-role context here means auth.uid() IS NULL, so we log explicitly.
+  const { error: auditError } = await adminClient.from('audit_logs').insert({
+    user_id: caller.id,
+    kindergarten_id: kindergartenId,
+    action: 'create',
+    entity: 'user_kindergartens',
+    entity_id: userId,
+  })
+  if (auditError) {
+    console.error('[invite] audit log failed:', auditError.message)
   }
 
   return { success: true }

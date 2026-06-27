@@ -102,6 +102,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // existing user → none
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // insert profile
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // upsert membership
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // audit log
 
     mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
       data: { user: { id: NEW_USER_ID } },
@@ -127,6 +128,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))       // role check
       .mockReturnValueOnce(makeQuery({ data: { id: EXISTING_USER_ID, role: 'educator' }, error: null }))      // existing user → found (non-super_admin)
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                          // upsert membership
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                          // audit log
 
     const result = await ((handler as unknown) as RouteHandler)({})
 
@@ -201,6 +203,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // membership upsert
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // audit log
 
     mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
       data: { user: { id: NEW_USER_ID } },
@@ -209,6 +212,17 @@ describe('POST /api/staff/invite', () => {
 
     const result = await ((handler as unknown) as RouteHandler)({})
     expect(result).toEqual({ success: true })
+  })
+
+  it('returns 403 when admin tries to invite with role admin', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, role: 'admin' })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin', status: 'active' }, error: null }))   // caller profile
+      .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))                // membership → member
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
   })
 
   it('returns 403 when trying to add an existing super_admin to a kindergarten', async () => {
