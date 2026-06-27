@@ -43,13 +43,14 @@ INSERT INTO auth.users (
   now(), now(), '', '', '', ''
 );
 
-INSERT INTO public.users (id, email, full_name, role, status)
+INSERT INTO public.users (id, email, full_name, role, status, created_by)
 VALUES (
   'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',
   'kgb-user@test.local',
   'KG-B Educator',
   'educator',
-  'active'
+  'active',
+  '11111111-1111-1111-1111-111111111111'
 );
 
 INSERT INTO public.kindergartens (id, name, address, city, status, settings, created_by)
