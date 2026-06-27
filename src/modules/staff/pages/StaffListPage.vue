@@ -287,7 +287,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
             <UInput v-model="inviteState.fullName" class="w-full" />
           </UFormField>
           <UFormField :label="t('staff.roleLabel')" name="role">
-            <USelect v-model="inviteState.role" :items="roleOptions" class="w-full" />
+            <USelect v-model="inviteState.role" :items="roleOptions" class="w-full" data-testid="role-select" />
           </UFormField>
           <UButton type="submit" color="primary" block loading-auto :loading="loading">
             {{ t('staff.invite') }}

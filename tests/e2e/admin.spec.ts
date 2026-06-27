@@ -20,20 +20,16 @@ test.describe('admin role', () => {
     await loginAsAdmin(page)
     await page.getByRole('link', { name: 'Personal' }).click()
     await expect(page).toHaveURL('http://localhost:3000/staff')
-
-    await page.locator('select, [role="combobox"]').first().click()
-    await page.getByRole('option', { name: 'Grădinița Zâna Florilor' }).click()
-
-    await expect(page.getByRole('cell', { name: 'Elena Popescu' })).toBeVisible()
+    // Admin's single kindergarten is auto-selected by the layout; wait for data to load
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('cell', { name: 'Elena Popescu' })).toBeVisible({ timeout: 10000 })
   })
 
   test('admin can invite an educator', async ({ page }) => {
     await loginAsAdmin(page)
     await page.getByRole('link', { name: 'Personal' }).click()
-
-    await page.locator('select, [role="combobox"]').first().click()
-    await page.getByRole('option', { name: 'Grădinița Zâna Florilor' }).click()
-    await expect(page.getByRole('cell', { name: 'Elena Popescu' })).toBeVisible()
+    // Admin's single kindergarten is auto-selected; wait for staff list to be ready
+    await expect(page.getByRole('cell', { name: 'Elena Popescu' })).toBeVisible({ timeout: 10000 })
 
     const uniqueEmail = `admin-invited-${Date.now()}@example.com`
     await page.getByRole('button', { name: 'Invită' }).click()
@@ -48,18 +44,23 @@ test.describe('admin role', () => {
   test('admin invite dialog does not offer the admin role option', async ({ page }) => {
     await loginAsAdmin(page)
     await page.getByRole('link', { name: 'Personal' }).click()
-
-    await page.locator('select, [role="combobox"]').first().click()
-    await page.getByRole('option', { name: 'Grădinița Zâna Florilor' }).click()
+    // Admin's single kindergarten is auto-selected; wait for Invite button to appear
+    await expect(page.getByRole('button', { name: 'Invită' })).toBeVisible({ timeout: 10000 })
 
     await page.getByRole('button', { name: 'Invită' }).click()
     const inviteDialog = page.getByRole('dialog')
 
-    // The role select (if present) must not expose the 'admin' option
-    const roleSelect = inviteDialog.locator('select[name="role"], [data-testid="role-select"]')
-    if (await roleSelect.isVisible()) {
-      await expect(inviteDialog.getByRole('option', { name: /^admin$/i })).not.toBeVisible()
-    }
-    // If there is no role field at all, the invite is implicitly educator-only — also valid
+    // The role select must be present — it carries data-testid="role-select"
+    const roleSelect = inviteDialog.locator('[data-testid="role-select"]')
+    await expect(roleSelect).toBeVisible({ timeout: 5000 })
+
+    // Open the dropdown so the option list is rendered
+    await roleSelect.click()
+
+    // Admin must NOT see an 'admin' option in the role picker
+    await expect(page.getByRole('option', { name: /^admin$/i })).not.toBeVisible()
+
+    // Close the dialog
+    await page.keyboard.press('Escape')
   })
 })
