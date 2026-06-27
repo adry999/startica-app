@@ -1,10 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '~/core/supabase/types'
+import type { Result } from '~/shared/types/result'
 import type { DashboardStats, GroupSummary } from '../types/dashboard.types'
 
-type Result<T> = { success: true; data: T } | { success: false; error: string }
+type Client = SupabaseClient<Database>
 
 export async function fetchStats(
-  client: SupabaseClient,
+  client: Client,
   kindergartenId: string,
 ): Promise<Result<DashboardStats>> {
   const isAll = kindergartenId === 'ALL'
@@ -21,7 +23,7 @@ export async function fetchStats(
     .is('deleted_at', null)
     .eq('status', 'active')
 
-  // Staff count: per-kg use user_kindergartens; for ALL use users table directly
+  // Staff count: per-kg use users + inner join to filter soft-deleted/inactive users
   const staffQuery = isAll
     ? client
         .from('users')
@@ -30,9 +32,12 @@ export async function fetchStats(
         .eq('status', 'active')
         .neq('role', 'super_admin')
     : client
-        .from('user_kindergartens')
-        .select('user_id', { count: 'exact', head: true })
-        .eq('kindergarten_id', kindergartenId)
+        .from('users')
+        .select('id, user_kindergartens!inner(kindergarten_id)', { count: 'exact', head: true })
+        .eq('user_kindergartens.kindergarten_id', kindergartenId)
+        .eq('status', 'active')
+        .is('deleted_at', null)
+        .neq('role', 'super_admin')
 
   if (!isAll) {
     childrenQuery.eq('kindergarten_id', kindergartenId)
@@ -56,11 +61,10 @@ export async function fetchStats(
 }
 
 export async function fetchActiveGroups(
-  client: SupabaseClient,
+  client: Client,
   kindergartenId: string,
 ): Promise<Result<GroupSummary[]>> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let q: any = client
+  const baseQuery = client
     .from('groups')
     .select('id, name, age_range, users!educator_id(full_name)')
     .eq('status', 'active')
@@ -68,20 +72,18 @@ export async function fetchActiveGroups(
     .order('name')
     .limit(10)
 
-  if (kindergartenId !== 'ALL') {
-    q = q.eq('kindergarten_id', kindergartenId)
-  }
-
-  const { data, error } = await q
+  const { data, error } = await (kindergartenId !== 'ALL'
+    ? baseQuery.eq('kindergarten_id', kindergartenId)
+    : baseQuery)
 
   if (error) return { success: false, error: error.message }
 
   return {
     success: true,
-    data: (data ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      name: row.name as string,
-      ageRange: (row.age_range as string | null) ?? null,
+    data: (data ?? []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      ageRange: row.age_range ?? null,
       capacity: null, // capacity column does not exist in the current DB schema
       educatorName: (row.users as { full_name: string } | null)?.full_name ?? null,
     })),

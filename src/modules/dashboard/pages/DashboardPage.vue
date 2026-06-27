@@ -81,43 +81,24 @@ useLazyAsyncData(
 
     <!-- Quick actions + Active groups -->
     <div class="grid grid-cols-3 gap-6">
-      <!-- Quick actions -->
-      <div class="rounded-xl border border-border bg-white p-5">
+      <!-- Quick actions (only shown when there are accessible actions) -->
+      <div v-if="can('read', 'staff')" class="rounded-xl border border-border bg-white p-5">
         <h2 class="mb-4 text-sm font-semibold text-slate-800">{{ t('dashboard.quickActions') }}</h2>
         <div class="space-y-1">
           <NuxtLink
-            v-if="can('read', 'staff')"
             to="/staff"
             class="flex items-center gap-3 rounded-lg p-3 text-sm text-slate-600 transition-colors hover:bg-app-bg"
           >
             <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-50">
-              <UIcon name="i-heroicons-user-plus" class="h-4 w-4 text-teal-600" />
+              <UIcon name="i-heroicons-user-plus" class="h-5 w-5 text-teal-600" />
             </div>
             {{ t('staff.invite') }}
-          </NuxtLink>
-          <NuxtLink
-            to="/children"
-            class="flex items-center gap-3 rounded-lg p-3 text-sm text-slate-600 transition-colors hover:bg-app-bg"
-          >
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-50">
-              <UIcon name="i-heroicons-academic-cap" class="h-4 w-4 text-amber-500" />
-            </div>
-            {{ t('nav.children') }}
-          </NuxtLink>
-          <NuxtLink
-            to="/groups"
-            class="flex items-center gap-3 rounded-lg p-3 text-sm text-slate-600 transition-colors hover:bg-app-bg"
-          >
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-              <UIcon name="i-heroicons-user-group" class="h-4 w-4 text-slate-500" />
-            </div>
-            {{ t('nav.groups') }}
           </NuxtLink>
         </div>
       </div>
 
       <!-- Active groups table -->
-      <div class="col-span-2 rounded-xl border border-border bg-white">
+      <div :class="can('read', 'staff') ? 'col-span-2' : 'col-span-3'" class="rounded-xl border border-border bg-white">
         <div class="border-b border-border px-5 py-4">
           <h2 class="text-sm font-semibold text-slate-800">{{ t('dashboard.activeGroups') }}</h2>
         </div>
@@ -134,7 +115,6 @@ useLazyAsyncData(
               <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('dashboard.table.group') }}</th>
               <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('dashboard.table.ageRange') }}</th>
               <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('dashboard.table.educator') }}</th>
-              <th class="px-5 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('dashboard.table.capacity') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -146,7 +126,6 @@ useLazyAsyncData(
               <td class="px-5 py-3 font-medium text-slate-800">{{ group.name }}</td>
               <td class="px-5 py-3 text-slate-500">{{ group.ageRange ?? '—' }}</td>
               <td class="px-5 py-3 text-slate-500">{{ group.educatorName ?? '—' }}</td>
-              <td class="px-5 py-3 tabular-nums text-slate-500">{{ group.capacity ?? '—' }}</td>
             </tr>
           </tbody>
         </table>

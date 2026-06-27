@@ -106,8 +106,7 @@
     "table": {
       "group": "Grupă",
       "ageRange": "Interval vârstă",
-      "educator": "Educator",
-      "capacity": "Capacitate"
+      "educator": "Educator"
     }
   },
   "staff": {
