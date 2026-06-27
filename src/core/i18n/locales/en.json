@@ -130,6 +130,18 @@
     "deactivate": "Deactivate",
     "reactivate": "Reactivate",
     "remove": "Remove",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "pageSubtitle": "Manage staff members and their roles.",
+    "stats": {
+      "total": "Total Staff",
+      "active": "Active",
+      "inactive": "Inactive",
+      "admins": "Admins"
+    },
+    "filter": {
+      "all": "All",
+      "educators": "Educators",
+      "admins": "Admins"
+    }
   }
 }

@@ -130,6 +130,18 @@
     "deactivate": "Dezactivează",
     "reactivate": "Reactivează",
     "remove": "Elimină",
-    "confirm": "Confirmă"
+    "confirm": "Confirmă",
+    "pageSubtitle": "Gestionează membrii și rolurile personalului.",
+    "stats": {
+      "total": "Total personal",
+      "active": "Activi",
+      "inactive": "Inactivi",
+      "admins": "Administratori"
+    },
+    "filter": {
+      "all": "Toți",
+      "educators": "Educatori",
+      "admins": "Administratori"
+    }
   }
 }
