@@ -90,6 +90,26 @@
     "createSuccess": "Grădinița a fost creată.",
     "updateSuccess": "Modificările au fost salvate."
   },
+  "dashboard": {
+    "pageTitle": "Prezentare generală",
+    "pageSubtitle": "Rezumatul activității grădiniței selectate.",
+    "stats": {
+      "children": "Copii înscriși",
+      "groups": "Grupe active",
+      "staff": "Personal activ",
+      "attendance": "Prezență"
+    },
+    "activeGroups": "Grupe active",
+    "groupsEmpty": "Nu există grupe active.",
+    "quickActions": "Acțiuni rapide",
+    "attendanceComingSoon": "Modulul prezență vine în curând",
+    "table": {
+      "group": "Grupă",
+      "ageRange": "Interval vârstă",
+      "educator": "Educator",
+      "capacity": "Capacitate"
+    }
+  },
   "staff": {
     "pageTitle": "Personal",
     "selectKindergarten": "Selectează o grădiniță pentru a vedea personalul.",

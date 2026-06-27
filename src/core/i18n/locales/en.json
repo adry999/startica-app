@@ -90,6 +90,26 @@
     "createSuccess": "Kindergarten created.",
     "updateSuccess": "Changes saved."
   },
+  "dashboard": {
+    "pageTitle": "Overview",
+    "pageSubtitle": "Summary of the selected kindergarten's activity.",
+    "stats": {
+      "children": "Enrolled Children",
+      "groups": "Active Groups",
+      "staff": "Active Staff",
+      "attendance": "Attendance"
+    },
+    "activeGroups": "Active Groups",
+    "groupsEmpty": "No active groups.",
+    "quickActions": "Quick Actions",
+    "attendanceComingSoon": "Attendance module coming soon",
+    "table": {
+      "group": "Group",
+      "ageRange": "Age Range",
+      "educator": "Educator",
+      "capacity": "Capacity"
+    }
+  },
   "staff": {
     "pageTitle": "Staff",
     "selectKindergarten": "Select a kindergarten to view staff.",
