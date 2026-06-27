@@ -28,7 +28,7 @@ BEGIN
 END $$;
 
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 -- ── Test 1: service_role can change role (trigger bypass) ────────────────────
 -- auth.uid() IS NULL for service_role → trigger allows the update.
@@ -81,6 +81,18 @@ SELECT throws_ok(
 SELECT lives_ok(
   $$UPDATE public.users SET full_name = 'Admin Renamed' WHERE id = '22222222-2222-2222-2222-222222222222'$$,
   'authenticated user can update full_name on own row'
+);
+
+-- ── Test 9: admin cannot promote another user to super_admin ─────────────────
+-- The admin (22222222) shares a kindergarten with the educator (33333333), so
+-- the USING clause permits the row — only the proxy-escalation guard blocks it.
+-- JWT context is still the admin user from the SET LOCAL above.
+SET LOCAL "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated"}';
+SELECT throws_ok(
+  $$UPDATE public.users SET role = 'super_admin' WHERE id = '33333333-3333-3333-3333-333333333333'$$,
+  '42501',
+  'only super_admin may grant or revoke the super_admin role',
+  'admin cannot promote another user to super_admin (proxy-escalation blocked)'
 );
 
 -- ── Switch to super_admin session for audit tests ────────────────────────────
