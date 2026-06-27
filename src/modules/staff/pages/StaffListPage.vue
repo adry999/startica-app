@@ -215,7 +215,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
         color="primary"
         @click="openInvite"
       >
-        <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-4 w-4" />
+        <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
         {{ t('staff.invite') }}
       </UButton>
     </div>
