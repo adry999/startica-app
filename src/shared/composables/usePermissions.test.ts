@@ -69,4 +69,22 @@ describe('usePermissions', () => {
     expect(can('update', 'staff')).toBe(false)
     expect(can('delete', 'staff')).toBe(false)
   })
+
+  it('lets only super_admin assign roles', () => {
+    setUserRole('super_admin')
+    const { can } = usePermissions()
+    expect(can('assign-role', 'staff')).toBe(true)
+  })
+
+  it('denies role assignment for admin', () => {
+    setUserRole('admin')
+    const { can } = usePermissions()
+    expect(can('assign-role', 'staff')).toBe(false)
+  })
+
+  it('denies role assignment for educator', () => {
+    setUserRole('educator')
+    const { can } = usePermissions()
+    expect(can('assign-role', 'staff')).toBe(false)
+  })
 })
