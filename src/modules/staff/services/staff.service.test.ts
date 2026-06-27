@@ -23,6 +23,9 @@ const sampleRow = {
 let mockIs: ReturnType<typeof vi.fn>
 let mockNeq: ReturnType<typeof vi.fn>
 
+let mockDeleteEq1: ReturnType<typeof vi.fn>
+let mockDeleteEq2: ReturnType<typeof vi.fn>
+
 function createMockClient(opts: {
   memberships?: Array<{ user_id: string }>
   users?: typeof sampleRow[]
@@ -41,6 +44,9 @@ function createMockClient(opts: {
   })
   mockIs = vi.fn().mockReturnValue({ neq: mockNeq })
 
+  mockDeleteEq2 = vi.fn().mockResolvedValue({ error: deleteError })
+  mockDeleteEq1 = vi.fn().mockReturnValue({ eq: mockDeleteEq2 })
+
   return {
     from: vi.fn().mockImplementation((table: string) => {
       if (table === 'user_kindergartens') {
@@ -49,9 +55,7 @@ function createMockClient(opts: {
             eq: vi.fn().mockResolvedValue({ data: memberships, error: null }),
           }),
           delete: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockResolvedValue({ error: deleteError }),
-            }),
+            eq: mockDeleteEq1,
           }),
         }
       }
@@ -140,12 +144,14 @@ describe('setStaffStatus', () => {
 })
 
 describe('removeFromKindergarten', () => {
-  it('deletes the user_kindergartens row', async () => {
+  it('deletes the correct user_kindergartens row by user_id and kindergarten_id', async () => {
     const client = createMockClient()
     const result = await removeFromKindergarten(client, 'user-2', 'kg-1')
 
     expect(result).toEqual({ success: true, data: null })
     expect(client.from).toHaveBeenCalledWith('user_kindergartens')
+    expect(mockDeleteEq1).toHaveBeenCalledWith('user_id', 'user-2')
+    expect(mockDeleteEq2).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
   })
 
   it('returns failure when the delete errors', async () => {

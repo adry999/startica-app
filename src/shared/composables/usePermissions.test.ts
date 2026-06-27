@@ -23,11 +23,11 @@ describe('usePermissions', () => {
     expect(can('delete', 'kindergarten')).toBe(false)
   })
 
-  it('lets an admin read but not create/update/delete a kindergarten', () => {
+  it('denies all kindergarten permissions to an admin (kindergartens list is super_admin-only)', () => {
     setUserRole('admin')
     const { can } = usePermissions()
 
-    expect(can('read', 'kindergarten')).toBe(true)
+    expect(can('read', 'kindergarten')).toBe(false)
     expect(can('create', 'kindergarten')).toBe(false)
     expect(can('update', 'kindergarten')).toBe(false)
     expect(can('delete', 'kindergarten')).toBe(false)

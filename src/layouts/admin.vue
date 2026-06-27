@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { computed } from 'vue'
 
 const { t } = useI18n()
 const { user, logout } = useAuth()
+const { can } = usePermissions()
 const tenantStore = useTenantStore()
 const kindergartensStore = useKindergartensStore()
 
-onMounted(async () => {
+useLazyAsyncData('admin-kindergartens', async () => {
   await kindergartensStore.fetchAll()
-  // Auto-select the first kindergarten for Admin users (they don't need the ALL view)
-  if (user.value?.role === 'admin' && tenantStore.selectedKindergartenId === 'ALL') {
+  // Non-super_admins manage a fixed set of kindergartens — skip the ALL view.
+  if (!can('read', 'kindergarten') && tenantStore.selectedKindergartenId === 'ALL') {
     const first = kindergartensStore.items[0]
     if (first) tenantStore.selectKindergarten(first.id)
   }
@@ -17,7 +18,7 @@ onMounted(async () => {
 
 const tenantOptions = computed(() => {
   const options = []
-  if (user.value?.role === 'super_admin') {
+  if (can('read', 'kindergarten')) {
     options.push({ label: t('tenant.all'), value: 'ALL' })
   }
   for (const kg of kindergartensStore.items) {
@@ -28,12 +29,8 @@ const tenantOptions = computed(() => {
 
 const navItems = computed(() => [
   { label: t('nav.overview'), to: '/', enabled: true },
-  { label: t('nav.kindergartens'), to: '/kindergartens', enabled: user.value?.role === 'super_admin' },
-  {
-    label: t('nav.staff'),
-    to: '/staff',
-    enabled: user.value?.role === 'super_admin' || user.value?.role === 'admin',
-  },
+  { label: t('nav.kindergartens'), to: '/kindergartens', enabled: can('read', 'kindergarten') },
+  { label: t('nav.staff'), to: '/staff', enabled: can('read', 'staff') },
   { label: t('nav.groups'), to: '/groups', enabled: false },
   { label: t('nav.children'), to: '/children', enabled: false },
 ])
@@ -69,7 +66,7 @@ async function onLogout() {
     <div class="flex flex-1 flex-col">
       <header class="flex h-16 items-center justify-between border-b border-neutral-200 bg-white px-6">
         <USelect
-          v-if="user?.role === 'super_admin' || user?.role === 'admin'"
+          v-if="can('read', 'staff')"
           :model-value="tenantStore.selectedKindergartenId"
           :items="tenantOptions"
           class="w-56"

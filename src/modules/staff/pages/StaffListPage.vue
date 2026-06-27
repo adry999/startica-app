@@ -12,7 +12,6 @@ import type { StaffMember } from '../types/staff.types'
 const { t } = useI18n()
 const toast = useToast()
 const { can } = usePermissions()
-const { user } = useAuth()
 const tenantStore = useTenantStore()
 const { items, loading, fetchAll, invite, updateProfile, setStatus, remove } = useStaff()
 
@@ -47,7 +46,7 @@ function openInvite() {
 }
 
 const roleOptions = computed(() => {
-  if (user.value?.role === 'super_admin') {
+  if (can('assign-role', 'staff')) {
     return [
       { label: t('staff.role.admin'), value: 'admin' },
       { label: t('staff.role.educator'), value: 'educator' },
@@ -81,7 +80,7 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateStaffInput>) {
   if (!editTarget.value) return
   const data: UpdateStaffInput = { fullName: event.data.fullName }
   // Only super_admin can change roles — omit the field otherwise
-  if (user.value?.role === 'super_admin' && event.data.role) {
+  if (can('assign-role', 'staff') && event.data.role) {
     data.role = event.data.role
   }
   const ok = await updateProfile(editTarget.value.id, data)
@@ -253,7 +252,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UFormField :label="t('staff.name')" name="fullName">
             <UInput v-model="editState.fullName" class="w-full" />
           </UFormField>
-          <UFormField v-if="user?.role === 'super_admin'" :label="t('staff.roleLabel')" name="role">
+          <UFormField v-if="can('assign-role', 'staff')" :label="t('staff.roleLabel')" name="role">
             <USelect
               v-model="editState.role"
               :items="[

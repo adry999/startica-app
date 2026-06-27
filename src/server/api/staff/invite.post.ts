@@ -18,11 +18,16 @@ export default defineEventHandler(async (event) => {
   const adminClient = createSupabaseAdminClient()
   const { data: callerProfile } = await adminClient
     .from('users')
-    .select('role')
+    .select('role, status, deleted_at')
     .eq('id', caller.id)
+    .is('deleted_at', null)
     .single()
 
-  if (!callerProfile || !['super_admin', 'admin'].includes(callerProfile.role)) {
+  if (
+    !callerProfile
+    || !['super_admin', 'admin'].includes(callerProfile.role)
+    || callerProfile.status !== 'active'
+  ) {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 

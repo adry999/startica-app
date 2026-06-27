@@ -75,7 +75,7 @@ describe('POST /api/staff/invite', () => {
   it('returns 403 when caller is an educator', async () => {
     mockReadBody.mockResolvedValue(VALID_BODY)
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
-    mockAdminClient.from.mockReturnValue(makeQuery({ data: { role: 'educator' }, error: null }))
+    mockAdminClient.from.mockReturnValue(makeQuery({ data: { role: 'educator', status: 'active' }, error: null }))
 
     await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
   })
@@ -85,7 +85,7 @@ describe('POST /api/staff/invite', () => {
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'admin' }, error: null }))  // role check
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin', status: 'active' }, error: null }))  // role check
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))               // membership → not a member
 
     await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
@@ -98,7 +98,7 @@ describe('POST /api/staff/invite', () => {
     const NEW_USER_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc'
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null })) // role check
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null })) // role check
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // existing user → none
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // insert profile
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // upsert membership
@@ -124,7 +124,7 @@ describe('POST /api/staff/invite', () => {
     const EXISTING_USER_ID = 'dddddddd-dddd-4ddd-8ddd-dddddddddddd'
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))       // role check
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))       // role check
       .mockReturnValueOnce(makeQuery({ data: { id: EXISTING_USER_ID, role: 'educator' }, error: null }))      // existing user → found (non-super_admin)
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                          // upsert membership
 
@@ -139,7 +139,7 @@ describe('POST /api/staff/invite', () => {
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
       .mockReturnValueOnce(makeQuery({ data: null, error: null })) // no existing user
 
     mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
@@ -157,7 +157,7 @@ describe('POST /api/staff/invite', () => {
     const NEW_USER_ID = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                       // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: { message: 'db_error' } }))   // profile insert fails
 
@@ -176,7 +176,7 @@ describe('POST /api/staff/invite', () => {
     const NEW_USER_ID = 'ffffffff-ffff-4fff-8fff-ffffffffffff'
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert ok
       .mockReturnValueOnce(makeQuery({ data: null, error: { message: 'fk_error' } }))  // membership fails
@@ -196,7 +196,7 @@ describe('POST /api/staff/invite', () => {
     const NEW_USER_ID = '11111111-1111-4111-8111-111111111111'
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'admin' }, error: null }))         // caller role
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin', status: 'active' }, error: null }))         // caller role
       .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))    // membership check → member
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert
@@ -216,7 +216,7 @@ describe('POST /api/staff/invite', () => {
     mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
 
     mockAdminClient.from
-      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin' }, error: null }))  // caller is super_admin
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))  // caller is super_admin
       .mockReturnValueOnce(makeQuery({ data: { id: 'target-id', role: 'super_admin' }, error: null })) // target is also super_admin
 
     await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })

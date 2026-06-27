@@ -1,6 +1,6 @@
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
-export type PermissionAction = 'create' | 'read' | 'update' | 'delete'
+export type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'assign-role'
 export type PermissionResource = 'kindergarten' | 'staff'
 
 export function usePermissions() {
@@ -11,16 +11,16 @@ export function usePermissions() {
     if (!role) return false
 
     if (resource === 'kindergarten') {
-      if (action === 'read') return true
-      // Kindergartens are never hard-deleted (no DELETE RLS policy, no delete
-      // service method, no delete UI). Returning false keeps can() honest and
-      // prevents future contributors from accidentally wiring a delete button
-      // off this check against an operation the DB will always reject.
+      // Kindergarten module (list, create, edit) is super_admin only.
+      // 'read' is intentionally super_admin-only — admins access their kindergarten
+      // via the tenant selector, not the /kindergartens management page.
       if (action === 'delete') return false
       return role === 'super_admin'
     }
 
     if (resource === 'staff') {
+      // Only super_admin may assign roles (promote/demote between admin/educator).
+      if (action === 'assign-role') return role === 'super_admin'
       return role === 'super_admin' || role === 'admin'
     }
 

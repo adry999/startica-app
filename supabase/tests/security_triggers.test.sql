@@ -101,68 +101,61 @@ SELECT throws_ok(
 SET LOCAL "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111", "role": "authenticated"}';
 
 -- ── Test 7: audit_logs row is written on UPDATE ───────────────────────────────
--- Mutates only full_name on the super_admin's own row — the trigger allows it
--- because no guarded field (role/status/deleted_at/email) changes.
-DO $$
-DECLARE
-  before_count BIGINT;
-  after_count  BIGINT;
-BEGIN
-  SELECT count(*) INTO before_count FROM public.audit_logs WHERE entity = 'users';
-  UPDATE public.users SET full_name = 'Audit Trigger Test'
-    WHERE id = '11111111-1111-1111-1111-111111111111';
-  SELECT count(*) INTO after_count FROM public.audit_logs WHERE entity = 'users';
-  IF after_count <= before_count THEN
-    RAISE EXCEPTION 'Expected audit_logs row to be written on UPDATE';
-  END IF;
+-- Capture count before, mutate, then assert exactly one new row via is().
+-- set_config(..., true) keeps the value transaction-local.
+DO $$ BEGIN
+  PERFORM set_config('app.audit_before_7', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
 END $$;
-SELECT ok(true, 'audit_logs row is written on UPDATE');
+
+UPDATE public.users SET full_name = 'Audit Trigger Test'
+  WHERE id = '11111111-1111-1111-1111-111111111111';
+
+SELECT is(
+  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_7')::bigint,
+  1::bigint,
+  'audit_logs row is written on UPDATE'
+);
 
 -- ── Test 8: audit_logs row is written on INSERT ───────────────────────────────
 -- public.users.id is a FK → auth.users.id, so we must insert the auth row first.
 -- Both inserts are rolled back with the outer ROLLBACK.
-DO $$
-DECLARE
-  before_count BIGINT;
-  after_count  BIGINT;
-BEGIN
-  SELECT count(*) INTO before_count FROM public.audit_logs WHERE entity = 'users';
-
-  -- auth.users row (required by FK)
-  INSERT INTO auth.users (
-    instance_id, id, aud, role, email, encrypted_password,
-    email_confirmed_at,
-    raw_app_meta_data, raw_user_meta_data,
-    created_at, updated_at,
-    confirmation_token, email_change, email_change_token_new, recovery_token
-  ) VALUES (
-    '00000000-0000-0000-0000-000000000000',
-    'aaaaaaaa-0000-4000-8000-000000000099',
-    'authenticated', 'authenticated',
-    'audit@test.local',
-    crypt('TestPass123!', gen_salt('bf')),
-    now(),
-    '{"provider":"email","providers":["email"]}', '{}',
-    now(), now(),
-    '', '', '', ''
-  );
-
-  -- public.users row — set_audit_columns trigger will stamp created_by / updated_by
-  INSERT INTO public.users (id, email, full_name, role, status)
-  VALUES (
-    'aaaaaaaa-0000-4000-8000-000000000099',
-    'audit@test.local',
-    'Audit Insert',
-    'educator',
-    'active'
-  );
-
-  SELECT count(*) INTO after_count FROM public.audit_logs WHERE entity = 'users';
-  IF after_count <= before_count THEN
-    RAISE EXCEPTION 'Expected audit_logs row to be written on INSERT';
-  END IF;
+DO $$ BEGIN
+  PERFORM set_config('app.audit_before_8', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
 END $$;
-SELECT ok(true, 'audit_logs row is written on INSERT');
+
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at,
+  confirmation_token, email_change, email_change_token_new, recovery_token
+) VALUES (
+  '00000000-0000-0000-0000-000000000000',
+  'aaaaaaaa-0000-4000-8000-000000000099',
+  'authenticated', 'authenticated',
+  'audit@test.local',
+  crypt('TestPass123!', gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}', '{}',
+  now(), now(),
+  '', '', '', ''
+);
+
+-- set_audit_columns trigger will stamp created_by / updated_by
+INSERT INTO public.users (id, email, full_name, role, status)
+VALUES (
+  'aaaaaaaa-0000-4000-8000-000000000099',
+  'audit@test.local',
+  'Audit Insert',
+  'educator',
+  'active'
+);
+
+SELECT is(
+  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_8')::bigint,
+  1::bigint,
+  'audit_logs row is written on INSERT'
+);
 
 RESET "request.jwt.claims";
 SELECT finish();

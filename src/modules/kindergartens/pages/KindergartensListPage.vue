@@ -61,7 +61,10 @@ async function onEditDetailsSubmit(event: FormSubmitEvent<KindergartenDetailsInp
 async function onEditSettingsSubmit(event: FormSubmitEvent<KindergartenSettingsInput>) {
   if (!editTarget.value) return
   const ok = await updateSettings(editTarget.value.id, event.data)
-  if (ok) toast.add({ title: t('kindergartens.updateSuccess'), color: 'success' })
+  if (ok) {
+    editModalOpen.value = false
+    toast.add({ title: t('kindergartens.updateSuccess'), color: 'success' })
+  }
 }
 
 const confirmModalOpen = ref(false)
