@@ -20,56 +20,53 @@ const sampleRow = {
   deleted_at: null,
 }
 
-let mockIs: ReturnType<typeof vi.fn>
+let mockOrder: ReturnType<typeof vi.fn>
 let mockNeq: ReturnType<typeof vi.fn>
+let mockIs: ReturnType<typeof vi.fn>
+let mockEq: ReturnType<typeof vi.fn>
 
 let mockDeleteEq1: ReturnType<typeof vi.fn>
 let mockDeleteEq2: ReturnType<typeof vi.fn>
 
 function createMockClient(opts: {
-  memberships?: Array<{ user_id: string }>
-  users?: typeof sampleRow[]
+  users?: Array<typeof sampleRow> | null
+  queryError?: { message: string } | null
   mutationResult?: typeof sampleRow | null
   deleteError?: { message: string } | null
 } = {}) {
   const {
-    memberships = [{ user_id: 'user-2' }],
     users = [sampleRow],
+    queryError = null,
     mutationResult = sampleRow,
     deleteError = null,
   } = opts
 
-  mockNeq = vi.fn().mockReturnValue({
-    order: vi.fn().mockResolvedValue({ data: users, error: null }),
-  })
+  mockOrder = vi.fn().mockResolvedValue({ data: users, error: queryError })
+  mockNeq = vi.fn().mockReturnValue({ order: mockOrder })
   mockIs = vi.fn().mockReturnValue({ neq: mockNeq })
+  mockEq = vi.fn().mockReturnValue({ is: mockIs })
 
   mockDeleteEq2 = vi.fn().mockResolvedValue({ error: deleteError })
   mockDeleteEq1 = vi.fn().mockReturnValue({ eq: mockDeleteEq2 })
 
   return {
     from: vi.fn().mockImplementation((table: string) => {
-      if (table === 'user_kindergartens') {
+      if (table === 'users') {
         return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockResolvedValue({ data: memberships, error: null }),
-          }),
-          delete: vi.fn().mockReturnValue({
-            eq: mockDeleteEq1,
+          select: vi.fn().mockReturnValue({ eq: mockEq }),
+          update: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              select: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({ data: mutationResult, error: null }),
+              }),
+            }),
           }),
         }
       }
-      return {
-        select: vi.fn().mockReturnValue({
-          in: vi.fn().mockReturnValue({ is: mockIs }),
-        }),
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: mutationResult, error: null }),
-            }),
-          }),
-        }),
+      if (table === 'user_kindergartens') {
+        return {
+          delete: vi.fn().mockReturnValue({ eq: mockDeleteEq1 }),
+        }
       }
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,17 +74,18 @@ function createMockClient(opts: {
 }
 
 describe('listStaff', () => {
-  it('returns users for the given kindergarten, excluding super_admins', async () => {
+  it('returns users for the given kindergarten via single join, excluding super_admins', async () => {
     const client = createMockClient()
     const result = await listStaff(client, 'kg-1')
 
     expect(result).toEqual({ success: true, data: [sampleRow] })
-    expect(client.from).toHaveBeenCalledWith('user_kindergartens')
     expect(client.from).toHaveBeenCalledWith('users')
+    expect(client.from).not.toHaveBeenCalledWith('user_kindergartens')
+    expect(mockEq).toHaveBeenCalledWith('user_kindergartens.kindergarten_id', 'kg-1')
   })
 
-  it('returns an empty array when the kindergarten has no members', async () => {
-    const client = createMockClient({ memberships: [] })
+  it('returns an empty array when no users match the kindergarten', async () => {
+    const client = createMockClient({ users: [] })
     const result = await listStaff(client, 'kg-1')
 
     expect(result).toEqual({ success: true, data: [] })
@@ -99,6 +97,13 @@ describe('listStaff', () => {
 
     expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
     expect(mockNeq).toHaveBeenCalledWith('role', 'super_admin')
+  })
+
+  it('returns failure when the query errors', async () => {
+    const client = createMockClient({ users: null, queryError: { message: 'db error' } })
+    const result = await listStaff(client, 'kg-1')
+
+    expect(result).toEqual({ success: false, error: 'db error' })
   })
 })
 

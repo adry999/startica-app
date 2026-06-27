@@ -11,28 +11,19 @@ export async function listStaff(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<UserRow[]>> {
-  // Step 1: get user IDs that belong to this kindergarten
-  const { data: memberships, error: linkErr } = await client
-    .from('user_kindergartens')
-    .select('user_id')
-    .eq('kindergarten_id', kindergartenId)
-
-  if (linkErr || !memberships) return { success: false, error: linkErr?.message ?? 'list_failed' }
-  if (memberships.length === 0) return { success: true, data: [] }
-
-  const userIds = memberships.map((m) => m.user_id)
-
-  // Step 2: fetch profiles, excluding soft-deleted rows and super_admins
   const { data, error } = await client
     .from('users')
-    .select('*')
-    .in('id', userIds)
+    .select('*, user_kindergartens!inner(kindergarten_id)')
+    .eq('user_kindergartens.kindergarten_id', kindergartenId)
     .is('deleted_at', null)
     .neq('role', 'super_admin')
     .order('full_name')
 
   if (error || !data) return { success: false, error: error?.message ?? 'list_failed' }
-  return { success: true, data }
+  return {
+    success: true,
+    data: data.map(({ user_kindergartens: _join, ...user }) => user as UserRow),
+  }
 }
 
 export async function updateStaffProfile(
