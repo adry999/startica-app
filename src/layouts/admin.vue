@@ -56,7 +56,7 @@ async function onLogout() {
         </div>
         <div class="min-w-0">
           <p class="truncate text-sm font-semibold text-white">{{ t('common.appName') }}</p>
-          <p class="text-xs text-slate-400">Admin Portal</p>
+          <p class="text-xs text-slate-400">{{ t('common.adminPortal') }}</p>
         </div>
       </div>
 

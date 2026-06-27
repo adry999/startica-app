@@ -6,7 +6,8 @@
     "delete": "Delete",
     "edit": "Edit",
     "loading": "Loading...",
-    "search": "Search"
+    "search": "Search",
+    "adminPortal": "Admin Portal"
   },
   "auth": {
     "login": "Login",

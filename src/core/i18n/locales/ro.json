@@ -6,7 +6,8 @@
     "delete": "Șterge",
     "edit": "Editează",
     "loading": "Se încarcă...",
-    "search": "Caută"
+    "search": "Caută",
+    "adminPortal": "Portal Admin"
   },
   "auth": {
     "login": "Autentificare",
