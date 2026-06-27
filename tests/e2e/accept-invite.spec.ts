@@ -46,7 +46,7 @@ const SUPER_ADMIN_ID = '11111111-1111-1111-1111-111111111111'
 // Cookie name: @supabase/supabase-js derives it as
 //   `sb-${new URL(supabaseUrl).hostname.split(".")[0]}-auth-token`
 // → hostname = "127.0.0.1", first segment = "127" → "sb-127-auth-token"
-const AUTH_COOKIE_NAME = 'sb-127-auth-token'
+const AUTH_COOKIE_NAME = `sb-${new URL(SUPABASE_URL).hostname.split('.')[0]}-auth-token`
 
 /** Shared headers for Supabase admin / REST requests (Node.js fetch). */
 function adminHeaders() {
@@ -152,6 +152,8 @@ function buildCookieValue(session: {
 }
 
 test.describe('accept-invite flow', () => {
+  let createdUserId: string | undefined
+
   test('invited user can set a password and land on the dashboard', async ({ browser }) => {
     // ── 1. Invite the user via the Supabase admin REST API ──────────────────
     const inviteEmail = `invite-e2e-${Date.now()}@example.com`
@@ -167,9 +169,23 @@ test.describe('accept-invite flow', () => {
     expect(inviteRes.ok, `invite API call failed with ${inviteRes.status}`).toBe(true)
     const inviteData = await inviteRes.json() as { id: string }
     const userId = inviteData.id
+    createdUserId = userId
     expect(userId, 'invite response must include user id').toBeTruthy()
 
     // ── 2. Create the user profile in public.users ───────────────────────────
+    // Verify seed super_admin exists so audit FK doesn't silently fail
+    const saRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/users?id=eq.${SUPER_ADMIN_ID}&select=id`,
+      {
+        headers: adminHeaders(),
+      }
+    )
+    const saRows = (await saRes.json()) as Array<{ id: string }>
+    expect(
+      saRows.length,
+      `Seed super_admin ${SUPER_ADMIN_ID} not found — run 'supabase db reset'`
+    ).toBe(1)
+
     const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
       method: 'POST',
       headers: { ...adminHeaders(), Prefer: 'return=minimal' },
@@ -243,6 +259,42 @@ test.describe('accept-invite flow', () => {
       await expect(invitePage).toHaveURL(`${APP_ORIGIN}/`, { timeout: 15000 })
     } finally {
       await inviteContext.close()
+    }
+  })
+
+  test.afterAll(async () => {
+    if (!createdUserId) return
+
+    try {
+      // Delete the public.users row
+      const usersRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/users?id=eq.${createdUserId}`,
+        {
+          method: 'DELETE',
+          headers: adminHeaders(),
+        }
+      )
+      if (!usersRes.ok) {
+        console.warn(`Failed to delete public.users row: ${usersRes.status}`)
+      }
+    } catch (err) {
+      console.warn('Error deleting public.users row:', err)
+    }
+
+    try {
+      // Delete the auth user
+      const authRes = await fetch(
+        `${SUPABASE_URL}/auth/v1/admin/users/${createdUserId}`,
+        {
+          method: 'DELETE',
+          headers: adminHeaders(),
+        }
+      )
+      if (!authRes.ok) {
+        console.warn(`Failed to delete auth user: ${authRes.status}`)
+      }
+    } catch (err) {
+      console.warn('Error deleting auth user:', err)
     }
   })
 })
