@@ -11,7 +11,7 @@ const { t } = useI18n()
 const toast = useToast()
 const { can } = usePermissions()
 const tenantStore = useTenantStore()
-const { items, loading, fetchAll, create, update, setStatus } = useChildren()
+const { items, loading, error, fetchAll, create, update, setStatus } = useChildren()
 const groupsStore = useGroupsStore()
 
 const UBadge = resolveComponent('UBadge')
@@ -202,6 +202,9 @@ const columns = computed<TableColumn<Child>[]>(() => [
         {{ t('children.addTitle') }}
       </UButton>
     </div>
+
+    <!-- Fetch error -->
+    <UAlert v-if="error" color="error" variant="soft" :description="error" class="mb-4" />
 
     <!-- Stat cards -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">

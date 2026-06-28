@@ -41,7 +41,8 @@ export const useChildrenStore = defineStore('children', {
       const actorId = useAuthStore().user?.id ?? ''
       const result = await childrenService.setChildStatus(useSupabaseClient(), id, status, actorId)
       if (!result.success) { this.error = result.error; return false }
-      this.items = this.items.filter(c => c.id !== id)
+      const idx = this.items.findIndex(c => c.id === id)
+      if (idx !== -1) this.items[idx]!.status = status
       return true
     },
   },

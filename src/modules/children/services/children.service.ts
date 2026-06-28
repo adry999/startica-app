@@ -124,7 +124,6 @@ export async function setChildStatus(
   const payload: Database['public']['Tables']['children']['Update'] = {
     status,
     updated_by: actorId,
-    ...(status === 'withdrawn' || status === 'graduated' ? { deleted_at: new Date().toISOString() } : { deleted_at: null }),
   }
   const { error } = await client.from('children').update(payload).eq('id', id)
   if (error) return { success: false, error: error.message }
