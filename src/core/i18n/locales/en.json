@@ -164,6 +164,49 @@
       "admins": "Admins"
     }
   },
+  "children": {
+    "pageTitle": "Children",
+    "pageSubtitle": "Directory of enrolled children.",
+    "addTitle": "Add Child",
+    "editTitle": "Edit Child",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "birthDate": "Birth date",
+    "age": "Age",
+    "bloodGroup": "Blood group",
+    "allergies": "Allergies",
+    "medicalNotes": "Medical notes",
+    "nationalId": "CNP / IDNP",
+    "idType": "ID type",
+    "group": "Group",
+    "noGroup": "No group",
+    "status": {
+      "enrolled": "Enrolled",
+      "withdrawn": "Withdrawn",
+      "graduated": "Graduated"
+    },
+    "setStatus": "Change status",
+    "confirmStatusTitle": "Change child status",
+    "confirmStatusBody": "The child will be marked as {status}.",
+    "addSuccess": "Child added.",
+    "updateSuccess": "Child updated.",
+    "statusSuccess": "Status updated.",
+    "empty": "No children found.",
+    "years": "{n} yrs",
+    "filter": {
+      "all": "All",
+      "enrolled": "Enrolled",
+      "withdrawn": "Withdrawn",
+      "graduated": "Graduated"
+    },
+    "table": {
+      "name": "Child",
+      "age": "Age",
+      "group": "Group",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
   "groups": {
     "pageTitle": "Groups",
     "pageSubtitle": "Manage groups and assigned educators.",

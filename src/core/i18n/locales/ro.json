@@ -164,6 +164,49 @@
       "admins": "Administratori"
     }
   },
+  "children": {
+    "pageTitle": "Copii",
+    "pageSubtitle": "Directorul copiilor înscriși.",
+    "addTitle": "Adaugă copil",
+    "editTitle": "Editează copil",
+    "firstName": "Prenume",
+    "lastName": "Nume de familie",
+    "birthDate": "Data nașterii",
+    "age": "Vârstă",
+    "bloodGroup": "Grupă sanguină",
+    "allergies": "Alergii",
+    "medicalNotes": "Note medicale",
+    "nationalId": "CNP / IDNP",
+    "idType": "Tip ID",
+    "group": "Grupă",
+    "noGroup": "Fără grupă",
+    "status": {
+      "enrolled": "Înscris",
+      "withdrawn": "Retras",
+      "graduated": "Absolvit"
+    },
+    "setStatus": "Schimbă status",
+    "confirmStatusTitle": "Schimbă statusul copilului",
+    "confirmStatusBody": "Copilul va fi marcat ca {status}. Acțiunea poate fi reversibilă.",
+    "addSuccess": "Copil adăugat.",
+    "updateSuccess": "Copil actualizat.",
+    "statusSuccess": "Status actualizat.",
+    "empty": "Niciun copil.",
+    "years": "{n} ani",
+    "filter": {
+      "all": "Toți",
+      "enrolled": "Înscriși",
+      "withdrawn": "Retrași",
+      "graduated": "Absolvenți"
+    },
+    "table": {
+      "name": "Copil",
+      "age": "Vârstă",
+      "group": "Grupă",
+      "status": "Status",
+      "actions": "Acțiuni"
+    }
+  },
   "groups": {
     "pageTitle": "Grupe",
     "pageSubtitle": "Gestionează grupele și educatorii asignați.",
