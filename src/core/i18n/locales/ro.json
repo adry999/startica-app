@@ -175,6 +175,7 @@
     "confirmRestoreBody": "Grupa va deveni activă din nou.",
     "name": "Nume grupă",
     "ageRange": "Interval vârstă",
+    "ageRangePlaceholder": "ex: 3-5 ani",
     "educator": "Educator",
     "noEducator": "Fără educator",
     "archive": "Arhivează",

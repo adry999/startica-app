@@ -225,7 +225,7 @@ const columns = computed<TableColumn<Group>[]>(() => [
             <UInput v-model="createState.name" class="w-full" />
           </UFormField>
           <UFormField :label="t('groups.ageRange')" name="ageRange">
-            <UInput v-model="createState.ageRange" placeholder="ex: 3-5 ani" class="w-full" />
+            <UInput v-model="createState.ageRange" :placeholder="t('groups.ageRangePlaceholder')" class="w-full" />
           </UFormField>
           <UFormField :label="t('groups.educator')" name="educatorId">
             <USelect v-model="createState.educatorId" :items="educatorOptions" class="w-full" />
@@ -248,7 +248,7 @@ const columns = computed<TableColumn<Group>[]>(() => [
             <UInput v-model="editState.name" class="w-full" />
           </UFormField>
           <UFormField :label="t('groups.ageRange')" name="ageRange">
-            <UInput v-model="editState.ageRange" placeholder="ex: 3-5 ani" class="w-full" />
+            <UInput v-model="editState.ageRange" :placeholder="t('groups.ageRangePlaceholder')" class="w-full" />
           </UFormField>
           <UFormField :label="t('groups.educator')" name="educatorId">
             <USelect v-model="editState.educatorId" :items="educatorOptions" class="w-full" />

@@ -175,6 +175,7 @@
     "confirmRestoreBody": "The group will become active again.",
     "name": "Group name",
     "ageRange": "Age range",
+    "ageRangePlaceholder": "e.g. 3-5 years old",
     "educator": "Educator",
     "noEducator": "No educator",
     "archive": "Archive",
