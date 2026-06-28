@@ -3,6 +3,7 @@
     "appName": "Startica",
     "save": "Salvează",
     "cancel": "Anulează",
+    "confirm": "Confirmă",
     "delete": "Șterge",
     "edit": "Editează",
     "loading": "Se încarcă...",
@@ -161,6 +162,43 @@
       "all": "Toți",
       "educators": "Educatori",
       "admins": "Administratori"
+    }
+  },
+  "groups": {
+    "pageTitle": "Grupe",
+    "pageSubtitle": "Gestionează grupele și educatorii asignați.",
+    "createTitle": "Grupă nouă",
+    "editTitle": "Editează grupa",
+    "confirmArchiveTitle": "Arhivează grupa",
+    "confirmArchiveBody": "Grupa va fi marcată ca arhivată. Copiii rămân neschimbați.",
+    "confirmRestoreTitle": "Reactivează grupa",
+    "confirmRestoreBody": "Grupa va deveni activă din nou.",
+    "name": "Nume grupă",
+    "ageRange": "Interval vârstă",
+    "educator": "Educator",
+    "noEducator": "Fără educator",
+    "archive": "Arhivează",
+    "restore": "Reactivează",
+    "createSuccess": "Grupă creată.",
+    "updateSuccess": "Grupă actualizată.",
+    "archiveSuccess": "Grupă arhivată.",
+    "restoreSuccess": "Grupă reactivată.",
+    "empty": "Nicio grupă.",
+    "filter": {
+      "all": "Toate",
+      "active": "Active",
+      "archived": "Arhivate"
+    },
+    "status": {
+      "active": "Activă",
+      "archived": "Arhivată"
+    },
+    "table": {
+      "name": "Grupă",
+      "ageRange": "Interval vârstă",
+      "educator": "Educator",
+      "status": "Status",
+      "actions": "Acțiuni"
     }
   }
 }

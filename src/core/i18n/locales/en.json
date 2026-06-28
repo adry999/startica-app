@@ -3,6 +3,7 @@
     "appName": "Startica",
     "save": "Save",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
     "loading": "Loading...",
@@ -161,6 +162,43 @@
       "all": "All",
       "educators": "Educators",
       "admins": "Admins"
+    }
+  },
+  "groups": {
+    "pageTitle": "Groups",
+    "pageSubtitle": "Manage groups and assigned educators.",
+    "createTitle": "New Group",
+    "editTitle": "Edit Group",
+    "confirmArchiveTitle": "Archive Group",
+    "confirmArchiveBody": "The group will be marked as archived. Children remain unchanged.",
+    "confirmRestoreTitle": "Restore Group",
+    "confirmRestoreBody": "The group will become active again.",
+    "name": "Group name",
+    "ageRange": "Age range",
+    "educator": "Educator",
+    "noEducator": "No educator",
+    "archive": "Archive",
+    "restore": "Restore",
+    "createSuccess": "Group created.",
+    "updateSuccess": "Group updated.",
+    "archiveSuccess": "Group archived.",
+    "restoreSuccess": "Group restored.",
+    "empty": "No groups found.",
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "table": {
+      "name": "Group",
+      "ageRange": "Age range",
+      "educator": "Educator",
+      "status": "Status",
+      "actions": "Actions"
     }
   }
 }
