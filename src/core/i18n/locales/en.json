@@ -3,10 +3,12 @@
     "appName": "Startica",
     "save": "Save",
     "cancel": "Cancel",
+    "confirm": "Confirm",
     "delete": "Delete",
     "edit": "Edit",
     "loading": "Loading...",
-    "search": "Search"
+    "search": "Search",
+    "adminPortal": "Admin Portal"
   },
   "auth": {
     "login": "Login",
@@ -33,6 +35,230 @@
       "super_admin": "Super Admin",
       "admin": "Admin",
       "educator": "Educator"
+    },
+    "acceptInvite": {
+      "title": "Welcome to Startica",
+      "subtitle": "Set a password for your account.",
+      "success": "Password set. Redirecting..."
     }
+  },
+  "nav": {
+    "overview": "Overview",
+    "kindergartens": "Kindergartens",
+    "staff": "Staff",
+    "groups": "Groups",
+    "children": "Children",
+    "settings": "Settings",
+    "comingSoon": "Coming soon"
+  },
+  "tenant": {
+    "all": "All kindergartens"
+  },
+  "kindergartens": {
+    "pageTitle": "Kindergartens",
+    "new": "New kindergarten",
+    "empty": "No kindergartens yet.",
+    "table": {
+      "name": "Name",
+      "city": "City",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "createTitle": "New kindergarten",
+    "editTitle": "Edit kindergarten",
+    "detailsSection": "Details",
+    "settingsSection": "Settings",
+    "name": "Name",
+    "address": "Address",
+    "city": "City",
+    "phone": "Phone",
+    "timezone": "Timezone",
+    "defaultLocale": "Default locale",
+    "workingHoursStart": "Working hours - start",
+    "workingHoursEnd": "Working hours - end",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "confirmSuspendTitle": "Suspend this kindergarten?",
+    "confirmSuspendBody": "Associated staff will no longer be able to access it while suspended.",
+    "confirmReactivateTitle": "Reactivate this kindergarten?",
+    "confirmReactivateBody": "The kindergarten will be accessible again.",
+    "confirm": "Confirm",
+    "createSuccess": "Kindergarten created.",
+    "updateSuccess": "Changes saved."
+  },
+  "dashboard": {
+    "pageTitle": "Overview",
+    "pageSubtitle": "Summary of the selected kindergarten's activity.",
+    "stats": {
+      "children": "Enrolled Children",
+      "groups": "Active Groups",
+      "staff": "Active Staff",
+      "attendance": "Attendance"
+    },
+    "activeGroups": "Active Groups",
+    "groupsEmpty": "No active groups.",
+    "quickActions": "Quick Actions",
+    "attendanceComingSoon": "Attendance module coming soon",
+    "table": {
+      "group": "Group",
+      "ageRange": "Age Range",
+      "educator": "Educator"
+    }
+  },
+  "staff": {
+    "pageTitle": "Staff",
+    "selectKindergarten": "Select a kindergarten to view staff.",
+    "empty": "No staff in this kindergarten.",
+    "invite": "Invite",
+    "inviteTitle": "Invite a new member",
+    "name": "Full name",
+    "email": "Email",
+    "roleLabel": "Role",
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "role": {
+      "super_admin": "Super Admin",
+      "admin": "Admin",
+      "educator": "Educator"
+    },
+    "editTitle": "Edit member",
+    "inviteSuccess": "Invitation sent.",
+    "updateSuccess": "Changes saved.",
+    "confirmDeactivateTitle": "Deactivate member?",
+    "confirmDeactivateBody": "The member will no longer be able to access the application.",
+    "deactivateSuccess": "Member deactivated.",
+    "confirmReactivateTitle": "Reactivate member?",
+    "confirmReactivateBody": "The member will be able to access the application again.",
+    "reactivateSuccess": "Member reactivated.",
+    "confirmRemoveTitle": "Remove from kindergarten?",
+    "confirmRemoveBody": "The member will lose access to this kindergarten. Their account remains active.",
+    "removeSuccess": "Member removed from kindergarten.",
+    "deactivate": "Deactivate",
+    "reactivate": "Reactivate",
+    "remove": "Remove",
+    "confirm": "Confirm",
+    "pageSubtitle": "Manage staff members and their roles.",
+    "stats": {
+      "total": "Total Staff",
+      "active": "Active",
+      "inactive": "Inactive",
+      "admins": "Admins"
+    },
+    "filter": {
+      "all": "All",
+      "educators": "Educators",
+      "admins": "Admins"
+    }
+  },
+  "children": {
+    "pageTitle": "Children",
+    "pageSubtitle": "Directory of enrolled children.",
+    "addTitle": "Add Child",
+    "editTitle": "Edit Child",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "birthDate": "Birth date",
+    "age": "Age",
+    "bloodGroup": "Blood group",
+    "allergies": "Allergies",
+    "medicalNotes": "Medical notes",
+    "nationalId": "CNP / IDNP",
+    "idType": "ID type",
+    "group": "Group",
+    "noGroup": "No group",
+    "status": {
+      "enrolled": "Enrolled",
+      "withdrawn": "Withdrawn",
+      "graduated": "Graduated"
+    },
+    "setStatus": "Change status",
+    "confirmStatusTitle": "Change child status",
+    "confirmStatusBody": "The child will be marked as {status}.",
+    "addSuccess": "Child added.",
+    "updateSuccess": "Child updated.",
+    "statusSuccess": "Status updated.",
+    "empty": "No children found.",
+    "years": "{n} yrs",
+    "filter": {
+      "all": "All",
+      "enrolled": "Enrolled",
+      "withdrawn": "Withdrawn",
+      "graduated": "Graduated"
+    },
+    "table": {
+      "name": "Child",
+      "age": "Age",
+      "group": "Group",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "groups": {
+    "pageTitle": "Groups",
+    "pageSubtitle": "Manage groups and assigned educators.",
+    "createTitle": "New Group",
+    "editTitle": "Edit Group",
+    "confirmArchiveTitle": "Archive Group",
+    "confirmArchiveBody": "The group will be marked as archived. Children remain unchanged.",
+    "confirmRestoreTitle": "Restore Group",
+    "confirmRestoreBody": "The group will become active again.",
+    "name": "Group name",
+    "ageRange": "Age range",
+    "ageRangePlaceholder": "e.g. 3-5 years old",
+    "educator": "Educator",
+    "noEducator": "No educator",
+    "archive": "Archive",
+    "restore": "Restore",
+    "createSuccess": "Group created.",
+    "updateSuccess": "Group updated.",
+    "archiveSuccess": "Group archived.",
+    "restoreSuccess": "Group restored.",
+    "empty": "No groups found.",
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "table": {
+      "name": "Group",
+      "ageRange": "Age range",
+      "educator": "Educator",
+      "status": "Status",
+      "actions": "Actions"
+    }
+  },
+  "settings": {
+    "pageTitle": "Settings",
+    "pageSubtitle": "Manage your profile and account preferences.",
+    "profileSection": "My Profile",
+    "fullName": "Full name",
+    "email": "Email address",
+    "role": "Role",
+    "emailReadonly": "Email address cannot be changed from the app.",
+    "saveProfile": "Save profile",
+    "saveSuccess": "Profile updated.",
+    "saveError": "Save failed.",
+    "passwordSection": "Change Password",
+    "passwordHint": "You will receive an email with a password reset link.",
+    "sendResetEmail": "Send reset email",
+    "resetSent": "Reset email sent."
   }
 }

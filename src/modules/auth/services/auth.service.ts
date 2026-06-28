@@ -1,10 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
+import type { Result } from '~/shared/types/result'
 
 type Client = SupabaseClient<Database>
 type UserRow = Database['public']['Tables']['users']['Row']
 
-export type AuthResult<T> = { success: true; data: T } | { success: false; error: string }
+export type AuthResult<T> = Result<T>
 
 export async function signInWithPassword(
   client: Client,

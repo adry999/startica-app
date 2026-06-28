@@ -1,4 +1,5 @@
 import { createBrowserClient, createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { parseCookies, setCookie } from 'h3'
 import type { H3Event } from 'h3'
 import type { Database } from './types'
@@ -44,11 +45,8 @@ export function createSupabaseServerClient(event: H3Event) {
 export function createSupabaseAdminClient() {
   const { public: { supabaseUrl }, supabaseServiceRoleKey } = useRuntimeConfig()
 
-  return createServerClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
-    cookies: {
-      getAll: () => [],
-      setAll: () => {},
-    },
+  return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
   })
 }
 
