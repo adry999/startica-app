@@ -244,5 +244,21 @@
       "status": "Status",
       "actions": "Actions"
     }
+  },
+  "settings": {
+    "pageTitle": "Settings",
+    "pageSubtitle": "Manage your profile and account preferences.",
+    "profileSection": "My Profile",
+    "fullName": "Full name",
+    "email": "Email address",
+    "role": "Role",
+    "emailReadonly": "Email address cannot be changed from the app.",
+    "saveProfile": "Save profile",
+    "saveSuccess": "Profile updated.",
+    "saveError": "Save failed.",
+    "passwordSection": "Change Password",
+    "passwordHint": "You will receive an email with a password reset link.",
+    "sendResetEmail": "Send reset email",
+    "resetSent": "Reset email sent."
   }
 }

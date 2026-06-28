@@ -244,5 +244,21 @@
       "status": "Status",
       "actions": "Acțiuni"
     }
+  },
+  "settings": {
+    "pageTitle": "Setări",
+    "pageSubtitle": "Gestionează profilul și preferințele contului tău.",
+    "profileSection": "Profilul meu",
+    "fullName": "Nume complet",
+    "email": "Adresă email",
+    "role": "Rol",
+    "emailReadonly": "Adresa de email nu poate fi modificată din aplicație.",
+    "saveProfile": "Salvează profilul",
+    "saveSuccess": "Profil actualizat.",
+    "saveError": "Eroare la salvare.",
+    "passwordSection": "Schimbă parola",
+    "passwordHint": "Vei primi un email cu link de resetare a parolei.",
+    "sendResetEmail": "Trimite email de resetare",
+    "resetSent": "Email de resetare trimis."
   }
 }
