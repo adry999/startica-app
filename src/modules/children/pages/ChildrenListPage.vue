@@ -116,11 +116,11 @@ const statusOpen    = ref(false)
 const statusTarget  = ref<Child | null>(null)
 const nextStatus    = ref<ChildStatus>('withdrawn')
 
-const statusOptions: { label: string; value: ChildStatus }[] = [
-  { label: 'Retras (withdrawn)', value: 'withdrawn' },
-  { label: 'Absolvit (graduated)', value: 'graduated' },
-  { label: 'Înscris (enrolled)', value: 'enrolled' },
-]
+const statusOptions = computed<{ label: string; value: ChildStatus }[]>(() => [
+  { label: t('children.status.withdrawn'), value: 'withdrawn' },
+  { label: t('children.status.graduated'), value: 'graduated' },
+  { label: t('children.status.enrolled'), value: 'enrolled' },
+])
 
 function openStatus(child: Child) {
   statusTarget.value = child
@@ -160,7 +160,7 @@ const columns = computed<TableColumn<Child>[]>(() => [
   {
     accessorKey: 'age',
     header: t('children.table.age'),
-    cell: ({ row }) => h('span', { class: 'text-sm tabular-nums text-slate-500' }, `${row.original.age} ani`),
+    cell: ({ row }) => h('span', { class: 'text-sm tabular-nums text-slate-500' }, t('children.years', { n: row.original.age })),
   },
   {
     accessorKey: 'groupName',
