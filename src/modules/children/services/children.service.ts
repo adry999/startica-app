@@ -12,6 +12,16 @@ function toChild(row: Record<string, unknown>): Child {
   const firstName = row.first_name as string
   const lastName  = row.last_name as string
   const birthDate = row.birth_date as string
+
+  // Primary guardian comes from the joined guardians array (may be null if no guardians)
+  type RawGuardian = {
+    first_name: string; last_name: string
+    phone: string | null; email: string | null
+    relationship: string; is_primary: boolean; deleted_at: string | null
+  }
+  const rawGuardians = (row.guardians as RawGuardian[] | null) ?? []
+  const primary = rawGuardians.find(g => g.is_primary && !g.deleted_at) ?? null
+
   return {
     id:           row.id as string,
     firstName,
@@ -28,6 +38,14 @@ function toChild(row: Record<string, unknown>): Child {
     groupId:      (row.group_id as string | null) ?? null,
     groupName:    ((row.groups as { name: string } | null)?.name) ?? null,
     kindergartenId: row.kindergarten_id as string,
+    primaryGuardian: primary
+      ? {
+          fullName:     `${primary.first_name} ${primary.last_name}`,
+          phone:        primary.phone,
+          email:        primary.email,
+          relationship: primary.relationship,
+        }
+      : null,
   }
 }
 
@@ -37,7 +55,7 @@ export async function listChildren(
 ): Promise<Result<Child[]>> {
   let q = client
     .from('children')
-    .select('*, groups(name)')
+    .select('*, groups(name), guardians(first_name, last_name, phone, email, relationship, is_primary, deleted_at)')
     .is('deleted_at', null)
     .order('last_name')
     .order('first_name')
@@ -128,4 +146,36 @@ export async function setChildStatus(
   const { error } = await client.from('children').update(payload).eq('id', id)
   if (error) return { success: false, error: error.message }
   return { success: true, data: undefined }
+}
+
+export async function listChildrenByGroup(
+  client: Client,
+  groupId: string,
+): Promise<Result<Child[]>> {
+  const { data, error } = await client
+    .from('children')
+    .select('*, groups(name)')
+    .eq('group_id', groupId)
+    .eq('status', 'enrolled')
+    .is('deleted_at', null)
+    .order('last_name')
+    .order('first_name')
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: (data ?? []).map(r => toChild(r as Record<string, unknown>)) }
+}
+
+export async function getChild(
+  client: Client,
+  id: string,
+): Promise<Result<Child>> {
+  const { data, error } = await client
+    .from('children')
+    .select('*, groups(name)')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single()
+
+  if (error || !data) return { success: false, error: error?.message ?? 'not_found' }
+  return { success: true, data: toChild(data as Record<string, unknown>) }
 }

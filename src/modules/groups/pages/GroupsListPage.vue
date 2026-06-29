@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { h, reactive, ref, computed } from 'vue'
-import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
-import { createGroupSchema, updateGroupSchema, type CreateGroupInput, type UpdateGroupInput } from '~/shared/schemas/groups.schema'
+import { reactive, ref, computed } from 'vue'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import {
+  createGroupSchema,
+  updateGroupSchema,
+  type CreateGroupInput,
+  type UpdateGroupInput,
+} from '~/shared/schemas/groups.schema'
 import type { Group } from '../types/groups.types'
 
 const { t } = useI18n()
@@ -9,23 +14,19 @@ const toast = useToast()
 const { can } = usePermissions()
 const tenantStore = useTenantStore()
 const { items, loading, error, fetchAll, create, update, archive, restore } = useGroups()
-
-// We also need staff list for the educator selector
 const staffStore = useStaffStore()
-
-const UBadge = resolveComponent('UBadge')
-const UButton = resolveComponent('UButton')
 
 const canMutate = computed(() => can('create', 'groups'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData('groups', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
-useLazyAsyncData('groups-staff', () =>
-  selectedKgId.value !== 'ALL' ? staffStore.fetchAll(selectedKgId.value) : Promise.resolve(),
+useLazyAsyncData(
+  'groups-staff',
+  () => selectedKgId.value !== 'ALL' ? staffStore.fetchAll(selectedKgId.value) : Promise.resolve(),
   { watch: [selectedKgId] },
 )
 
-// ── Tab filter ─────────────────────────────────────────────────────────────
+// ── Tab filter ──────────────────────────────────────────────────────────────
 const activeFilter = ref<'all' | 'active' | 'archived'>('active')
 const filteredItems = computed(() => {
   if (activeFilter.value === 'active')   return items.value.filter(g => g.status === 'active')
@@ -33,11 +34,37 @@ const filteredItems = computed(() => {
   return items.value
 })
 
-// ── Stats ──────────────────────────────────────────────────────────────────
-const activeCount   = computed(() => items.value.filter(g => g.status === 'active').length)
-const archivedCount = computed(() => items.value.filter(g => g.status === 'archived').length)
+// ── Stats ───────────────────────────────────────────────────────────────────
+const activeItems     = computed(() => items.value.filter(g => g.status === 'active'))
+const totalEnrolled   = computed(() => activeItems.value.reduce((s, g) => s + g.childrenCount, 0))
+const educatorsCount  = computed(() => activeItems.value.filter(g => g.educatorId !== null).length)
+const totalCapacity   = computed(() => {
+  const withCap = activeItems.value.filter(g => g.capacity !== null)
+  return withCap.length > 0 ? withCap.reduce((s, g) => s + (g.capacity ?? 0), 0) : null
+})
 
-// ── Educator options ───────────────────────────────────────────────────────
+// ── Card accent colors ──────────────────────────────────────────────────────
+const STRIPE_CLASSES = [
+  'bg-teal-600', 'bg-brand-gold', 'bg-success', 'bg-slate-500', 'bg-teal-400',
+] as const
+
+function cardAccentClass(idx: number): string {
+  return STRIPE_CLASSES[idx % STRIPE_CLASSES.length] ?? 'bg-teal-600'
+}
+
+function fillPercent(group: Group): number {
+  if (!group.capacity || group.capacity === 0) return 0
+  return Math.round((group.childrenCount / group.capacity) * 100)
+}
+
+function fillBarClass(group: Group): string {
+  const pct = fillPercent(group)
+  if (pct >= 90) return 'bg-error'
+  if (pct >= 70) return 'bg-warning'
+  return 'bg-teal-600'
+}
+
+// ── Educator options ────────────────────────────────────────────────────────
 const educatorOptions = computed(() => [
   { label: t('groups.noEducator'), value: null },
   ...staffStore.items
@@ -45,16 +72,17 @@ const educatorOptions = computed(() => [
     .map(s => ({ label: s.fullName, value: s.id })),
 ])
 
-// ── Create modal ───────────────────────────────────────────────────────────
+// ── Create modal ────────────────────────────────────────────────────────────
 const createOpen = ref(false)
 const createState = reactive<Partial<CreateGroupInput>>({
-  name: undefined, ageRange: null, educatorId: null, kindergartenId: undefined,
+  name: undefined, ageRange: null, educatorId: null, capacity: null, kindergartenId: undefined,
 })
 
 function openCreate() {
   createState.name = undefined
   createState.ageRange = null
   createState.educatorId = null
+  createState.capacity = null
   createState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
   createOpen.value = true
 }
@@ -67,17 +95,18 @@ async function onCreateSubmit(event: FormSubmitEvent<CreateGroupInput>) {
   }
 }
 
-// ── Edit modal ─────────────────────────────────────────────────────────────
+// ── Edit modal ──────────────────────────────────────────────────────────────
 const editOpen   = ref(false)
 const editTarget = ref<Group | null>(null)
 const editState  = reactive<Partial<UpdateGroupInput>>({})
 
 function openEdit(group: Group) {
-  editTarget.value = group
-  editState.name = group.name
-  editState.ageRange = group.ageRange
-  editState.educatorId = group.educatorId
-  editOpen.value = true
+  editTarget.value      = group
+  editState.name        = group.name
+  editState.ageRange    = group.ageRange
+  editState.educatorId  = group.educatorId
+  editState.capacity    = group.capacity
+  editOpen.value        = true
 }
 
 async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
@@ -89,7 +118,7 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
   }
 }
 
-// ── Archive / restore ──────────────────────────────────────────────────────
+// ── Archive / restore ────────────────────────────────────────────────────────
 const archiveOpen   = ref(false)
 const archiveTarget = ref<Group | null>(null)
 
@@ -101,63 +130,20 @@ function openArchive(group: Group) {
 async function onArchiveConfirm() {
   if (!archiveTarget.value) return
   const isArchiving = archiveTarget.value.status === 'active'
-  const ok = isArchiving
-    ? await archive(archiveTarget.value.id)
-    : await restore(archiveTarget.value.id)
+  const ok = isArchiving ? await archive(archiveTarget.value.id) : await restore(archiveTarget.value.id)
   if (ok) {
     archiveOpen.value = false
-    toast.add({ title: isArchiving ? t('groups.archiveSuccess') : t('groups.restoreSuccess'), color: 'success' })
+    toast.add({
+      title: isArchiving ? t('groups.archiveSuccess') : t('groups.restoreSuccess'),
+      color: 'success',
+    })
   }
 }
-
-// ── Table ──────────────────────────────────────────────────────────────────
-const columns = computed<TableColumn<Group>[]>(() => [
-  {
-    accessorKey: 'name',
-    header: t('groups.table.name'),
-    cell: ({ row }) => h('p', { class: 'font-medium text-slate-800' }, row.original.name),
-  },
-  {
-    accessorKey: 'ageRange',
-    header: t('groups.table.ageRange'),
-    cell: ({ row }) => h('span', { class: 'text-sm text-slate-500' }, row.original.ageRange ?? '—'),
-  },
-  {
-    accessorKey: 'educatorName',
-    header: t('groups.table.educator'),
-    cell: ({ row }) => h('span', { class: 'text-sm text-slate-500' }, row.original.educatorName ?? '—'),
-  },
-  {
-    accessorKey: 'status',
-    header: t('groups.table.status'),
-    cell: ({ row }) =>
-      h(UBadge,
-        { color: row.original.status === 'active' ? 'success' : 'neutral', variant: 'soft' },
-        () => t(`groups.status.${row.original.status}`),
-      ),
-  },
-  {
-    id: 'actions',
-    header: t('groups.table.actions'),
-    cell: ({ row }) =>
-      h('div', { class: 'flex gap-1' }, [
-        canMutate.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
-          : null,
-        canMutate.value
-          ? h(UButton,
-              { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openArchive(row.original) },
-              () => row.original.status === 'active' ? t('groups.archive') : t('groups.restore'),
-            )
-          : null,
-      ]),
-  },
-])
 </script>
 
 <template>
   <div class="space-y-6">
-    <!-- Header -->
+    <!-- Page header -->
     <div class="flex items-start justify-between">
       <div>
         <h1 class="text-xl font-semibold text-slate-800">{{ t('groups.pageTitle') }}</h1>
@@ -169,51 +155,149 @@ const columns = computed<TableColumn<Group>[]>(() => [
       </UButton>
     </div>
 
-    <!-- Fetch error -->
-    <UAlert v-if="error" color="error" variant="soft" :description="error" class="mb-4" />
+    <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
-    <!-- Stat cards -->
-    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">
+    <!-- Stats bar -->
+    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
       <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.filter.all') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ items.length }}</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalGroups') }}</p>
+        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ activeItems.length }}</p>
       </div>
       <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.filter.active') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ activeCount }}</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalEnrollment') }}</p>
+        <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ totalEnrolled }}</p>
       </div>
       <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.filter.archived') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ archivedCount }}</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.educators') }}</p>
+        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ educatorsCount }}</p>
+      </div>
+      <div class="rounded-xl border border-border bg-white p-5">
+        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalCapacity') }}</p>
+        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ totalCapacity ?? '—' }}</p>
       </div>
     </div>
 
     <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
-      <div class="rounded-xl border border-border bg-white">
-        <!-- Tabs -->
-        <div class="flex border-b border-border px-4">
-          <button
-            v-for="f in (['all', 'active', 'archived'] as const)"
-            :key="f"
-            :class="[
-              '-mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-              activeFilter === f
-                ? 'border-teal-600 text-teal-600'
-                : 'border-transparent text-slate-400 hover:text-slate-600',
-            ]"
-            @click="activeFilter = f"
-          >
-            {{ t(`groups.filter.${f}`) }}
-          </button>
-        </div>
+      <!-- Filter tabs -->
+      <div class="flex gap-1 border-b border-border">
+        <button
+          v-for="f in (['active', 'all', 'archived'] as const)"
+          :key="f"
+          :class="[
+            '-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+            activeFilter === f
+              ? 'border-teal-600 text-teal-600'
+              : 'border-transparent text-slate-400 hover:text-slate-600',
+          ]"
+          @click="activeFilter = f"
+        >
+          {{ t(`groups.filter.${f}`) }}
+        </button>
+      </div>
 
-        <UTable :data="filteredItems" :columns="columns" :loading="loading">
-          <template #empty>
-            <p class="py-10 text-center text-sm text-slate-400">{{ t('groups.empty') }}</p>
-          </template>
-        </UTable>
+      <!-- Loading skeletons -->
+      <div v-if="loading" class="grid grid-cols-3 gap-6">
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="h-64 animate-pulse rounded-2xl border border-border bg-white"
+        />
+      </div>
+
+      <!-- Empty state -->
+      <div
+        v-else-if="filteredItems.length === 0"
+        class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400"
+      >
+        {{ t('groups.empty') }}
+      </div>
+
+      <!-- Card grid -->
+      <div v-else class="grid grid-cols-3 gap-6">
+        <div
+          v-for="(group, idx) in filteredItems"
+          :key="group.id"
+          class="flex flex-col overflow-hidden rounded-2xl border border-border bg-white"
+        >
+          <!-- Colored top stripe -->
+          <div :class="['h-2 w-full', cardAccentClass(idx)]" />
+
+          <!-- Card body -->
+          <div class="flex flex-1 flex-col gap-4 p-6">
+            <!-- Name + age range -->
+            <div>
+              <h4 class="font-semibold text-slate-800">{{ group.name }}</h4>
+              <span
+                v-if="group.ageRange"
+                class="mt-1.5 inline-block rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-600"
+              >
+                {{ group.ageRange }}
+              </span>
+            </div>
+
+            <!-- Educator row -->
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+              <UIcon name="i-heroicons-user" class="h-4 w-4 shrink-0 text-slate-400" />
+              {{ group.educatorName ?? t('groups.noEducator') }}
+            </div>
+
+            <!-- Capacity / fill bar -->
+            <div v-if="group.capacity" class="space-y-1.5">
+              <div class="flex justify-between text-xs text-slate-500">
+                <span>{{ t('groups.childrenCount', { n: group.childrenCount, total: group.capacity }) }}</span>
+                <span>{{ fillPercent(group) }}%</span>
+              </div>
+              <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  :class="['h-full rounded-full transition-all duration-300', fillBarClass(group)]"
+                  :style="{ width: `${Math.min(100, fillPercent(group))}%` }"
+                />
+              </div>
+            </div>
+            <div v-else class="text-sm text-slate-500">
+              <UIcon name="i-heroicons-users" class="mr-1 inline h-4 w-4 text-slate-400" />
+              {{ group.childrenCount }} {{ t('nav.children').toLowerCase() }}
+            </div>
+
+            <!-- Footer: status + actions -->
+            <div class="mt-auto flex items-center justify-between pt-2">
+              <UBadge
+                :color="group.status === 'active' ? 'success' : 'neutral'"
+                variant="soft"
+                size="xs"
+              >
+                {{ t(`groups.status.${group.status}`) }}
+              </UBadge>
+
+              <div class="flex items-center gap-2">
+                <NuxtLink
+                  :to="`/groups/${group.id}`"
+                  class="text-sm font-medium text-teal-600 hover:text-teal-700"
+                >
+                  {{ t('groups.viewDetails') }} →
+                </NuxtLink>
+                <template v-if="canMutate">
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    :icon="'i-heroicons-pencil'"
+                    @click="openEdit(group)"
+                  />
+                  <UButton
+                    size="xs"
+                    color="neutral"
+                    variant="ghost"
+                    :icon="group.status === 'active' ? 'i-heroicons-archive-box' : 'i-heroicons-arrow-path'"
+                    @click="openArchive(group)"
+                  />
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </template>
 
@@ -232,6 +316,9 @@ const columns = computed<TableColumn<Group>[]>(() => [
           </UFormField>
           <UFormField :label="t('groups.educator')" name="educatorId">
             <USelect v-model="createState.educatorId" :items="educatorOptions" class="w-full" />
+          </UFormField>
+          <UFormField :label="t('groups.capacity')" name="capacity">
+            <UInput v-model="createState.capacity" type="number" min="1" class="w-full" />
           </UFormField>
           <UButton type="submit" color="primary" block loading-auto :loading="loading">
             {{ t('groups.createTitle') }}
@@ -256,6 +343,9 @@ const columns = computed<TableColumn<Group>[]>(() => [
           <UFormField :label="t('groups.educator')" name="educatorId">
             <USelect v-model="editState.educatorId" :items="educatorOptions" class="w-full" />
           </UFormField>
+          <UFormField :label="t('groups.capacity')" name="capacity">
+            <UInput v-model="editState.capacity" type="number" min="1" class="w-full" />
+          </UFormField>
           <UButton type="submit" color="primary" loading-auto :loading="loading">{{ t('common.save') }}</UButton>
         </UForm>
       </template>
@@ -274,7 +364,9 @@ const columns = computed<TableColumn<Group>[]>(() => [
         </p>
         <div class="mt-6 flex justify-end gap-3">
           <UButton color="neutral" variant="ghost" @click="archiveOpen = false">{{ t('common.cancel') }}</UButton>
-          <UButton color="primary" loading-auto :loading="loading" @click="onArchiveConfirm">{{ t('common.confirm') }}</UButton>
+          <UButton color="primary" loading-auto :loading="loading" @click="onArchiveConfirm">
+            {{ t('common.confirm') }}
+          </UButton>
         </div>
       </template>
     </UModal>

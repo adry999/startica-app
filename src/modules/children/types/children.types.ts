@@ -1,3 +1,10 @@
+export interface ChildGuardianSummary {
+  fullName: string
+  phone: string | null
+  email: string | null
+  relationship: string
+}
+
 export interface Child {
   id: string
   firstName: string
@@ -14,4 +21,5 @@ export interface Child {
   groupId: string | null
   groupName: string | null
   kindergartenId: string
+  primaryGuardian: ChildGuardianSummary | null
 }

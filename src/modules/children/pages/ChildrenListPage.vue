@@ -148,14 +148,19 @@ const columns = computed<TableColumn<Child>[]>(() => [
   {
     id: 'child',
     header: t('children.table.name'),
-    cell: ({ row }) =>
-      h('div', { class: 'flex items-center gap-3' }, [
+    cell: ({ row }) => {
+      const NuxtLink = resolveComponent('NuxtLink')
+      return h('div', { class: 'flex items-center gap-3' }, [
         h(BaseAvatar, { name: row.original.fullName, size: 'sm' }),
         h('div', {}, [
-          h('p', { class: 'text-sm font-medium text-slate-800' }, row.original.fullName),
+          h(NuxtLink,
+            { to: `/children/${row.original.id}`, class: 'text-sm font-medium text-slate-800 hover:text-teal-600' },
+            () => row.original.fullName,
+          ),
           h('p', { class: 'text-xs text-slate-400' }, row.original.birthDate),
         ]),
-      ]),
+      ])
+    },
   },
   {
     accessorKey: 'age',
@@ -165,7 +170,22 @@ const columns = computed<TableColumn<Child>[]>(() => [
   {
     accessorKey: 'groupName',
     header: t('children.table.group'),
-    cell: ({ row }) => h('span', { class: 'text-sm text-slate-500' }, row.original.groupName ?? '—'),
+    cell: ({ row }) =>
+      row.original.groupName
+        ? h('span', { class: 'inline-block rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-600' }, row.original.groupName)
+        : h('span', { class: 'text-sm text-slate-400' }, '—'),
+  },
+  {
+    id: 'guardian',
+    header: t('guardians.title'),
+    cell: ({ row }) => {
+      const g = row.original.primaryGuardian
+      if (!g) return h('span', { class: 'text-sm text-slate-400' }, '—')
+      return h('div', {}, [
+        h('p', { class: 'text-sm text-slate-800' }, g.fullName),
+        h('p', { class: 'text-xs text-slate-400' }, g.phone ?? g.email ?? ''),
+      ])
+    },
   },
   {
     accessorKey: 'status',

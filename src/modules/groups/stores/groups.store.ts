@@ -31,7 +31,10 @@ export const useGroupsStore = defineStore('groups', {
       const result = await groupsService.updateGroup(useSupabaseClient(), id, input, actorId)
       if (!result.success) { this.error = result.error; return false }
       const idx = this.items.findIndex(g => g.id === id)
-      if (idx !== -1) this.items[idx] = result.data
+      if (idx !== -1) {
+        // Preserve childrenCount — updateGroup does not re-fetch it
+        this.items[idx] = { ...result.data, childrenCount: this.items[idx]!.childrenCount }
+      }
       return true
     },
     async archive(id: string) {

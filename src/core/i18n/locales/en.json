@@ -8,7 +8,8 @@
     "edit": "Edit",
     "loading": "Loading...",
     "search": "Search",
-    "adminPortal": "Admin Portal"
+    "adminPortal": "Admin Portal",
+    "back": "Back"
   },
   "auth": {
     "login": "Login",
@@ -205,7 +206,21 @@
       "group": "Group",
       "status": "Status",
       "actions": "Actions"
-    }
+    },
+    "profile": {
+      "title": "Child Profile",
+      "medicalAlerts": "Medical Alerts & Allergies",
+      "noMedicalAlerts": "No medical alerts on record.",
+      "enrollmentStats": "Enrollment Stats",
+      "attendance": "Attendance",
+      "activityScore": "Activity Score",
+      "recentActivity": "Recent Activity",
+      "noActivity": "No recent activity.",
+      "studentId": "Student ID",
+      "exportForm": "Export Enrollment Form",
+      "editProfile": "Edit Profile"
+    },
+    "notFound": "Child not found."
   },
   "groups": {
     "pageTitle": "Groups",
@@ -243,7 +258,23 @@
       "educator": "Educator",
       "status": "Status",
       "actions": "Actions"
-    }
+    },
+    "capacity": "Capacity",
+    "viewDetails": "View details",
+    "childrenCount": "{n}/{total} children",
+    "fillPercent": "{n}% full",
+    "stats": {
+      "totalGroups": "Total groups",
+      "totalEnrollment": "Total enrolled",
+      "educators": "Assigned educators",
+      "totalCapacity": "Total capacity"
+    },
+    "detail": {
+      "title": "Group details",
+      "enrolledChildren": "Enrolled children",
+      "empty": "No children in this group."
+    },
+    "notFound": "Group not found."
   },
   "settings": {
     "pageTitle": "Settings",
@@ -260,5 +291,31 @@
     "passwordHint": "You will receive an email with a password reset link.",
     "sendResetEmail": "Send reset email",
     "resetSent": "Reset email sent."
+  },
+  "guardians": {
+    "title": "Guardian Contacts",
+    "addGuardian": "Add Guardian",
+    "editGuardian": "Edit Guardian",
+    "removeGuardian": "Remove Guardian",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "relationship": "Relationship",
+    "isPrimary": "Primary contact",
+    "primary": "Primary",
+    "notes": "Notes",
+    "relationships": {
+      "mother": "Mother",
+      "father": "Father",
+      "guardian": "Guardian",
+      "other": "Other"
+    },
+    "addSuccess": "Guardian added.",
+    "updateSuccess": "Guardian updated.",
+    "removeSuccess": "Guardian removed.",
+    "empty": "No guardians added.",
+    "confirmRemoveTitle": "Remove guardian?",
+    "confirmRemoveBody": "The guardian will be removed from the child's profile."
   }
 }
