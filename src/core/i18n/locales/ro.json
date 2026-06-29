@@ -259,7 +259,8 @@
       "title": "Detalii grupă",
       "enrolledChildren": "Copii înscriși",
       "empty": "Niciun copil în această grupă."
-    }
+    },
+    "notFound": "Grupă negăsită."
   },
   "settings": {
     "pageTitle": "Setări",

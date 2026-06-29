@@ -3,10 +3,8 @@ import { reactive, ref } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updateGroupSchema, type UpdateGroupInput } from '~/shared/schemas/groups.schema'
 import * as groupsService from '../services/groups.service'
-import { listChildrenByGroup } from '~/modules/children/services/children.service'
 import { useSupabaseClient } from '~/core/supabase/client'
 import type { Group } from '../types/groups.types'
-import type { Child } from '~/modules/children/types/children.types'
 
 const props = defineProps<{ id: string }>()
 
@@ -16,27 +14,21 @@ const { can } = usePermissions()
 const staffStore = useStaffStore()
 const authStore = useAuthStore()
 const client = useSupabaseClient()
+const { fetchByGroup, groupChildren } = useChildren()
 
 const canMutate = computed(() => can('create', 'groups'))
 
 const group = ref<Group | null>(null)
-const children = ref<Child[]>([])
 
-const { pending: groupLoading } = await useLazyAsyncData(
+const { pending: groupLoading } = useLazyAsyncData(
   `group-${props.id}`,
   async () => {
-    const [gResult, cResult] = await Promise.all([
-      groupsService.getGroup(client, props.id),
-      listChildrenByGroup(client, props.id),
-    ])
+    const gResult = await groupsService.getGroup(client, props.id)
     if (gResult.success) group.value = gResult.data
-    if (cResult.success) children.value = cResult.data
+    await fetchByGroup(props.id)
+    // fetch staff after group loads so we have kindergartenId
+    if (gResult.success) await staffStore.fetchAll(gResult.data.kindergartenId)
   },
-)
-
-useLazyAsyncData(
-  'group-detail-staff',
-  () => group.value ? staffStore.fetchAll(group.value.kindergartenId) : Promise.resolve(),
 )
 
 // ── Edit modal ──────────────────────────────────────────────────────────────
@@ -134,16 +126,16 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
       <div class="rounded-2xl border border-border bg-white">
         <div class="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 class="font-semibold text-slate-800">{{ t('groups.detail.enrolledChildren') }}</h2>
-          <UBadge color="neutral" variant="soft">{{ children.length }}</UBadge>
+          <UBadge color="neutral" variant="soft">{{ groupChildren.length }}</UBadge>
         </div>
 
-        <div v-if="children.length === 0" class="py-12 text-center text-sm text-slate-400">
+        <div v-if="groupChildren.length === 0" class="py-12 text-center text-sm text-slate-400">
           {{ t('groups.detail.empty') }}
         </div>
 
         <div v-else class="divide-y divide-border">
           <NuxtLink
-            v-for="child in children"
+            v-for="child in groupChildren"
             :key="child.id"
             :to="`/children/${child.id}`"
             class="flex items-center gap-4 px-6 py-4 transition-colors hover:bg-app-bg"
@@ -161,6 +153,10 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
         </div>
       </div>
     </template>
+
+    <div v-else class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400">
+      {{ t('groups.notFound') }}
+    </div>
 
     <!-- Edit modal -->
     <UModal v-model:open="editOpen">

@@ -259,7 +259,8 @@
       "title": "Group details",
       "enrolledChildren": "Enrolled children",
       "empty": "No children in this group."
-    }
+    },
+    "notFound": "Group not found."
   },
   "settings": {
     "pageTitle": "Settings",

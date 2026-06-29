@@ -9,11 +9,20 @@ type ChildStatus = Database['public']['Enums']['child_status']
 
 export const useChildrenStore = defineStore('children', {
   state: () => ({
-    items:   [] as Child[],
+    items:        [] as Child[],
+    groupChildren: [] as Child[],
     loading: false,
     error:   null as string | null,
   }),
   actions: {
+    async fetchByGroup(groupId: string) {
+      this.loading = true
+      this.error = null
+      const result = await childrenService.listChildrenByGroup(useSupabaseClient(), groupId)
+      this.loading = false
+      if (!result.success) { this.error = result.error; return }
+      this.groupChildren = result.data
+    },
     async fetchAll(kindergartenId: string) {
       this.loading = true
       this.error = null
