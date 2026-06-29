@@ -206,6 +206,19 @@
       "group": "Group",
       "status": "Status",
       "actions": "Actions"
+    },
+    "profile": {
+      "title": "Child Profile",
+      "medicalAlerts": "Medical Alerts & Allergies",
+      "noMedicalAlerts": "No medical alerts on record.",
+      "enrollmentStats": "Enrollment Stats",
+      "attendance": "Attendance",
+      "activityScore": "Activity Score",
+      "recentActivity": "Recent Activity",
+      "noActivity": "No recent activity.",
+      "studentId": "Student ID",
+      "exportForm": "Export Enrollment Form",
+      "editProfile": "Edit Profile"
     }
   },
   "groups": {

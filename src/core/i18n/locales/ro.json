@@ -206,6 +206,19 @@
       "group": "Grupă",
       "status": "Status",
       "actions": "Acțiuni"
+    },
+    "profile": {
+      "title": "Profilul copilului",
+      "medicalAlerts": "Alerte medicale și alergii",
+      "noMedicalAlerts": "Nicio alertă medicală înregistrată.",
+      "enrollmentStats": "Statistici înrolare",
+      "attendance": "Prezență",
+      "activityScore": "Scor activitate",
+      "recentActivity": "Activitate recentă",
+      "noActivity": "Nicio activitate recentă.",
+      "studentId": "ID Student",
+      "exportForm": "Exportă formular înscriere",
+      "editProfile": "Editează profilul"
     }
   },
   "groups": {

@@ -146,3 +146,18 @@ export async function listChildrenByGroup(
   if (error) return { success: false, error: error.message }
   return { success: true, data: (data ?? []).map(r => toChild(r as Record<string, unknown>)) }
 }
+
+export async function getChild(
+  client: Client,
+  id: string,
+): Promise<Result<Child>> {
+  const { data, error } = await client
+    .from('children')
+    .select('*, groups(name)')
+    .eq('id', id)
+    .is('deleted_at', null)
+    .single()
+
+  if (error || !data) return { success: false, error: error?.message ?? 'not_found' }
+  return { success: true, data: toChild(data as Record<string, unknown>) }
+}
