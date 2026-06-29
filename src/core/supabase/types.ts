@@ -1,3 +1,5 @@
+WARN: config section [inbucket] is deprecated. Please use [local_smtp] instead.
+Connecting to db 5432
 export type Json =
   | string
   | number
@@ -177,6 +179,7 @@ export type Database = {
       groups: {
         Row: {
           age_range: string | null
+          capacity: number | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
@@ -190,6 +193,7 @@ export type Database = {
         }
         Insert: {
           age_range?: string | null
+          capacity?: number | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -203,6 +207,7 @@ export type Database = {
         }
         Update: {
           age_range?: string | null
+          capacity?: number | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
@@ -238,6 +243,89 @@ export type Database = {
           },
           {
             foreignKeyName: "groups_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guardians: {
+        Row: {
+          child_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          is_primary: boolean
+          kindergarten_id: string
+          last_name: string
+          notes: string | null
+          phone: string | null
+          relationship: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          is_primary?: boolean
+          kindergarten_id: string
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          is_primary?: boolean
+          kindergarten_id?: string
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          relationship?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guardians_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardians_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardians_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "guardians_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
