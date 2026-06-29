@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
 import type { DashboardStats, GroupSummary } from '../types/dashboard.types'
+import { STAFF_EXCLUDED_ROLES } from '~/shared/utils/staffFilters'
 
 type Client = SupabaseClient<Database>
 
@@ -23,21 +24,21 @@ export async function fetchStats(
     .is('deleted_at', null)
     .eq('status', 'active')
 
-  // Staff count: per-kg use users + inner join to filter soft-deleted/inactive users
+  // Staff count: active users only, excluding super_admin (platform-level, not kindergarten staff)
   const staffQuery = isAll
     ? client
         .from('users')
         .select('id', { count: 'exact', head: true })
         .is('deleted_at', null)
         .eq('status', 'active')
-        .neq('role', 'super_admin')
+        .neq('role', STAFF_EXCLUDED_ROLES[0])
     : client
         .from('users')
         .select('id, user_kindergartens!inner(kindergarten_id)', { count: 'exact', head: true })
         .eq('user_kindergartens.kindergarten_id', kindergartenId)
         .eq('status', 'active')
         .is('deleted_at', null)
-        .neq('role', 'super_admin')
+        .neq('role', STAFF_EXCLUDED_ROLES[0])
 
   if (!isAll) {
     childrenQuery.eq('kindergarten_id', kindergartenId)

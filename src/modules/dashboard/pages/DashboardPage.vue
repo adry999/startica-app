@@ -43,8 +43,8 @@ useLazyAsyncData(
       <div class="rounded-xl border border-border bg-white p-5">
         <div class="flex items-center justify-between">
           <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('dashboard.stats.groups') }}</p>
-          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50">
-            <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-amber-500" />
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-sage/20">
+            <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-teal-600" />
           </div>
         </div>
         <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-800">
