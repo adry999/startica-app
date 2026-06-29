@@ -176,6 +176,18 @@ const columns = computed<TableColumn<Child>[]>(() => [
         : h('span', { class: 'text-sm text-slate-400' }, '—'),
   },
   {
+    id: 'guardian',
+    header: t('guardians.title'),
+    cell: ({ row }) => {
+      const g = row.original.primaryGuardian
+      if (!g) return h('span', { class: 'text-sm text-slate-400' }, '—')
+      return h('div', {}, [
+        h('p', { class: 'text-sm text-slate-800' }, g.fullName),
+        h('p', { class: 'text-xs text-slate-400' }, g.phone ?? g.email ?? ''),
+      ])
+    },
+  },
+  {
     accessorKey: 'status',
     header: t('children.table.status'),
     cell: ({ row }) =>
