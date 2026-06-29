@@ -8,7 +8,8 @@
     "edit": "Edit",
     "loading": "Loading...",
     "search": "Search",
-    "adminPortal": "Admin Portal"
+    "adminPortal": "Admin Portal",
+    "back": "Back"
   },
   "auth": {
     "login": "Login",
@@ -243,6 +244,21 @@
       "educator": "Educator",
       "status": "Status",
       "actions": "Actions"
+    },
+    "capacity": "Capacity",
+    "viewDetails": "View details",
+    "childrenCount": "{n}/{total} children",
+    "fillPercent": "{n}% full",
+    "stats": {
+      "totalGroups": "Total groups",
+      "totalEnrollment": "Total enrolled",
+      "educators": "Assigned educators",
+      "totalCapacity": "Total capacity"
+    },
+    "detail": {
+      "title": "Group details",
+      "enrolledChildren": "Enrolled children",
+      "empty": "No children in this group."
     }
   },
   "settings": {

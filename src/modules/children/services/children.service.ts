@@ -129,3 +129,20 @@ export async function setChildStatus(
   if (error) return { success: false, error: error.message }
   return { success: true, data: undefined }
 }
+
+export async function listChildrenByGroup(
+  client: Client,
+  groupId: string,
+): Promise<Result<Child[]>> {
+  const { data, error } = await client
+    .from('children')
+    .select('*, groups(name)')
+    .eq('group_id', groupId)
+    .eq('status', 'enrolled')
+    .is('deleted_at', null)
+    .order('last_name')
+    .order('first_name')
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: (data ?? []).map(r => toChild(r as Record<string, unknown>)) }
+}

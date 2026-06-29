@@ -8,7 +8,8 @@
     "edit": "Editează",
     "loading": "Se încarcă...",
     "search": "Caută",
-    "adminPortal": "Portal Admin"
+    "adminPortal": "Portal Admin",
+    "back": "Înapoi"
   },
   "auth": {
     "login": "Autentificare",
@@ -243,6 +244,21 @@
       "educator": "Educator",
       "status": "Status",
       "actions": "Acțiuni"
+    },
+    "capacity": "Capacitate",
+    "viewDetails": "Vezi detalii",
+    "childrenCount": "{n}/{total} copii",
+    "fillPercent": "{n}% ocupat",
+    "stats": {
+      "totalGroups": "Total grupe",
+      "totalEnrollment": "Total înscriși",
+      "educators": "Educatori asignați",
+      "totalCapacity": "Capacitate totală"
+    },
+    "detail": {
+      "title": "Detalii grupă",
+      "enrolledChildren": "Copii înscriși",
+      "empty": "Niciun copil în această grupă."
     }
   },
   "settings": {
