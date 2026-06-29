@@ -280,6 +280,7 @@
     "pageTitle": "Settings",
     "pageSubtitle": "Manage your profile and account preferences.",
     "profileSection": "My Profile",
+    "profileDescription": "This information will be displayed on reports and staff directories.",
     "fullName": "Full name",
     "email": "Email address",
     "role": "Role",
