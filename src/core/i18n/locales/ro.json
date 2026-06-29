@@ -104,11 +104,38 @@
     "activeGroups": "Grupe active",
     "groupsEmpty": "Nu există grupe active.",
     "quickActions": "Acțiuni rapide",
-    "attendanceComingSoon": "Modulul prezență vine în curând",
+    "attendanceComingSoon": "În curând",
+    "recentActivity": "Activitate recentă",
+    "viewAllLog": "Vezi tot",
+    "activityEmpty": "Nicio activitate recentă.",
+    "staffOnDuty": "Personal activ",
+    "staffOnDutyEmpty": "Niciun membru găsit.",
+    "active": "Activ",
+    "children": "{n} copii",
     "table": {
       "group": "Grupă",
       "ageRange": "Interval vârstă",
-      "educator": "Educator"
+      "educator": "Educator",
+      "children": "Copii",
+      "status": "Status"
+    },
+    "actions": {
+      "addChild": "Adaugă copil",
+      "inviteStaff": "Invită personal",
+      "groups": "Grupe",
+      "children": "Copii"
+    },
+    "activity": {
+      "INSERT_children": "Copil adăugat",
+      "UPDATE_children": "Copil actualizat",
+      "DELETE_children": "Copil eliminat",
+      "INSERT_groups": "Grupă creată",
+      "UPDATE_groups": "Grupă actualizată",
+      "DELETE_groups": "Grupă arhivată",
+      "INSERT_staff": "Personal invitat",
+      "UPDATE_staff": "Personal actualizat",
+      "DELETE_staff": "Personal eliminat",
+      "default": "Înregistrare actualizată"
     }
   },
   "staff": {
