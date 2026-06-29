@@ -14,10 +14,10 @@ const languages = [
       :key="lang.code"
       type="button"
       :class="[
-        'flex items-center gap-3 rounded-xl border px-4 py-3 text-left transition-all',
+        'flex items-center gap-3 rounded-xl border-2 px-4 py-3 text-left transition-all',
         locale === lang.code
-          ? 'border-teal-600 bg-teal-50 text-teal-700 ring-1 ring-teal-600'
-          : 'border-border bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+          ? 'border-teal-600 bg-teal-50 text-teal-700'
+          : 'border-[#E3E7E5] bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
       ]"
       @click="setLocale(lang.code)"
     >

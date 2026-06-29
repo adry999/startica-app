@@ -67,13 +67,13 @@ async function onLogout() {
       </div>
 
       <!-- Primary nav -->
-      <nav class="flex-1 space-y-0.5 px-2 py-1">
+      <nav class="flex-1 space-y-0.5 px-3 py-1">
         <template v-for="item in navItems" :key="item.to">
           <NuxtLink
             v-if="item.enabled"
             :to="item.to"
-            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-colors hover:bg-white/5 hover:text-white"
-            active-class="bg-white/10 text-white"
+            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-colors hover:bg-white/8 hover:text-white/90"
+            active-class="bg-white/12 text-white font-semibold"
           >
             <UIcon :name="item.icon" class="h-5 w-5 shrink-0" />
             {{ item.label }}
@@ -81,7 +81,7 @@ async function onLogout() {
           <span v-else class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/20 cursor-default">
             <UIcon :name="item.icon" class="h-5 w-5 shrink-0" />
             <span class="flex-1">{{ item.label }}</span>
-            <UBadge size="xs" color="neutral" variant="soft">{{ t('nav.comingSoon') }}</UBadge>
+            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">{{ t('nav.comingSoon') }}</span>
           </span>
         </template>
       </nav>
@@ -109,37 +109,43 @@ async function onLogout() {
     <!-- ── Main ─────────────────────────────────────────────────────────── -->
     <div class="flex min-w-0 flex-1 flex-col">
       <!-- Header -->
-      <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-white px-6">
-        <span class="text-sm font-medium text-slate-400">{{ t('common.appName') }}</span>
+      <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-white px-6 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <!-- Left: breadcrumb / page context (empty placeholder keeps layout stable) -->
+        <div class="flex-1" />
 
+        <!-- Right: kg selector + user -->
         <div class="flex items-center gap-3">
-          <!-- Kindergarten selector (admin/super-admin only) -->
-          <div v-if="can('read', 'staff') && tenantOptions.length > 1" class="flex items-center gap-2 rounded-lg border border-border bg-app-bg px-3 py-1.5">
+          <!-- Kindergarten selector (admin/super-admin with multiple) -->
+          <div
+            v-if="can('read', 'staff') && tenantOptions.length > 1"
+            class="flex items-center gap-2 rounded-lg border border-border bg-[#F6F7F5] px-3 py-1.5 hover:bg-slate-50 transition-colors"
+          >
             <UIcon name="i-heroicons-building-office-2" class="h-4 w-4 shrink-0 text-slate-400" />
             <select
               :value="tenantStore.selectedKindergartenId"
-              class="bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer pr-1"
+              class="max-w-[160px] truncate bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
               @change="(e) => tenantStore.selectKindergarten((e.target as HTMLSelectElement).value)"
             >
               <option v-for="opt in tenantOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
             </select>
+            <UIcon name="i-heroicons-chevron-down" class="h-3.5 w-3.5 shrink-0 text-slate-400" />
           </div>
-          <!-- Single kindergarten: just show name -->
+          <!-- Single kindergarten: just show label -->
           <div v-else-if="can('read', 'staff') && tenantOptions.length === 1" class="flex items-center gap-2 text-sm text-slate-500">
             <UIcon name="i-heroicons-building-office-2" class="h-4 w-4 text-slate-400" />
-            {{ selectedKgLabel }}
+            <span class="font-medium text-slate-700">{{ selectedKgLabel }}</span>
           </div>
 
           <!-- Divider -->
           <div class="h-6 w-px bg-border" />
 
-          <!-- User -->
-          <div class="flex items-center gap-3">
+          <!-- User avatar + info -->
+          <div class="flex items-center gap-2.5">
             <div class="text-right">
-              <p class="text-sm font-medium text-slate-800 leading-tight">{{ user?.fullName }}</p>
-              <p class="text-xs text-slate-400">{{ user ? t(`auth.role.${user.role}`) : '' }}</p>
+              <p class="text-sm font-semibold text-slate-800 leading-tight">{{ user?.fullName }}</p>
+              <p class="text-xs text-slate-400 leading-tight">{{ user ? t(`auth.role.${user.role}`) : '' }}</p>
             </div>
-            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600 text-sm font-semibold text-white">
+            <span class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-600 text-sm font-semibold text-white ring-2 ring-white">
               {{ userInitials }}
             </span>
           </div>

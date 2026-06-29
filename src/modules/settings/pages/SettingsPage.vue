@@ -50,7 +50,7 @@ async function sendPasswordReset() {
     </div>
 
     <!-- Profile card -->
-    <div class="rounded-xl border border-border bg-white p-6 space-y-5">
+    <div class="rounded-2xl border border-border bg-white p-6 space-y-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
       <h2 class="text-sm font-semibold text-slate-800">{{ t('settings.profileSection') }}</h2>
 
       <div class="flex items-center gap-4">
@@ -85,7 +85,7 @@ async function sendPasswordReset() {
     </div>
 
     <!-- Password card -->
-    <div class="rounded-xl border border-border bg-white p-6 space-y-4">
+    <div class="rounded-2xl border border-border bg-white p-6 space-y-4 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
       <h2 class="text-sm font-semibold text-slate-800">{{ t('settings.passwordSection') }}</h2>
       <p class="text-sm text-slate-500">{{ t('settings.passwordHint') }}</p>
       <UButton color="neutral" variant="outline" :loading="sending" @click="sendPasswordReset">
@@ -94,7 +94,7 @@ async function sendPasswordReset() {
     </div>
 
     <!-- Language card -->
-    <div class="rounded-xl border border-border bg-white p-6 space-y-4">
+    <div class="rounded-2xl border border-border bg-white p-6 space-y-4 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
       <h2 class="text-sm font-semibold text-slate-800">{{ t('settings.languageSection') }}</h2>
       <p class="text-sm text-slate-500">{{ t('settings.languageHint') }}</p>
       <LanguageSwitcher />

@@ -159,20 +159,20 @@ async function onArchiveConfirm() {
 
     <!-- Stats bar -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalGroups') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalGroups') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ activeItems.length }}</p>
       </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalEnrollment') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalEnrollment') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ totalEnrolled }}</p>
       </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.educators') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.educators') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ educatorsCount }}</p>
       </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('groups.stats.totalCapacity') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalCapacity') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ totalCapacity ?? '—' }}</p>
       </div>
     </div>
@@ -202,14 +202,14 @@ async function onArchiveConfirm() {
         <div
           v-for="i in 3"
           :key="i"
-          class="h-64 animate-pulse rounded-2xl border border-border bg-white"
+          class="h-64 animate-pulse rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]"
         />
       </div>
 
       <!-- Empty state -->
       <div
         v-else-if="filteredItems.length === 0"
-        class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400"
+        class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400 shadow-[0_1px_3px_rgba(16,24,40,0.04)]"
       >
         {{ t('groups.empty') }}
       </div>
@@ -219,7 +219,7 @@ async function onArchiveConfirm() {
         <div
           v-for="(group, idx) in filteredItems"
           :key="group.id"
-          class="flex flex-col overflow-hidden rounded-2xl border border-border bg-white"
+          class="flex flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)] transition-shadow hover:shadow-[0_4px_12px_rgba(16,24,40,0.08)]"
         >
           <!-- Colored top stripe -->
           <div :class="['h-2 w-full', cardAccentClass(idx)]" />

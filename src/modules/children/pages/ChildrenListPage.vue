@@ -228,16 +228,16 @@ const columns = computed<TableColumn<Child>[]>(() => [
 
     <!-- Stat cards -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('children.filter.all') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.all') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ items.length }}</p>
       </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('children.filter.enrolled') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.enrolled') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ enrolledCount }}</p>
       </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('children.filter.withdrawn') }}</p>
+      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
+        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.withdrawn') }}</p>
         <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ withdrawnCount }}</p>
       </div>
     </div>
@@ -245,7 +245,7 @@ const columns = computed<TableColumn<Child>[]>(() => [
     <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
-      <div class="rounded-xl border border-border bg-white">
+      <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
         <!-- Search + tabs -->
         <div class="flex items-center justify-between border-b border-border px-4">
           <div class="flex">
