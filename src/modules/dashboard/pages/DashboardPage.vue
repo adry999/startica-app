@@ -24,8 +24,8 @@ const quickActions = computed(() => [
     label: t('dashboard.actions.inviteStaff'),
     icon: 'i-heroicons-paper-airplane',
     to: '/staff',
-    bgColor: 'bg-amber-50',
-    iconColor: 'text-amber-600',
+    bgColor: 'bg-brand-yellow/20',
+    iconColor: 'text-brand-gold',
     show: can('create', 'staff'),
   },
   {
@@ -59,8 +59,8 @@ function formatTime(iso: string): string {
 
 function activityDotColor(action: string): string {
   if (action === 'INSERT') return 'bg-teal-500'
-  if (action === 'DELETE') return 'bg-red-400'
-  return 'bg-amber-400'
+  if (action === 'DELETE') return 'bg-error'
+  return 'bg-warning'
 }
 
 function roleInitials(name: string): string {
@@ -194,7 +194,7 @@ function roleInitials(name: string): string {
         </div>
 
         <!-- Attendance coming soon — occupies "Facility Reminder" slot -->
-        <div class="rounded-2xl bg-[#0f2825] p-5">
+        <div class="rounded-2xl bg-teal-700 p-5">
           <div class="flex items-start gap-3">
             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10">
               <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-teal-300" />
