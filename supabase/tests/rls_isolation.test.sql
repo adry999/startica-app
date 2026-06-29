@@ -8,6 +8,7 @@
 -- Relies on seed users (populated by `supabase db reset`):
 --   22222222-2222-2222-2222-222222222222  admin  (assigned to KG-A only)
 --   aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa  Grădinița Zâna Florilor (KG-A)
+-- KG-B and its child are created inline and rolled back.
 
 DO $$
 BEGIN
@@ -21,7 +22,7 @@ BEGIN
 END $$;
 
 BEGIN;
-SELECT plan(4);
+SELECT plan(6);
 
 -- ── Setup: KG-B and a user assigned only to KG-B ────────────────────────────
 -- All data is rolled back at the end; doesn't pollute the dev DB.
@@ -71,6 +72,19 @@ VALUES (
   '11111111-1111-1111-1111-111111111111'
 );
 
+-- Child belonging only to KG-B (for cross-tenant isolation test)
+INSERT INTO public.children (
+  id, first_name, last_name, birth_date, kindergarten_id, status, created_by
+) VALUES (
+  'cccccccc-1111-4111-8111-111111111111',
+  'Copil',
+  'KG-B',
+  '2020-03-15',
+  'ffffffff-ffff-4fff-8fff-ffffffffffff',
+  'enrolled',
+  '11111111-1111-1111-1111-111111111111'
+);
+
 -- ── Simulate admin session (KG-A only) ───────────────────────────────────────
 -- SET LOCAL ROLE switches to the `authenticated` role so Postgres enforces RLS.
 -- Without this the session runs as the `postgres` superuser which bypasses RLS
@@ -104,6 +118,21 @@ SELECT is(
   (SELECT count(*) FROM public.users WHERE id = '33333333-3333-3333-3333-333333333333'),
   1::bigint,
   'admin can read users from their own kindergarten'
+);
+
+-- ── Test 5: admin (KG-A only) cannot read a child from KG-B ─────────────────
+SELECT is(
+  (SELECT count(*) FROM public.children WHERE id = 'cccccccc-1111-4111-8111-111111111111'),
+  0::bigint,
+  'admin cannot read children belonging only to a different kindergarten'
+);
+
+-- ── Test 6 (positive): admin CAN read a child from their own kindergarten ────
+-- Uses the known KG-A child from seed (Andrei Vasilescu, cccccccc-0001-...).
+SELECT is(
+  (SELECT count(*) FROM public.children WHERE id = 'cccccccc-0001-0000-0000-000000000000'),
+  1::bigint,
+  'admin can read children from their own kindergarten'
 );
 
 -- Reset back to superuser before finish() so pgTAP cleanup has full privileges.
