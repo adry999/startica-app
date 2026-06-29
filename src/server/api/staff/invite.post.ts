@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Invalid request body' })
   }
   const { email, fullName, role, kindergartenId } = parsed.data
+  const normalizedEmail = email.toLowerCase()
 
   const userClient = createSupabaseServerClient(event)
   const { data: { user: caller } } = await userClient.auth.getUser()
@@ -52,11 +53,17 @@ export default defineEventHandler(async (event) => {
   const { data: existing } = await adminClient
     .from('users')
     .select('id, role')
-    .eq('email', email)
+    .eq('email', normalizedEmail)
     .is('deleted_at', null)
     .maybeSingle()
 
   if (existing?.role === 'super_admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
+
+  // S-I1: admin callers may only re-add users whose current role is educator.
+  // (super_admin callers are unrestricted; the super_admin-target guard above handles that edge.)
+  if (existing && callerProfile.role === 'admin' && existing.role !== 'educator') {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
@@ -68,7 +75,7 @@ export default defineEventHandler(async (event) => {
     const siteUrl = useRuntimeConfig(event).public.siteUrl
 
     const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
-      email,
+      normalizedEmail,
       {
         data: { full_name: fullName, role },
         redirectTo: `${siteUrl}/accept-invite`,
@@ -82,7 +89,7 @@ export default defineEventHandler(async (event) => {
 
     const { error: profileError } = await adminClient.from('users').insert({
       id: userId,
-      email,
+      email: normalizedEmail,
       full_name: fullName,
       role,
       status: 'active',
@@ -92,6 +99,20 @@ export default defineEventHandler(async (event) => {
     if (profileError) {
       console.error('[invite] profile insert failed:', profileError.message)
       throw createError({ statusCode: 500, statusMessage: 'profile_insert_failed' })
+    }
+
+    // Audit: log the new user account creation explicitly.
+    // write_audit_log trigger fires only when auth.uid() IS NOT NULL;
+    // service-role context means auth.uid() IS NULL, so we log manually.
+    const { error: userAuditError } = await adminClient.from('audit_logs').insert({
+      user_id: caller.id,
+      kindergarten_id: kindergartenId,
+      action: 'create',
+      entity: 'users',
+      entity_id: userId,
+    })
+    if (userAuditError) {
+      console.error('[invite] user audit log failed:', userAuditError.message)
     }
   }
 

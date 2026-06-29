@@ -101,6 +101,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null })) // role check
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // existing user → none
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // insert profile
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // user audit log
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // upsert membership
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // audit log
 
@@ -181,6 +182,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert ok
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // user audit log
       .mockReturnValueOnce(makeQuery({ data: null, error: { message: 'fk_error' } }))  // membership fails
 
     mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
@@ -202,6 +204,7 @@ describe('POST /api/staff/invite', () => {
       .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))    // membership check → member
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // no existing user
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // profile insert
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // user audit log
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // membership upsert
       .mockReturnValueOnce(makeQuery({ data: null, error: null }))                      // audit log
 
@@ -235,5 +238,47 @@ describe('POST /api/staff/invite', () => {
 
     await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
     expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
+  })
+
+  it('returns 403 when admin tries to re-add an existing admin user', async () => {
+    mockReadBody.mockResolvedValue(VALID_BODY) // role: 'educator' in VALID_BODY
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin', status: 'active' }, error: null }))        // caller profile
+      .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))                     // membership → member
+      // existing.role is 'admin' (not educator)
+      .mockReturnValueOnce(makeQuery({ data: { id: 'target-admin', role: 'admin' }, error: null }))
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 403 })
+    expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
+  })
+
+  it('normalizes email to lowercase before existing-user lookup', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, email: 'NEW@EXAMPLE.COM' })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = 'aaaaaaaa-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))  // no existing user
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))  // profile insert
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))  // user audit log
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))  // membership upsert
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))  // audit log
+
+    mockAdminClient.auth.admin.inviteUserByEmail.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+    expect(result).toEqual({ success: true })
+    // The invite should have been sent to the lowercased email
+    expect(mockAdminClient.auth.admin.inviteUserByEmail).toHaveBeenCalledWith(
+      'new@example.com',
+      expect.any(Object),
+    )
   })
 })
