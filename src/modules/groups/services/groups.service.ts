@@ -5,7 +5,7 @@ import type { Group } from '../types/groups.types'
 
 type Client = SupabaseClient<Database>
 
-function toGroup(row: Record<string, unknown>): Group {
+function toGroup(row: Record<string, unknown>, childrenCount = 0): Group {
   return {
     id: row.id as string,
     name: row.name as string,
@@ -14,6 +14,8 @@ function toGroup(row: Record<string, unknown>): Group {
     educatorName: ((row.users as { full_name: string } | null)?.full_name) ?? null,
     status: row.status as 'active' | 'archived',
     kindergartenId: row.kindergarten_id as string,
+    capacity: (row.capacity as number | null) ?? null,
+    childrenCount,
   }
 }
 
@@ -21,22 +23,72 @@ export async function listGroups(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<Group[]>> {
-  let q = client
+  let groupsQ = client
     .from('groups')
     .select('*, users!educator_id(full_name)')
     .is('deleted_at', null)
     .order('name')
 
-  if (kindergartenId !== 'ALL') q = q.eq('kindergarten_id', kindergartenId)
+  let childrenQ = client
+    .from('children')
+    .select('group_id')
+    .eq('status', 'enrolled')
+    .is('deleted_at', null)
 
-  const { data, error } = await q
-  if (error) return { success: false, error: error.message }
-  return { success: true, data: (data ?? []).map(r => toGroup(r as Record<string, unknown>)) }
+  if (kindergartenId !== 'ALL') {
+    groupsQ = groupsQ.eq('kindergarten_id', kindergartenId)
+    childrenQ = childrenQ.eq('kindergarten_id', kindergartenId)
+  }
+
+  const [groupsResult, childrenResult] = await Promise.all([groupsQ, childrenQ])
+
+  if (groupsResult.error) return { success: false, error: groupsResult.error.message }
+
+  const countMap: Record<string, number> = {}
+  for (const c of childrenResult.data ?? []) {
+    if (c.group_id) countMap[c.group_id] = (countMap[c.group_id] ?? 0) + 1
+  }
+
+  return {
+    success: true,
+    data: (groupsResult.data ?? []).map(r =>
+      toGroup(r as Record<string, unknown>, countMap[(r as { id: string }).id] ?? 0),
+    ),
+  }
+}
+
+export async function getGroup(
+  client: Client,
+  id: string,
+): Promise<Result<Group>> {
+  const [groupResult, countResult] = await Promise.all([
+    client.from('groups').select('*, users!educator_id(full_name)').eq('id', id).single(),
+    client
+      .from('children')
+      .select('id', { count: 'exact', head: true })
+      .eq('group_id', id)
+      .eq('status', 'enrolled')
+      .is('deleted_at', null),
+  ])
+
+  if (groupResult.error || !groupResult.data)
+    return { success: false, error: groupResult.error?.message ?? 'not_found' }
+
+  return {
+    success: true,
+    data: toGroup(groupResult.data as Record<string, unknown>, countResult.count ?? 0),
+  }
 }
 
 export async function createGroup(
   client: Client,
-  input: { name: string; ageRange?: string | null; educatorId?: string | null; kindergartenId: string },
+  input: {
+    name: string
+    ageRange?: string | null
+    educatorId?: string | null
+    kindergartenId: string
+    capacity?: number | null
+  },
   actorId: string,
 ): Promise<Result<Group>> {
   const { data, error } = await client
@@ -46,6 +98,7 @@ export async function createGroup(
       age_range: input.ageRange ?? null,
       educator_id: input.educatorId ?? null,
       kindergarten_id: input.kindergartenId,
+      capacity: input.capacity ?? null,
       created_by: actorId,
       updated_by: actorId,
     })
@@ -59,13 +112,19 @@ export async function createGroup(
 export async function updateGroup(
   client: Client,
   id: string,
-  input: { name?: string; ageRange?: string | null; educatorId?: string | null },
+  input: {
+    name?: string
+    ageRange?: string | null
+    educatorId?: string | null
+    capacity?: number | null
+  },
   actorId: string,
 ): Promise<Result<Group>> {
   const payload: Database['public']['Tables']['groups']['Update'] = { updated_by: actorId }
   if (input.name !== undefined) payload.name = input.name
   if (input.ageRange !== undefined) payload.age_range = input.ageRange
   if (input.educatorId !== undefined) payload.educator_id = input.educatorId
+  if (input.capacity !== undefined) payload.capacity = input.capacity
 
   const { data, error } = await client
     .from('groups')

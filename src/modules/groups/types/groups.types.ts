@@ -6,4 +6,6 @@ export interface Group {
   educatorName: string | null
   status: 'active' | 'archived'
   kindergartenId: string
+  capacity: number | null
+  childrenCount: number
 }
