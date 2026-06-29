@@ -57,6 +57,15 @@ export async function createGuardian(
   },
   actorId: string,
 ): Promise<Result<Guardian>> {
+  if (input.isPrimary) {
+    await client
+      .from('guardians')
+      .update({ is_primary: false, updated_by: actorId })
+      .eq('child_id', input.childId)
+      .eq('is_primary', true)
+      .is('deleted_at', null)
+  }
+
   const { data, error } = await client
     .from('guardians')
     .insert({
@@ -101,6 +110,23 @@ export async function updateGuardian(
   if (input.relationship !== undefined) payload.relationship = input.relationship
   if (input.isPrimary    !== undefined) payload.is_primary   = input.isPrimary
   if (input.notes        !== undefined) payload.notes        = input.notes
+
+  if (input.isPrimary) {
+    const { data: existing } = await client
+      .from('guardians')
+      .select('child_id')
+      .eq('id', id)
+      .single()
+    if (existing?.child_id) {
+      await client
+        .from('guardians')
+        .update({ is_primary: false, updated_by: actorId })
+        .eq('child_id', existing.child_id)
+        .eq('is_primary', true)
+        .neq('id', id)
+        .is('deleted_at', null)
+    }
+  }
 
   const { data, error } = await client
     .from('guardians')

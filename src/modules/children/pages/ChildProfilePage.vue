@@ -16,7 +16,7 @@ const { can } = usePermissions()
 const authStore = useAuthStore()
 const client = useSupabaseClient()
 const groupsStore = useGroupsStore()
-const { items: guardians, loading: guardiansLoading, fetchForChild, create: createGuardian, update: updateGuardian, remove: removeGuardian } = useGuardians()
+const { items: guardians, loading: guardiansLoading, error: guardiansError, fetchForChild, create: createGuardian, update: updateGuardian, remove: removeGuardian } = useGuardians()
 
 const canMutate = computed(() => can('update', 'children'))
 
@@ -110,6 +110,8 @@ async function onAddGuardianSubmit(event: FormSubmitEvent<CreateGuardianInput>) 
   if (ok) {
     addGuardianOpen.value = false
     toast.add({ title: t('guardians.addSuccess'), color: 'success' })
+  } else if (guardiansError.value) {
+    toast.add({ title: guardiansError.value, color: 'error' })
   }
 }
 
@@ -136,6 +138,8 @@ async function onEditGuardianSubmit(event: FormSubmitEvent<UpdateGuardianInput>)
   if (ok) {
     editGuardianOpen.value = false
     toast.add({ title: t('guardians.updateSuccess'), color: 'success' })
+  } else if (guardiansError.value) {
+    toast.add({ title: guardiansError.value, color: 'error' })
   }
 }
 
@@ -154,6 +158,8 @@ async function onRemoveGuardianConfirm() {
   if (ok) {
     removeGuardianOpen.value = false
     toast.add({ title: t('guardians.removeSuccess'), color: 'success' })
+  } else if (guardiansError.value) {
+    toast.add({ title: guardiansError.value, color: 'error' })
   }
 }
 
@@ -392,6 +398,10 @@ function shortId(id: string): string {
         </div>
       </div>
     </template>
+
+    <div v-else class="rounded-2xl border border-border bg-white p-12 text-center text-sm text-slate-400">
+      {{ t('children.notFound') }}
+    </div>
 
     <!-- ── Modals ──────────────────────────────────────────────────────────── -->
 

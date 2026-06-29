@@ -219,7 +219,8 @@
       "studentId": "Student ID",
       "exportForm": "Export Enrollment Form",
       "editProfile": "Edit Profile"
-    }
+    },
+    "notFound": "Child not found."
   },
   "groups": {
     "pageTitle": "Groups",

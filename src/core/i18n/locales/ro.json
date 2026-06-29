@@ -219,7 +219,8 @@
       "studentId": "ID Student",
       "exportForm": "Exportă formular înscriere",
       "editProfile": "Editează profilul"
-    }
+    },
+    "notFound": "Copilul nu a fost găsit."
   },
   "groups": {
     "pageTitle": "Grupe",
