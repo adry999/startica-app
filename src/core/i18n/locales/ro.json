@@ -277,5 +277,31 @@
     "passwordHint": "Vei primi un email cu link de resetare a parolei.",
     "sendResetEmail": "Trimite email de resetare",
     "resetSent": "Email de resetare trimis."
+  },
+  "guardians": {
+    "title": "Contacte tutori",
+    "addGuardian": "Adaugă tutore",
+    "editGuardian": "Editează tutore",
+    "removeGuardian": "Elimină tutore",
+    "firstName": "Prenume",
+    "lastName": "Nume",
+    "email": "Email",
+    "phone": "Telefon",
+    "relationship": "Relație",
+    "isPrimary": "Contact primar",
+    "primary": "Primar",
+    "notes": "Notițe",
+    "relationships": {
+      "mother": "Mamă",
+      "father": "Tată",
+      "guardian": "Tutore",
+      "other": "Altul"
+    },
+    "addSuccess": "Tutore adăugat.",
+    "updateSuccess": "Tutore actualizat.",
+    "removeSuccess": "Tutore eliminat.",
+    "empty": "Niciun tutore adăugat.",
+    "confirmRemoveTitle": "Elimină tutorele?",
+    "confirmRemoveBody": "Tutorele va fi eliminat din profilul copilului."
   }
 }

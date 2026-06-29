@@ -277,5 +277,31 @@
     "passwordHint": "You will receive an email with a password reset link.",
     "sendResetEmail": "Send reset email",
     "resetSent": "Reset email sent."
+  },
+  "guardians": {
+    "title": "Guardian Contacts",
+    "addGuardian": "Add Guardian",
+    "editGuardian": "Edit Guardian",
+    "removeGuardian": "Remove Guardian",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email",
+    "phone": "Phone",
+    "relationship": "Relationship",
+    "isPrimary": "Primary contact",
+    "primary": "Primary",
+    "notes": "Notes",
+    "relationships": {
+      "mother": "Mother",
+      "father": "Father",
+      "guardian": "Guardian",
+      "other": "Other"
+    },
+    "addSuccess": "Guardian added.",
+    "updateSuccess": "Guardian updated.",
+    "removeSuccess": "Guardian removed.",
+    "empty": "No guardians added.",
+    "confirmRemoveTitle": "Remove guardian?",
+    "confirmRemoveBody": "The guardian will be removed from the child's profile."
   }
 }
