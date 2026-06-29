@@ -290,7 +290,9 @@
     "passwordSection": "Schimbă parola",
     "passwordHint": "Vei primi un email cu link de resetare a parolei.",
     "sendResetEmail": "Trimite email de resetare",
-    "resetSent": "Email de resetare trimis."
+    "resetSent": "Email de resetare trimis.",
+    "languageSection": "Limbă interfață",
+    "languageHint": "Alege limba în care este afișată aplicația."
   },
   "guardians": {
     "title": "Contacte tutori",

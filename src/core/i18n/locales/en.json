@@ -290,7 +290,9 @@
     "passwordSection": "Change Password",
     "passwordHint": "You will receive an email with a password reset link.",
     "sendResetEmail": "Send reset email",
-    "resetSent": "Reset email sent."
+    "resetSent": "Reset email sent.",
+    "languageSection": "Interface Language",
+    "languageHint": "Choose the language in which the application is displayed."
   },
   "guardians": {
     "title": "Guardian Contacts",

@@ -92,5 +92,12 @@ async function sendPasswordReset() {
         {{ t('settings.sendResetEmail') }}
       </UButton>
     </div>
+
+    <!-- Language card -->
+    <div class="rounded-xl border border-border bg-white p-6 space-y-4">
+      <h2 class="text-sm font-semibold text-slate-800">{{ t('settings.languageSection') }}</h2>
+      <p class="text-sm text-slate-500">{{ t('settings.languageHint') }}</p>
+      <LanguageSwitcher />
+    </div>
   </div>
 </template>
