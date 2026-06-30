@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
+import { STAFF_EXCLUDED_ROLES } from '~/shared/utils/staffFilters'
 
 type Client = SupabaseClient<Database>
 export type UserRow = Database['public']['Tables']['users']['Row']
@@ -16,7 +17,7 @@ export async function listStaff(
     .select('*, user_kindergartens!inner(kindergarten_id)')
     .eq('user_kindergartens.kindergarten_id', kindergartenId)
     .is('deleted_at', null)
-    .neq('role', 'super_admin')
+    .neq('role', STAFF_EXCLUDED_ROLES[0])
     .order('full_name')
 
   if (error || !data) return { success: false, error: error?.message ?? 'list_failed' }

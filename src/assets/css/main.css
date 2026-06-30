@@ -58,9 +58,10 @@
 
   /* Surfaces */
   --color-surface: #FFFFFF;
-  --color-app-bg: #F6F7F7;
+  --color-sidebar-bg: #0f2825;
+  --color-app-bg: #F6F7F5;
   --color-sidebar-tint: #E8EAE0;
-  --color-border: #D1D6D6;
+  --color-border: #E3E7E5;
 
   /* Typography */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;

@@ -104,11 +104,38 @@
     "activeGroups": "Grupe active",
     "groupsEmpty": "Nu există grupe active.",
     "quickActions": "Acțiuni rapide",
-    "attendanceComingSoon": "Modulul prezență vine în curând",
+    "attendanceComingSoon": "În curând",
+    "recentActivity": "Activitate recentă",
+    "viewAllLog": "Vezi tot",
+    "activityEmpty": "Nicio activitate recentă.",
+    "staffOnDuty": "Personal activ",
+    "staffOnDutyEmpty": "Niciun membru găsit.",
+    "active": "Activ",
+    "children": "{n} copii",
     "table": {
       "group": "Grupă",
       "ageRange": "Interval vârstă",
-      "educator": "Educator"
+      "educator": "Educator",
+      "children": "Copii",
+      "status": "Status"
+    },
+    "actions": {
+      "addChild": "Adaugă copil",
+      "inviteStaff": "Invită personal",
+      "groups": "Grupe",
+      "children": "Copii"
+    },
+    "activity": {
+      "INSERT_children": "Copil adăugat",
+      "UPDATE_children": "Copil actualizat",
+      "DELETE_children": "Copil eliminat",
+      "INSERT_groups": "Grupă creată",
+      "UPDATE_groups": "Grupă actualizată",
+      "DELETE_groups": "Grupă arhivată",
+      "INSERT_staff": "Personal invitat",
+      "UPDATE_staff": "Personal actualizat",
+      "DELETE_staff": "Personal eliminat",
+      "default": "Înregistrare actualizată"
     }
   },
   "staff": {
@@ -280,6 +307,7 @@
     "pageTitle": "Setări",
     "pageSubtitle": "Gestionează profilul și preferințele contului tău.",
     "profileSection": "Profilul meu",
+    "profileDescription": "Aceste informații vor fi afișate în rapoarte și directorul personalului.",
     "fullName": "Nume complet",
     "email": "Adresă email",
     "role": "Rol",
@@ -290,7 +318,9 @@
     "passwordSection": "Schimbă parola",
     "passwordHint": "Vei primi un email cu link de resetare a parolei.",
     "sendResetEmail": "Trimite email de resetare",
-    "resetSent": "Email de resetare trimis."
+    "resetSent": "Email de resetare trimis.",
+    "languageSection": "Limbă interfață",
+    "languageHint": "Alege limba în care este afișată aplicația."
   },
   "guardians": {
     "title": "Contacte tutori",

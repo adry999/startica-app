@@ -2,8 +2,6 @@
 import { reactive, ref } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updateGroupSchema, type UpdateGroupInput } from '~/shared/schemas/groups.schema'
-import * as groupsService from '../services/groups.service'
-import { useSupabaseClient } from '~/core/supabase/client'
 import type { Group } from '../types/groups.types'
 
 const props = defineProps<{ id: string }>()
@@ -11,9 +9,8 @@ const props = defineProps<{ id: string }>()
 const { t } = useI18n()
 const toast = useToast()
 const { can } = usePermissions()
+const groupsStore = useGroupsStore()
 const staffStore = useStaffStore()
-const authStore = useAuthStore()
-const client = useSupabaseClient()
 const { fetchByGroup, groupChildren } = useChildren()
 
 const canMutate = computed(() => can('create', 'groups'))
@@ -23,11 +20,11 @@ const group = ref<Group | null>(null)
 const { pending: groupLoading } = useLazyAsyncData(
   `group-${props.id}`,
   async () => {
-    const gResult = await groupsService.getGroup(client, props.id)
-    if (gResult.success) group.value = gResult.data
+    const g = await groupsStore.fetchById(props.id)
+    if (g) group.value = g
     await fetchByGroup(props.id)
     // fetch staff after group loads so we have kindergartenId
-    if (gResult.success) await staffStore.fetchAll(gResult.data.kindergartenId)
+    if (g) await staffStore.fetchAll(g.kindergartenId)
   },
 )
 
@@ -55,14 +52,13 @@ const educatorOptions = computed(() => [
 async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
   if (!group.value) return
   updating.value = true
-  const actorId = authStore.user?.id ?? ''
-  const result = await groupsService.updateGroup(client, group.value.id, event.data, actorId)
+  const ok = await groupsStore.update(group.value.id, event.data)
   updating.value = false
-  if (!result.success) {
-    toast.add({ title: result.error, color: 'error' })
+  if (!ok) {
+    toast.add({ title: groupsStore.error ?? 'update_failed', color: 'error' })
     return
   }
-  group.value = { ...result.data, childrenCount: group.value.childrenCount }
+  group.value = groupsStore.items.find(g => g.id === props.id) ?? await groupsStore.fetchById(props.id) ?? group.value
   editOpen.value = false
   toast.add({ title: t('groups.updateSuccess'), color: 'success' })
 }

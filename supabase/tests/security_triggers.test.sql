@@ -42,6 +42,8 @@ UPDATE public.users SET role = 'admin' WHERE id = '22222222-2222-2222-2222-22222
 
 -- ── Simulate authenticated session (admin user) ──────────────────────────────
 -- SET LOCAL scopes the setting to this transaction; auth.uid() reads it.
+-- SET LOCAL ROLE activates RLS so Postgres enforces row-level policies.
+SET LOCAL ROLE authenticated;
 SET LOCAL "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated"}';
 
 -- ── Test 2: authenticated user cannot change own role ────────────────────────
@@ -83,19 +85,20 @@ SELECT lives_ok(
   'authenticated user can update full_name on own row'
 );
 
--- ── Test 9: admin cannot promote another user to super_admin ─────────────────
+-- ── Test 7: admin cannot promote another user to super_admin ─────────────────
 -- The admin (22222222) shares a kindergarten with the educator (33333333), so
--- the USING clause permits the row — only the proxy-escalation guard blocks it.
+-- RLS permits the row — but the proxy-escalation trigger fires first.
 -- JWT context is still the admin user from the SET LOCAL above.
+SET LOCAL ROLE authenticated;
 SET LOCAL "request.jwt.claims" = '{"sub": "22222222-2222-2222-2222-222222222222", "role": "authenticated"}';
 SELECT throws_ok(
   $$UPDATE public.users SET role = 'super_admin' WHERE id = '33333333-3333-3333-3333-333333333333'$$,
   '42501',
   'only super_admin may change user roles',
-  'admin cannot promote another user to super_admin (proxy-escalation blocked)'
+  'proxy-escalation trigger blocks the attempt before RLS UPDATE USING is evaluated'
 );
 
--- ── Test 10: admin cannot change another user's role to a non-super_admin role ──
+-- ── Test 8: admin cannot change another user's role to a non-super_admin role ──
 -- The original guard only blocked super_admin promotion; this verifies the
 -- new blanket rule: only super_admin may change role at all.
 -- Context is still the admin user (22222222) from the SET LOCAL above.
@@ -107,31 +110,32 @@ SELECT throws_ok(
 );
 
 -- ── Switch to super_admin session for audit tests ────────────────────────────
--- write_audit_log fires only when auth.uid() IS NOT NULL, so we must keep an
--- authenticated context. Using the super_admin avoids any self-guard conflicts.
+-- Reset to superuser so the auth.users INSERT in Test 10 is not blocked by RLS.
+-- write_audit_log is SECURITY DEFINER so it can still write audit_logs.
+RESET ROLE;
 SET LOCAL "request.jwt.claims" = '{"sub": "11111111-1111-1111-1111-111111111111", "role": "authenticated"}';
 
--- ── Test 7: audit_logs row is written on UPDATE ───────────────────────────────
+-- ── Test 9: audit_logs row is written on UPDATE ───────────────────────────────
 -- Capture count before, mutate, then assert exactly one new row via is().
 -- set_config(..., true) keeps the value transaction-local.
 DO $$ BEGIN
-  PERFORM set_config('app.audit_before_7', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
+  PERFORM set_config('app.audit_before_9', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
 END $$;
 
 UPDATE public.users SET full_name = 'Audit Trigger Test'
   WHERE id = '11111111-1111-1111-1111-111111111111';
 
 SELECT is(
-  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_7')::bigint,
+  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_9')::bigint,
   1::bigint,
   'audit_logs row is written on UPDATE'
 );
 
--- ── Test 8: audit_logs row is written on INSERT ───────────────────────────────
+-- ── Test 10: audit_logs row is written on INSERT ──────────────────────────────
 -- public.users.id is a FK → auth.users.id, so we must insert the auth row first.
 -- Both inserts are rolled back with the outer ROLLBACK.
 DO $$ BEGIN
-  PERFORM set_config('app.audit_before_8', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
+  PERFORM set_config('app.audit_before_10', (SELECT count(*)::text FROM public.audit_logs WHERE entity = 'users'), true);
 END $$;
 
 INSERT INTO auth.users (
@@ -163,7 +167,7 @@ VALUES (
 );
 
 SELECT is(
-  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_8')::bigint,
+  (SELECT count(*) FROM public.audit_logs WHERE entity = 'users') - current_setting('app.audit_before_10')::bigint,
   1::bigint,
   'audit_logs row is written on INSERT'
 );

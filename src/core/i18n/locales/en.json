@@ -104,11 +104,38 @@
     "activeGroups": "Active Groups",
     "groupsEmpty": "No active groups.",
     "quickActions": "Quick Actions",
-    "attendanceComingSoon": "Attendance module coming soon",
+    "attendanceComingSoon": "Coming soon",
+    "recentActivity": "Recent Activity",
+    "viewAllLog": "View all",
+    "activityEmpty": "No recent activity.",
+    "staffOnDuty": "Staff on Duty",
+    "staffOnDutyEmpty": "No staff found.",
+    "active": "Active",
+    "children": "{n} children",
     "table": {
       "group": "Group",
       "ageRange": "Age Range",
-      "educator": "Educator"
+      "educator": "Educator",
+      "children": "Children",
+      "status": "Status"
+    },
+    "actions": {
+      "addChild": "Add Child",
+      "inviteStaff": "Invite Staff",
+      "groups": "Groups",
+      "children": "Children"
+    },
+    "activity": {
+      "INSERT_children": "Child added",
+      "UPDATE_children": "Child updated",
+      "DELETE_children": "Child removed",
+      "INSERT_groups": "Group created",
+      "UPDATE_groups": "Group updated",
+      "DELETE_groups": "Group archived",
+      "INSERT_staff": "Staff invited",
+      "UPDATE_staff": "Staff updated",
+      "DELETE_staff": "Staff removed",
+      "default": "Record updated"
     }
   },
   "staff": {
@@ -280,6 +307,7 @@
     "pageTitle": "Settings",
     "pageSubtitle": "Manage your profile and account preferences.",
     "profileSection": "My Profile",
+    "profileDescription": "This information will be displayed on reports and staff directories.",
     "fullName": "Full name",
     "email": "Email address",
     "role": "Role",
@@ -290,7 +318,9 @@
     "passwordSection": "Change Password",
     "passwordHint": "You will receive an email with a password reset link.",
     "sendResetEmail": "Send reset email",
-    "resetSent": "Reset email sent."
+    "resetSent": "Reset email sent.",
+    "languageSection": "Interface Language",
+    "languageHint": "Choose the language in which the application is displayed."
   },
   "guardians": {
     "title": "Guardian Contacts",
