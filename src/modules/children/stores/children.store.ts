@@ -31,6 +31,16 @@ export const useChildrenStore = defineStore('children', {
       if (!result.success) { this.error = result.error; return }
       this.items = result.data
     },
+    async fetchById(id: string) {
+      this.loading = true
+      this.error = null
+      const result = await childrenService.getChild(useSupabaseClient(), id)
+      this.loading = false
+      if (!result.success) { this.error = result.error; return null }
+      const existing = this.items.findIndex(c => c.id === id)
+      if (existing !== -1) this.items[existing] = result.data
+      return result.data
+    },
     async create(input: Parameters<typeof childrenService.createChild>[1]) {
       const actorId = useAuthStore().user?.id ?? ''
       const result = await childrenService.createChild(useSupabaseClient(), input, actorId)

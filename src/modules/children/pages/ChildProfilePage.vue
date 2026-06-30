@@ -3,8 +3,6 @@ import { computed, reactive, ref } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updateChildSchema, type UpdateChildInput } from '~/shared/schemas/children.schema'
 import { createGuardianSchema, updateGuardianSchema, type CreateGuardianInput, type UpdateGuardianInput } from '~/shared/schemas/guardian.schema'
-import { useSupabaseClient } from '~/core/supabase/client'
-import * as childrenSvc from '../services/children.service'
 import type { Child } from '../types/children.types'
 import type { Guardian } from '../types/guardian.types'
 
@@ -13,8 +11,7 @@ const props = defineProps<{ id: string }>()
 const { t } = useI18n()
 const toast = useToast()
 const { can } = usePermissions()
-const authStore = useAuthStore()
-const client = useSupabaseClient()
+const childrenStore = useChildrenStore()
 const groupsStore = useGroupsStore()
 const { items: guardians, loading: guardiansLoading, error: guardiansError, fetchForChild, create: createGuardian, update: updateGuardian, remove: removeGuardian } = useGuardians()
 
@@ -25,8 +22,8 @@ const child = ref<Child | null>(null)
 const { pending: childLoading } = useLazyAsyncData(
   `child-${props.id}`,
   async () => {
-    const result = await childrenSvc.getChild(client, props.id)
-    if (result.success) child.value = result.data
+    const result = await childrenStore.fetchById(props.id)
+    if (result) child.value = result
   },
 )
 
@@ -38,6 +35,7 @@ useLazyAsyncData(
 useLazyAsyncData(
   'child-profile-groups',
   () => child.value ? groupsStore.fetchAll(child.value.kindergartenId) : Promise.resolve(),
+  { watch: [child] },
 )
 
 // ── Computed ─────────────────────────────────────────────────────────────────
@@ -72,11 +70,10 @@ function openEdit() {
 async function onEditSubmit(event: FormSubmitEvent<UpdateChildInput>) {
   if (!child.value) return
   editLoading.value = true
-  const actorId = authStore.user?.id ?? ''
-  const result = await childrenSvc.updateChild(client, child.value.id, event.data, actorId)
+  const ok = await childrenStore.update(child.value.id, event.data)
   editLoading.value = false
-  if (!result.success) { toast.add({ title: result.error, color: 'error' }); return }
-  child.value = result.data
+  if (!ok) { toast.add({ title: childrenStore.error ?? 'update_failed', color: 'error' }); return }
+  child.value = childrenStore.items.find(c => c.id === props.id) ?? await childrenStore.fetchById(props.id) ?? child.value
   editOpen.value = false
   toast.add({ title: t('children.updateSuccess'), color: 'success' })
 }
