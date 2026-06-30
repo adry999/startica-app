@@ -54,7 +54,7 @@ async function onLogout() {
 <template>
   <div class="flex min-h-screen bg-app-bg font-sans">
     <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
-    <aside class="flex w-64 shrink-0 flex-col bg-[#0f2825]">
+    <aside class="flex w-64 shrink-0 flex-col bg-sidebar-bg">
       <!-- Logo -->
       <div class="flex items-center gap-3 px-5 py-5">
         <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-500">
@@ -118,7 +118,7 @@ async function onLogout() {
           <!-- Kindergarten selector (admin/super-admin with multiple) -->
           <div
             v-if="can('read', 'staff') && tenantOptions.length > 1"
-            class="flex items-center gap-2 rounded-lg border border-border bg-[#F6F7F5] px-3 py-1.5 hover:bg-slate-50 transition-colors"
+            class="flex items-center gap-2 rounded-lg border border-border bg-app-bg px-3 py-1.5 hover:bg-slate-50 transition-colors"
           >
             <UIcon name="i-heroicons-building-office-2" class="h-4 w-4 shrink-0 text-slate-400" />
             <select
