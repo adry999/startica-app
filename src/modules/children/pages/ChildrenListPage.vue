@@ -290,13 +290,6 @@ const columns = computed<TableColumn<Child>[]>(() => [
     <!-- Fetch error -->
     <UAlert v-if="error" color="error" variant="soft" :description="error" class="mb-4" />
 
-    <!-- Stat cards -->
-    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">
-      <BaseStatCard :label="t('children.filter.all')" :value="items.length" icon="i-heroicons-academic-cap" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
-      <BaseStatCard :label="t('children.filter.enrolled')" :value="enrolledCount" icon="i-heroicons-check-circle" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
-      <BaseStatCard :label="t('children.filter.withdrawn')" :value="withdrawnCount" icon="i-heroicons-arrow-right-start-on-rectangle" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
-    </div>
-
     <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
@@ -338,6 +331,13 @@ const columns = computed<TableColumn<Child>[]>(() => [
             {{ t('children.pagination.showing', { from, to, total }) }}
           </template>
         </BasePagination>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid grid-cols-3 gap-4">
+        <BaseStatCard :label="t('children.filter.all')" :value="items.length" icon="i-heroicons-academic-cap" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
+        <BaseStatCard :label="t('children.filter.enrolled')" :value="enrolledCount" icon="i-heroicons-check-circle" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
+        <BaseStatCard :label="t('children.filter.withdrawn')" :value="withdrawnCount" icon="i-heroicons-arrow-right-start-on-rectangle" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
       </div>
     </template>
 
