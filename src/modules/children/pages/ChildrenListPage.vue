@@ -86,7 +86,10 @@ const pagedItems = computed(() =>
   filteredItems.value.slice((page.value - 1) * pageSize, page.value * pageSize),
 )
 
-watch([activeFilter, search, groupFilter, ageBucket], () => { page.value = 1 })
+watch(filteredItems, () => {
+  const maxPage = Math.max(1, Math.ceil(filteredItems.value.length / pageSize))
+  if (page.value > maxPage) page.value = maxPage
+})
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 const enrolledCount  = computed(() => items.value.filter(c => c.status === 'enrolled').length)
@@ -256,12 +259,12 @@ const columns = computed<TableColumn<Child>[]>(() => [
     id: 'actions',
     header: t('children.table.actions'),
     cell: ({ row }) => {
-      const items = [
+      const menuItems = [
         { label: t('children.viewProfile'), icon: 'i-heroicons-user', onSelect: () => navigateTo(`/children/${row.original.id}`) },
         canMutate.value ? { label: t('common.edit'), icon: 'i-heroicons-pencil-square', onSelect: () => openEdit(row.original) } : null,
         canMutate.value ? { label: t('children.setStatus'), icon: 'i-heroicons-arrow-path', onSelect: () => openStatus(row.original) } : null,
       ].filter((item): item is { label: string; icon: string; onSelect: () => void } => item !== null)
-      return h(UDropdownMenu, { items }, {
+      return h(UDropdownMenu, { items: menuItems }, {
         default: () => h(UButton, {
           icon: 'i-heroicons-ellipsis-vertical',
           size: 'xs',
