@@ -2,10 +2,17 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import { usePermissions } from './usePermissions'
+import type { ModuleGrant } from '~/modules/auth/types/moduleAccess.types'
 
 function setUserRole(role: 'super_admin' | 'admin' | 'educator') {
   const authStore = useAuthStore()
   authStore.user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' }
+}
+
+function setUser(role: 'super_admin' | 'admin' | 'educator', grants: ModuleGrant[] = []) {
+  const authStore = useAuthStore()
+  authStore.user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' }
+  authStore.moduleGrants = grants
 }
 
 describe('usePermissions', () => {
@@ -86,5 +93,54 @@ describe('usePermissions', () => {
     setUserRole('educator')
     const { can } = usePermissions()
     expect(can('assign-role', 'staff')).toBe(false)
+  })
+})
+
+describe('usePermissions — pool/payroll', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('admin and super_admin can view pool regardless of grants', () => {
+    setUser('admin')
+    expect(usePermissions().can('view', 'pool', 'kg-1')).toBe(true)
+    setUser('super_admin')
+    expect(usePermissions().can('view', 'pool', 'kg-1')).toBe(true)
+  })
+
+  it('educator can view pool only for a kindergarten they hold a pool grant in', () => {
+    setUser('educator', [{ kindergartenId: 'kg-1', moduleKey: 'pool' }])
+    const { can } = usePermissions()
+    expect(can('view', 'pool', 'kg-1')).toBe(true)
+    expect(can('view', 'pool', 'kg-2')).toBe(false)
+  })
+
+  it('educator with no grants cannot view pool or payroll', () => {
+    setUser('educator', [])
+    const { can } = usePermissions()
+    expect(can('view', 'pool', 'kg-1')).toBe(false)
+    expect(can('view', 'payroll', 'kg-1')).toBe(false)
+  })
+
+  it('payrollScope returns all for admin/super_admin', () => {
+    setUser('admin')
+    expect(usePermissions().payrollScope('kg-1')).toBe('all')
+    setUser('super_admin')
+    expect(usePermissions().payrollScope('kg-1')).toBe('all')
+  })
+
+  it('payrollScope reflects the educator grant key', () => {
+    setUser('educator', [{ kindergartenId: 'kg-1', moduleKey: 'payroll_own' }])
+    expect(usePermissions().payrollScope('kg-1')).toBe('own')
+    setUser('educator', [{ kindergartenId: 'kg-1', moduleKey: 'payroll_all' }])
+    expect(usePermissions().payrollScope('kg-1')).toBe('all')
+    setUser('educator', [])
+    expect(usePermissions().payrollScope('kg-1')).toBe(null)
+  })
+
+  it('can(view, payroll) is true exactly when payrollScope is non-null', () => {
+    setUser('educator', [{ kindergartenId: 'kg-1', moduleKey: 'payroll_all' }])
+    expect(usePermissions().can('view', 'payroll', 'kg-1')).toBe(true)
+    expect(usePermissions().can('view', 'payroll', 'kg-2')).toBe(false)
   })
 })
