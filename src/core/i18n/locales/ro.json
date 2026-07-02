@@ -243,6 +243,9 @@
       "threeToFive": "3–5 ani",
       "fivePlus": "Peste 5 ani"
     },
+    "pagination": {
+      "showing": "Se afișează {from}–{to} din {total} copii"
+    },
     "table": {
       "name": "Copil",
       "age": "Vârstă",

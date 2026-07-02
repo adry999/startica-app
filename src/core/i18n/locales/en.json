@@ -243,6 +243,9 @@
       "threeToFive": "3–5 Years",
       "fivePlus": "5+ Years"
     },
+    "pagination": {
+      "showing": "Showing {from}–{to} of {total} children"
+    },
     "table": {
       "name": "Child",
       "age": "Age",

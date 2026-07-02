@@ -78,6 +78,16 @@ const filteredItems = computed(() => {
   return list
 })
 
+// ── Pagination ─────────────────────────────────────────────────────────────
+const page = ref(1)
+const pageSize = 10
+
+const pagedItems = computed(() =>
+  filteredItems.value.slice((page.value - 1) * pageSize, page.value * pageSize),
+)
+
+watch([activeFilter, search, groupFilter, ageBucket], () => { page.value = 1 })
+
 // ── Stats ──────────────────────────────────────────────────────────────────
 const enrolledCount  = computed(() => items.value.filter(c => c.status === 'enrolled').length)
 const withdrawnCount = computed(() => items.value.filter(c => c.status === 'withdrawn').length)
@@ -317,11 +327,17 @@ const columns = computed<TableColumn<Child>[]>(() => [
           </div>
         </div>
 
-        <UTable :data="filteredItems" :columns="columns" :loading="loading">
+        <UTable :data="pagedItems" :columns="columns" :loading="loading">
           <template #empty>
             <p class="py-10 text-center text-sm text-slate-400">{{ t('children.empty') }}</p>
           </template>
         </UTable>
+
+        <BasePagination v-model:page="page" :page-size="pageSize" :total="filteredItems.length">
+          <template #summary="{ from, to, total }">
+            {{ t('children.pagination.showing', { from, to, total }) }}
+          </template>
+        </BasePagination>
       </div>
     </template>
 
