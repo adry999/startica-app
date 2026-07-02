@@ -139,36 +139,37 @@ const confirmBody = computed(() =>
 
 <template>
   <div>
-    <div class="mb-6 flex items-center justify-between">
-      <h1 class="text-xl font-semibold text-neutral-800">{{ t('kindergartens.pageTitle') }}</h1>
-      <UModal v-if="can('create', 'kindergarten')" v-model:open="createModalOpen">
-        <UButton color="primary">{{ t('kindergartens.new') }}</UButton>
+    <BasePageHeader :title="t('kindergartens.pageTitle')" class="mb-6">
+      <template #actions>
+        <UModal v-if="can('create', 'kindergarten')" v-model:open="createModalOpen">
+          <UButton color="primary">{{ t('kindergartens.new') }}</UButton>
 
-        <template #header>
-          <h2 class="text-lg font-semibold">{{ t('kindergartens.createTitle') }}</h2>
-        </template>
+          <template #header>
+            <h2 class="text-lg font-semibold">{{ t('kindergartens.createTitle') }}</h2>
+          </template>
 
-        <template #body>
-          <UForm :schema="kindergartenDetailsSchema" :state="createState" class="space-y-4" @submit="onCreateSubmit">
-            <UFormField :label="t('kindergartens.name')" name="name">
-              <UInput v-model="createState.name" class="w-full" />
-            </UFormField>
-            <UFormField :label="t('kindergartens.address')" name="address">
-              <UInput v-model="createState.address" class="w-full" />
-            </UFormField>
-            <UFormField :label="t('kindergartens.city')" name="city">
-              <UInput v-model="createState.city" class="w-full" />
-            </UFormField>
-            <UFormField :label="t('kindergartens.phone')" name="phone">
-              <UInput v-model="createState.phone" class="w-full" />
-            </UFormField>
-            <UButton type="submit" color="primary" block loading-auto :loading="loading">
-              {{ t('common.save') }}
-            </UButton>
-          </UForm>
-        </template>
-      </UModal>
-    </div>
+          <template #body>
+            <UForm :schema="kindergartenDetailsSchema" :state="createState" class="space-y-4" @submit="onCreateSubmit">
+              <UFormField :label="t('kindergartens.name')" name="name">
+                <UInput v-model="createState.name" class="w-full" />
+              </UFormField>
+              <UFormField :label="t('kindergartens.address')" name="address">
+                <UInput v-model="createState.address" class="w-full" />
+              </UFormField>
+              <UFormField :label="t('kindergartens.city')" name="city">
+                <UInput v-model="createState.city" class="w-full" />
+              </UFormField>
+              <UFormField :label="t('kindergartens.phone')" name="phone">
+                <UInput v-model="createState.phone" class="w-full" />
+              </UFormField>
+              <UButton type="submit" color="primary" block loading-auto :loading="loading">
+                {{ t('common.save') }}
+              </UButton>
+            </UForm>
+          </template>
+        </UModal>
+      </template>
+    </BasePageHeader>
 
     <UTable :data="items" :columns="columns" :loading="loading">
       <template #empty>

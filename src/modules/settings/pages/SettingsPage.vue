@@ -57,10 +57,7 @@ async function sendPasswordReset() {
 <template>
   <div class="space-y-6">
     <!-- Page header -->
-    <div>
-      <h1 class="text-xl font-semibold text-slate-800">{{ t('settings.pageTitle') }}</h1>
-      <p class="mt-0.5 text-sm text-slate-400">{{ t('settings.pageSubtitle') }}</p>
-    </div>
+    <BasePageHeader :title="t('settings.pageTitle')" :subtitle="t('settings.pageSubtitle')" />
 
     <!-- Two-column layout -->
     <div class="flex gap-8 items-start">
