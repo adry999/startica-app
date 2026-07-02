@@ -511,6 +511,84 @@ export type Database = {
           },
         ]
       }
+      user_modules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          granted_at: string
+          granted_by: string
+          id: string
+          kindergarten_id: string
+          module_key: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          granted_at?: string
+          granted_by: string
+          id?: string
+          kindergarten_id: string
+          module_key: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          kindergarten_id?: string
+          module_key?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_modules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_modules_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_modules_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_modules_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_modules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
