@@ -11,6 +11,9 @@
     "adminPortal": "Admin Portal",
     "back": "Back"
   },
+  "topbar": {
+    "searchPlaceholder": "Search child…"
+  },
   "auth": {
     "login": "Login",
     "email": "Email",

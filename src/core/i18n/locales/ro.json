@@ -11,6 +11,9 @@
     "adminPortal": "Portal Admin",
     "back": "Înapoi"
   },
+  "topbar": {
+    "searchPlaceholder": "Caută copil…"
+  },
   "auth": {
     "login": "Autentificare",
     "email": "Email",
