@@ -3,7 +3,7 @@
 **Context:** Follow-up to the 2026-06-26 audits, requested because "the UI is not the same as in the design."
 **Method:** Static comparison — mockup screenshots (`design/mockups/*/screen.png`) + both design specs vs. the current pages/layouts. Docker was not running, so no live screenshot loop was possible (see "Next steps").
 
-**Status update:** UI-0, UI-1, and UI-2 implemented on `fix/security-and-quality` (see `docs/superpowers/plans/2026-07-02-ui-design-alignment.md`). UI-3 (children pagination/kebab/filters) and the live screenshot-compare loop remain open.
+**Status update:** UI-0, UI-1, UI-2, and UI-3 implemented on `fix/security-and-quality` (see `docs/superpowers/plans/2026-07-02-ui-design-alignment.md` and `docs/superpowers/plans/2026-07-02-children-directory-ui3.md`). The live screenshot-compare loop remains open (needs Docker/local Supabase running).
 
 ---
 
