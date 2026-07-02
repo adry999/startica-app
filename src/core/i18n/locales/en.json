@@ -231,6 +231,18 @@
       "withdrawn": "Withdrawn",
       "graduated": "Graduated"
     },
+    "groupFilter": {
+      "label": "Group",
+      "all": "All Groups"
+    },
+    "ageFilter": {
+      "label": "Age Range",
+      "all": "All Ages",
+      "under1": "0–12 Months",
+      "oneToThree": "1–3 Years",
+      "threeToFive": "3–5 Years",
+      "fivePlus": "5+ Years"
+    },
     "table": {
       "name": "Child",
       "age": "Age",

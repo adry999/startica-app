@@ -36,15 +36,41 @@ const search = ref((route.query.q as string) ?? '')
 watch(() => route.query.q, q => { search.value = (q as string) ?? '' })
 
 const activeFilter = ref<'all' | 'enrolled' | 'withdrawn' | 'graduated'>('enrolled')
+const groupFilter = ref<'all' | 'none' | string>('all')
+const ageBucket = ref<'all' | 'under1' | 'oneToThree' | 'threeToFive' | 'fivePlus'>('all')
 
 const filterTabs = computed(() =>
   (['enrolled', 'all', 'withdrawn', 'graduated'] as const)
     .map(f => ({ label: t(`children.filter.${f}`), value: f })),
 )
 
+const groupFilterOptions = computed(() => [
+  { label: t('children.groupFilter.all'), value: 'all' },
+  { label: t('children.noGroup'), value: 'none' },
+  ...groupsStore.items
+    .filter(g => g.status === 'active')
+    .map(g => ({ label: g.name, value: g.id })),
+])
+
+const ageFilterOptions = computed(() =>
+  (['all', 'under1', 'oneToThree', 'threeToFive', 'fivePlus'] as const)
+    .map(b => ({ label: t(`children.ageFilter.${b}`), value: b })),
+)
+
+function matchesAgeBucket(age: number, bucket: 'all' | 'under1' | 'oneToThree' | 'threeToFive' | 'fivePlus'): boolean {
+  if (bucket === 'all') return true
+  if (bucket === 'under1') return age === 0
+  if (bucket === 'oneToThree') return age === 1 || age === 2
+  if (bucket === 'threeToFive') return age === 3 || age === 4
+  return age >= 5 // 'fivePlus'
+}
+
 const filteredItems = computed(() => {
   let list = items.value
   if (activeFilter.value !== 'all') list = list.filter(c => c.status === activeFilter.value)
+  if (groupFilter.value === 'none') list = list.filter(c => c.groupId === null)
+  else if (groupFilter.value !== 'all') list = list.filter(c => c.groupId === groupFilter.value)
+  if (ageBucket.value !== 'all') list = list.filter(c => matchesAgeBucket(c.age, ageBucket.value))
   if (search.value.trim()) {
     const q = search.value.toLowerCase()
     list = list.filter(c => c.fullName.toLowerCase().includes(q))
@@ -265,14 +291,30 @@ const columns = computed<TableColumn<Child>[]>(() => [
 
     <template v-else>
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <!-- Search + tabs -->
-        <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <!-- Search + tabs + filters -->
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
           <BaseFilterTabs v-model="activeFilter" :items="filterTabs" />
-          <UInput v-model="search" :placeholder="t('common.search')" size="sm" class="w-52">
-            <template #leading>
-              <UIcon name="i-heroicons-magnifying-glass" class="h-4 w-4 text-slate-400" />
-            </template>
-          </UInput>
+          <div class="flex flex-wrap items-center gap-2">
+            <USelect
+              v-model="groupFilter"
+              :items="groupFilterOptions"
+              :aria-label="t('children.groupFilter.label')"
+              size="sm"
+              class="w-40"
+            />
+            <USelect
+              v-model="ageBucket"
+              :items="ageFilterOptions"
+              :aria-label="t('children.ageFilter.label')"
+              size="sm"
+              class="w-40"
+            />
+            <UInput v-model="search" :placeholder="t('common.search')" size="sm" class="w-52">
+              <template #leading>
+                <UIcon name="i-heroicons-magnifying-glass" class="h-4 w-4 text-slate-400" />
+              </template>
+            </UInput>
+          </div>
         </div>
 
         <UTable :data="filteredItems" :columns="columns" :loading="loading">

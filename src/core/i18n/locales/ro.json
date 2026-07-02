@@ -231,6 +231,18 @@
       "withdrawn": "Retrași",
       "graduated": "Absolvenți"
     },
+    "groupFilter": {
+      "label": "Grupă",
+      "all": "Toate grupele"
+    },
+    "ageFilter": {
+      "label": "Interval de vârstă",
+      "all": "Toate vârstele",
+      "under1": "0–12 luni",
+      "oneToThree": "1–3 ani",
+      "threeToFive": "3–5 ani",
+      "fivePlus": "Peste 5 ani"
+    },
     "table": {
       "name": "Copil",
       "age": "Vârstă",
