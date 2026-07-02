@@ -2,7 +2,9 @@ import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
 import type { Database } from '~/core/supabase/types'
 import * as authService from '../services/auth.service'
+import { listUserModuleGrants } from '../services/moduleAccess.service'
 import type { AuthUser } from '../types/auth.types'
+import type { ModuleGrant } from '../types/moduleAccess.types'
 
 type UserRow = Database['public']['Tables']['users']['Row']
 
@@ -23,6 +25,7 @@ export const useAuthStore = defineStore('auth', {
     loading: false,
     error: null as string | null,
     isPasswordRecovery: false,
+    moduleGrants: [] as ModuleGrant[],
   }),
 
   getters: {
@@ -56,6 +59,7 @@ export const useAuthStore = defineStore('auth', {
 
       this.loading = false
       this.user = toAuthUser(profileResult.data)
+      await this.loadModuleGrants(profileResult.data.id)
       return true
     },
 
@@ -63,6 +67,7 @@ export const useAuthStore = defineStore('auth', {
       const client = useSupabaseClient()
       await authService.signOut(client)
       this.user = null
+      this.moduleGrants = []
     },
 
     async fetchCurrentUser() {
@@ -82,6 +87,13 @@ export const useAuthStore = defineStore('auth', {
       }
 
       this.user = toAuthUser(profileResult.data)
+      await this.loadModuleGrants(profileResult.data.id)
+    },
+
+    async loadModuleGrants(userId: string) {
+      const client = useSupabaseClient()
+      const result = await listUserModuleGrants(client, userId)
+      this.moduleGrants = result.success ? result.data : []
     },
 
     setPasswordRecovery(value: boolean) {
