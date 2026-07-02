@@ -217,6 +217,7 @@
       "graduated": "Graduated"
     },
     "setStatus": "Change status",
+    "viewProfile": "View profile",
     "confirmStatusTitle": "Change child status",
     "confirmStatusBody": "The child will be marked as {status}.",
     "addSuccess": "Child added.",

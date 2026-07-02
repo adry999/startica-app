@@ -217,6 +217,7 @@
       "graduated": "Absolvit"
     },
     "setStatus": "Schimbă status",
+    "viewProfile": "Vezi profilul",
     "confirmStatusTitle": "Schimbă statusul copilului",
     "confirmStatusBody": "Copilul va fi marcat ca {status}. Acțiunea poate fi reversibilă.",
     "addSuccess": "Copil adăugat.",

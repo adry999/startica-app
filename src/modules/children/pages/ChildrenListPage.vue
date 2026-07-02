@@ -17,6 +17,7 @@ const groupsStore = useGroupsStore()
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const BaseAvatar = resolveComponent('BaseAvatar')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const canMutate   = computed(() => can('create', 'children'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
@@ -218,15 +219,22 @@ const columns = computed<TableColumn<Child>[]>(() => [
   {
     id: 'actions',
     header: t('children.table.actions'),
-    cell: ({ row }) =>
-      h('div', { class: 'flex gap-1' }, [
-        canMutate.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
-          : null,
-        canMutate.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openStatus(row.original) }, () => t('children.setStatus'))
-          : null,
-      ]),
+    cell: ({ row }) => {
+      const items = [
+        { label: t('children.viewProfile'), icon: 'i-heroicons-user', onSelect: () => navigateTo(`/children/${row.original.id}`) },
+        canMutate.value ? { label: t('common.edit'), icon: 'i-heroicons-pencil-square', onSelect: () => openEdit(row.original) } : null,
+        canMutate.value ? { label: t('children.setStatus'), icon: 'i-heroicons-arrow-path', onSelect: () => openStatus(row.original) } : null,
+      ].filter((item): item is { label: string; icon: string; onSelect: () => void } => item !== null)
+      return h(UDropdownMenu, { items }, {
+        default: () => h(UButton, {
+          icon: 'i-heroicons-ellipsis-vertical',
+          size: 'xs',
+          color: 'neutral',
+          variant: 'ghost',
+          'aria-label': t('children.table.actions'),
+        }),
+      })
+    },
   },
 ])
 </script>
