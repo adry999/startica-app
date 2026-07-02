@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-07-02):** For palette, radii, and type scale, the source of truth is now `design/mockups/startica_core/DESIGN.md` (see `docs/superpowers/specs/2026-07-02-ui-design-alignment-design.md`). This document remains valid for UX copy: screen inventory, component states, and accessibility notes.
+
 # Startica — Design Prompt (Admin Panel)
 
 Design a web-based admin panel for **Startica**, a kindergarten management SaaS. The panel is used by kindergarten administrators and educators to manage multiple kindergartens, groups, children, and staff. It handles sensitive data about children, so it must feel **professional, calm, and trustworthy** — modern SaaS, not playful or childish.

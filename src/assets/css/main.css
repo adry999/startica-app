@@ -2,54 +2,58 @@
 @import "@nuxt/ui";
 
 /*
- * Design tokens from docs/Startica_DesignPrompt.md.
- * Source of truth for every hex value used in the UI — never hardcode a
- * color, reference these tokens (bg-teal-500, text-neutral-600, bg-warning…).
+ * Design tokens from design/mockups/startica_core/DESIGN.md — the single
+ * source of truth for palette, radii, and type scale (decision 2026-07-02,
+ * see docs/superpowers/specs/2026-07-02-ui-design-alignment-design.md).
+ * Never hardcode a color — always reference these tokens.
  */
 @theme {
-  /* Teal — primary/interactive (buttons, links, active nav, focus rings) */
-  --color-teal-50: #EAF3F2;
-  --color-teal-100: #D0E5E3;
-  --color-teal-200: #A3CCC8;
-  --color-teal-300: #6FB0AB;
-  --color-teal-400: #429089;
-  --color-teal-500: #1F706A;
-  --color-teal-600: #1A5F5A;
-  --color-teal-700: #154D49;
+  /* Teal — primary/interactive (buttons, links, active nav, focus rings).
+   * Ramp built around DESIGN.md primary #005752 (verified against mockup
+   * PNGs: buttons sample #004E48–#00524D, active nav #094F4D). */
+  --color-teal-50: #E4F0EE;
+  --color-teal-100: #C7E0DD;
+  --color-teal-200: #93C0BB;
+  --color-teal-300: #4E938C;
+  --color-teal-400: #1F706A;
+  --color-teal-500: #005752;
+  --color-teal-600: #004A46;
+  --color-teal-700: #003B38;
 
   /*
-   * Neutral — slate family (text, borders, surfaces). Named "slate" rather
+   * Neutral — ink family (text, borders, surfaces). Named "slate" rather
    * than "neutral": Nuxt UI reserves the literal Tailwind color name
    * "neutral" for its own built-in gray internally, so overriding it under
    * that exact name gets bypassed. app.config.ts maps ui.colors.neutral to
    * 'slate', and Nuxt UI bridges it back to the neutral-* utility classes
    * (text-neutral-600 etc. still work and resolve to these hexes).
+   * 400/500/600 are DESIGN.md ink-400/ink-500/ink-700; 800 is ink-900.
    */
-  --color-slate-50: #F6F7F7;
-  --color-slate-100: #E8EAEA;
-  --color-slate-200: #D1D6D6;
-  --color-slate-300: #AEB6B7;
-  --color-slate-400: #7E898C;
-  --color-slate-500: #5C686C;
+  --color-slate-50: #F4F6F6;
+  --color-slate-100: #E7EAEA;
+  --color-slate-200: #D2D7D8;
+  --color-slate-300: #AEB6B9;
+  --color-slate-400: #889094;
+  --color-slate-500: #636C70;
   --color-slate-600: #434E53;
-  --color-slate-800: #282F32;
+  --color-slate-800: #131D21;
 
   /* Brand colors (from the logo) — accents only, never primary buttons */
   --color-brand-slate: #434E53;
   --color-brand-yellow: #FAD25B;
-  --color-brand-gold: #D89B3F;
+  --color-brand-gold: #C98A2B;
   --color-brand-peach: #F2CAA7;
   --color-brand-sage: #AFC1BE;
   --color-brand-cream: #E8EAE0;
 
-  /* Semantic — single tone each per design prompt (not full ramps) */
-  --color-success: #3E8E7E;
+  /* Semantic — single tone each per DESIGN.md (not full ramps) */
+  --color-success: #3E8A6E;
   --color-warning: #D89B3F;
-  --color-error: #C0492F;
+  --color-error: #C0553D;
   --color-info: #3B7A9E;
 
   /* Role badges */
-  --color-role-super-admin-bg: #1F706A;
+  --color-role-super-admin-bg: #005752;
   --color-role-super-admin-text: #FFFFFF;
   --color-role-admin-bg: #FAD25B;
   --color-role-admin-text: #6B4E16;
@@ -58,7 +62,7 @@
 
   /* Surfaces */
   --color-surface: #FFFFFF;
-  --color-sidebar-bg: #0f2825;
+  --color-sidebar-bg: #2C363A;
   --color-app-bg: #F6F7F5;
   --color-sidebar-tint: #E8EAE0;
   --color-border: #E3E7E5;
@@ -66,7 +70,21 @@
   /* Typography */
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-  /* Layout */
-  --radius-card: 12px;
-  --radius-control: 8px;
+  /* Display style for page titles (DESIGN.md: 32/40, 600, -0.02em) */
+  --text-display: 2rem;
+  --text-display--line-height: 2.5rem;
+  --text-display--font-weight: 600;
+  --text-display--letter-spacing: -0.02em;
+
+  /* Layout (DESIGN.md: structural 16px, interactive 10px) */
+  --radius-card: 16px;
+  --radius-control: 10px;
+}
+
+/*
+ * Nuxt UI computes control radii from --ui-radius (default 0.25rem).
+ * 0.4rem scales buttons/inputs to ≈10px — DESIGN.md interactive radius.
+ */
+:root {
+  --ui-radius: 0.4rem;
 }
