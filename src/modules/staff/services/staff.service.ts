@@ -108,6 +108,40 @@ export async function grantModule(
   moduleKey: ModuleKey,
   actorId: string,
 ): Promise<Result<UserModuleRow>> {
+  const { data: existing, error: lookupError } = await client
+    .from('user_modules')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('kindergarten_id', kindergartenId)
+    .eq('module_key', moduleKey)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (lookupError) return { success: false, error: lookupError.message ?? 'grant_failed' }
+
+  if (existing) {
+    // Live grant already exists — re-granting is a no-op.
+    if (existing.deleted_at === null) return { success: true, data: existing }
+
+    // Soft-deleted row found — resurrect it instead of inserting a duplicate.
+    const { data: resurrected, error: updateError } = await client
+      .from('user_modules')
+      .update({
+        deleted_at: null,
+        granted_by: actorId,
+        granted_at: new Date().toISOString(),
+      })
+      .eq('id', existing.id)
+      .select('*')
+      .single()
+
+    if (updateError || !resurrected) {
+      return { success: false, error: updateError?.message ?? 'grant_failed' }
+    }
+    return { success: true, data: resurrected }
+  }
+
   const { data, error } = await client
     .from('user_modules')
     .insert({

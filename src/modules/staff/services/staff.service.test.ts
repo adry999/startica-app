@@ -8,6 +8,7 @@ import {
   grantModule,
   revokeModule,
   listAssignedKindergartens,
+  type UserModuleRow,
 } from './staff.service'
 
 const sampleRow = {
@@ -205,11 +206,34 @@ describe('listUserModules', () => {
 })
 
 describe('grantModule', () => {
-  it('inserts a grant row with granted_by set to the actor', async () => {
+  // Builds the lookup chain: select('*').eq().eq().eq().order().limit().maybeSingle()
+  function mockLookupChain(existing: UserModuleRow | null) {
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: existing, error: null })
+    const mockLimit = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockOrder = vi.fn().mockReturnValue({ limit: mockLimit })
+    const mockEq3 = vi.fn().mockReturnValue({ order: mockOrder })
+    const mockEq2 = vi.fn().mockReturnValue({ eq: mockEq3 })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockSelectLookup = vi.fn().mockReturnValue({ eq: mockEq1 })
+    return { mockSelectLookup, mockEq1, mockEq2, mockEq3, mockOrder, mockLimit, mockMaybeSingle }
+  }
+
+  it('no existing row: inserts a grant row with granted_by set to the actor', async () => {
+    const { mockSelectLookup } = mockLookupChain(null)
+
     const mockSingle = vi.fn().mockResolvedValue({ data: moduleRow, error: null })
-    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
-    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect })
-    const client = { from: vi.fn().mockReturnValue({ insert: mockInsert }) } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    const mockSelectInsert = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelectInsert })
+    const mockUpdate = vi.fn()
+
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: mockSelectLookup,
+        insert: mockInsert,
+        update: mockUpdate,
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
 
     const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
     expect(result).toEqual({ success: true, data: moduleRow })
@@ -219,6 +243,59 @@ describe('grantModule', () => {
       module_key: 'pool',
       granted_by: 'user-1',
     })
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('re-grant of a live row is a no-op: returns the existing row, no insert/update', async () => {
+    const { mockSelectLookup } = mockLookupChain(moduleRow)
+
+    const mockInsert = vi.fn()
+    const mockUpdate = vi.fn()
+
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: mockSelectLookup,
+        insert: mockInsert,
+        update: mockUpdate,
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
+    expect(result).toEqual({ success: true, data: moduleRow })
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('re-grant after revoke: resurrects the soft-deleted row via update', async () => {
+    const deletedRow = { ...moduleRow, deleted_at: '2026-07-02T10:00:00Z' }
+    const { mockSelectLookup } = mockLookupChain(deletedRow)
+
+    const resurrectedRow = { ...moduleRow, deleted_at: null, granted_by: 'user-1' }
+    const mockUpdateSingle = vi.fn().mockResolvedValue({ data: resurrectedRow, error: null })
+    const mockUpdateSelect = vi.fn().mockReturnValue({ single: mockUpdateSingle })
+    const mockUpdateEq = vi.fn().mockReturnValue({ select: mockUpdateSelect })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq })
+    const mockInsert = vi.fn()
+
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: mockSelectLookup,
+        insert: mockInsert,
+        update: mockUpdate,
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
+    expect(result).toEqual({ success: true, data: resurrectedRow })
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      deleted_at: null,
+      granted_by: 'user-1',
+      granted_at: expect.any(String),
+    }))
+    expect(mockUpdateEq).toHaveBeenCalledWith('id', deletedRow.id)
   })
 })
 
