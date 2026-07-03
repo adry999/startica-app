@@ -52,6 +52,8 @@
     "staff": "Staff",
     "groups": "Groups",
     "children": "Children",
+    "pool": "Pool",
+    "payroll": "Payroll",
     "settings": "Settings",
     "comingSoon": "Coming soon"
   },
@@ -306,6 +308,14 @@
       "empty": "No children in this group."
     },
     "notFound": "Group not found."
+  },
+  "pool": {
+    "title": "Pool",
+    "comingSoon": "The Pool module is coming soon."
+  },
+  "payroll": {
+    "title": "Payroll",
+    "comingSoon": "The Payroll module is coming soon."
   },
   "settings": {
     "pageTitle": "Settings",

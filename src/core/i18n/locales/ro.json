@@ -52,6 +52,8 @@
     "staff": "Personal",
     "groups": "Grupe",
     "children": "Copii",
+    "pool": "Bazin",
+    "payroll": "Salarii",
     "settings": "Setări",
     "comingSoon": "În curând"
   },
@@ -306,6 +308,14 @@
       "empty": "Niciun copil în această grupă."
     },
     "notFound": "Grupă negăsită."
+  },
+  "pool": {
+    "title": "Bazin",
+    "comingSoon": "Modulul Bazin va fi disponibil în curând."
+  },
+  "payroll": {
+    "title": "Salarii",
+    "comingSoon": "Modulul Salarii va fi disponibil în curând."
   },
   "settings": {
     "pageTitle": "Setări",

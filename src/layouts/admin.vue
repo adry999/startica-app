@@ -38,6 +38,8 @@ const navItems = computed(() => [
   { label: t('nav.staff'),         to: '/staff',          icon: 'i-heroicons-user-group',        enabled: can('read', 'staff') },
   { label: t('nav.groups'),        to: '/groups',         icon: 'i-heroicons-users',             enabled: can('read', 'groups') },
   { label: t('nav.children'),      to: '/children',       icon: 'i-heroicons-academic-cap',      enabled: can('read', 'children') },
+  { label: t('nav.pool'),          to: '/pool',           icon: 'i-heroicons-lifebuoy',          enabled: can('view', 'pool', tenantStore.selectedKindergartenId) },
+  { label: t('nav.payroll'),       to: '/payroll',        icon: 'i-heroicons-banknotes',         enabled: can('view', 'payroll', tenantStore.selectedKindergartenId) },
 ])
 
 const userInitials = computed(() => {
