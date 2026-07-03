@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 import type { StaffMember } from '../types/staff.types'
 
@@ -8,12 +8,9 @@ const emit = defineEmits<{ saved: [] }>()
 
 const { t } = useI18n()
 const toast = useToast()
-const staffStore = useStaffStore()
+const { error: staffError, fetchAssignedKindergartens, fetchUserModules, saveModuleGrants } = useStaff()
 
-const loading = ref(false)
 const saving = ref(false)
-const error = ref<string | null>(null)
-const kindergartens = ref<Array<{ id: string; name: string }>>([])
 // desired keys per kindergarten id
 const selection = ref<Record<string, ModuleKey[]>>({})
 
@@ -23,31 +20,38 @@ const moduleOptions: Array<{ key: ModuleKey; label: string }> = [
   { key: 'payroll_all',  label: t('staff.modulePayrollAll') },
 ]
 
-async function load() {
-  loading.value = true
-  error.value = null
-
-  kindergartens.value = await staffStore.fetchAssignedKindergartens(props.member.id)
+async function loadGrants() {
+  const assigned = await fetchAssignedKindergartens(props.member.id)
   // fetchAssignedKindergartens/fetchUserModules swallow errors to [] — check
-  // staffStore.error so a fetch failure isn't rendered as a legitimate empty list.
-  if (staffStore.error) {
-    error.value = staffStore.error
-    loading.value = false
-    return
+  // staffStore.error (via useStaff().error) so a fetch failure isn't rendered
+  // as a legitimate empty list.
+  if (staffError.value) {
+    return { kindergartens: [] as Array<{ id: string; name: string }>, selection: {} as Record<string, ModuleKey[]> }
   }
 
   const next: Record<string, ModuleKey[]> = {}
-  for (const kg of kindergartens.value) {
-    next[kg.id] = await staffStore.fetchUserModules(props.member.id, kg.id)
-    if (staffStore.error) {
-      error.value = staffStore.error
-      loading.value = false
-      return
+  for (const kg of assigned) {
+    next[kg.id] = await fetchUserModules(props.member.id, kg.id)
+    if (staffError.value) {
+      return { kindergartens: [] as Array<{ id: string; name: string }>, selection: {} as Record<string, ModuleKey[]> }
     }
   }
-  selection.value = next
-  loading.value = false
+  return { kindergartens: assigned, selection: next }
 }
+
+const { data, pending, refresh } = useLazyAsyncData(
+  () => `staff-module-access-${props.member.id}`,
+  loadGrants,
+  { watch: [() => props.member.id] },
+)
+
+watch(data, (value) => {
+  selection.value = value?.selection ?? {}
+}, { immediate: true })
+
+const kindergartens = computed(() => data.value?.kindergartens ?? [])
+const loading = computed(() => pending.value)
+const error = computed(() => staffError.value)
 
 function toggle(kgId: string, key: ModuleKey, checked: boolean) {
   const set = new Set(selection.value[kgId] ?? [])
@@ -64,7 +68,7 @@ async function save() {
   saving.value = true
   let ok = true
   for (const kg of kindergartens.value) {
-    ok = await staffStore.saveModuleGrants(props.member.id, kg.id, selection.value[kg.id] ?? [])
+    ok = await saveModuleGrants(props.member.id, kg.id, selection.value[kg.id] ?? [])
     if (!ok) break
   }
   saving.value = false
@@ -78,11 +82,9 @@ async function save() {
   // saveModuleGrants is non-atomic: some grants/revokes may already be applied
   // before the failure. Re-fetch actual persisted state so the checkboxes never
   // show stale intent as if nothing had happened.
-  toast.add({ title: staffStore.error ?? t('staff.moduleSaveError'), color: 'error' })
-  await load()
+  toast.add({ title: staffError.value ?? t('staff.moduleSaveError'), color: 'error' })
+  await refresh()
 }
-
-watch(() => props.member.id, load, { immediate: true })
 </script>
 
 <template>
