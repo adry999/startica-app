@@ -8,6 +8,7 @@ import {
   type UpdateStaffInput,
 } from '~/shared/schemas/staff.schema'
 import type { StaffMember } from '../types/staff.types'
+import ModuleAssignmentPanel from '../components/ModuleAssignmentPanel.vue'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -150,6 +151,15 @@ async function onRemoveConfirm() {
   }
 }
 
+// ── Module access drawer ────────────────────────────────────────────────────
+const moduleModalOpen = ref(false)
+const moduleTarget = ref<StaffMember | null>(null)
+
+function openModuleAccess(member: StaffMember) {
+  moduleTarget.value = member
+  moduleModalOpen.value = true
+}
+
 // ── Table ──────────────────────────────────────────────────────────────────
 const roleBadgeColor = (role: StaffMember['role']): 'error' | 'primary' | 'neutral' => {
   if (role === 'super_admin') return 'error'
@@ -190,6 +200,9 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     header: t('staff.table.actions'),
     cell: ({ row }) =>
       h('div', { class: 'flex gap-1' }, [
+        canUpdateStaff.value
+          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openModuleAccess(row.original) }, () => t('staff.moduleAccess'))
+          : null,
         canUpdateStaff.value
           ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
           : null,
@@ -319,6 +332,21 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UButton color="neutral" variant="ghost" @click="removeModalOpen = false">{{ t('common.cancel') }}</UButton>
           <UButton color="error" loading-auto :loading="loading" @click="onRemoveConfirm">{{ t('staff.remove') }}</UButton>
         </div>
+      </template>
+    </UModal>
+
+    <UModal v-model:open="moduleModalOpen">
+      <template #header>
+        <h2 class="text-base font-semibold text-slate-800">
+          {{ moduleTarget ? t('staff.moduleAccessTitle', { name: moduleTarget.fullName }) : '' }}
+        </h2>
+      </template>
+      <template #body>
+        <ModuleAssignmentPanel
+          v-if="moduleTarget"
+          :member="moduleTarget"
+          @saved="moduleModalOpen = false"
+        />
       </template>
     </UModal>
   </div>

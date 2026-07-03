@@ -122,15 +122,24 @@ export const useStaffStore = defineStore('staff', {
     },
 
     async fetchAssignedKindergartens(userId: string) {
+      this.error = null
       const client = useSupabaseClient()
       const result = await staffService.listAssignedKindergartens(client, userId)
-      return result.success ? result.data : []
+      if (!result.success) {
+        this.error = result.error
+        return []
+      }
+      return result.data
     },
 
     async fetchUserModules(userId: string, kindergartenId: string): Promise<ModuleKey[]> {
+      this.error = null
       const client = useSupabaseClient()
       const result = await staffService.listUserModules(client, userId, kindergartenId)
-      if (!result.success) return []
+      if (!result.success) {
+        this.error = result.error
+        return []
+      }
       return result.data.map((row) => row.module_key as ModuleKey)
     },
 
