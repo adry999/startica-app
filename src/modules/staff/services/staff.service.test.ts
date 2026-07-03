@@ -4,6 +4,10 @@ import {
   updateStaffProfile,
   setStaffStatus,
   removeFromKindergarten,
+  listUserModules,
+  grantModule,
+  revokeModule,
+  listAssignedKindergartens,
 } from './staff.service'
 
 const sampleRow = {
@@ -164,5 +168,93 @@ describe('removeFromKindergarten', () => {
     const result = await removeFromKindergarten(client, 'user-2', 'kg-1')
 
     expect(result).toEqual({ success: false, error: 'delete failed' })
+  })
+})
+
+const moduleRow = {
+  id: 'um-1',
+  user_id: 'user-2',
+  kindergarten_id: 'kg-1',
+  module_key: 'pool' as const,
+  granted_by: 'user-1',
+  granted_at: '2026-07-02T00:00:00Z',
+  created_at: '2026-07-02T00:00:00Z',
+  updated_at: '2026-07-02T00:00:00Z',
+  created_by: 'user-1',
+  updated_by: 'user-1',
+  deleted_at: null,
+}
+
+describe('listUserModules', () => {
+  it('returns live module rows for a user in a kindergarten', async () => {
+    const mockIs = vi.fn().mockResolvedValue({ data: [moduleRow], error: null })
+    const mockEq2 = vi.fn().mockReturnValue({ is: mockIs })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const client = {
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: mockEq1 }) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await listUserModules(client, 'user-2', 'kg-1')
+    expect(result).toEqual({ success: true, data: [moduleRow] })
+    expect(client.from).toHaveBeenCalledWith('user_modules')
+    expect(mockEq1).toHaveBeenCalledWith('user_id', 'user-2')
+    expect(mockEq2).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
+  })
+})
+
+describe('grantModule', () => {
+  it('inserts a grant row with granted_by set to the actor', async () => {
+    const mockSingle = vi.fn().mockResolvedValue({ data: moduleRow, error: null })
+    const mockSelect = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelect })
+    const client = { from: vi.fn().mockReturnValue({ insert: mockInsert }) } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
+    expect(result).toEqual({ success: true, data: moduleRow })
+    expect(mockInsert).toHaveBeenCalledWith({
+      user_id: 'user-2',
+      kindergarten_id: 'kg-1',
+      module_key: 'pool',
+      granted_by: 'user-1',
+    })
+  })
+})
+
+describe('revokeModule', () => {
+  it('soft-deletes the live grant row matching user, kindergarten and key', async () => {
+    const mockIs = vi.fn().mockResolvedValue({ error: null })
+    const mockEq3 = vi.fn().mockReturnValue({ is: mockIs })
+    const mockEq2 = vi.fn().mockReturnValue({ eq: mockEq3 })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq1 })
+    const client = { from: vi.fn().mockReturnValue({ update: mockUpdate }) } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const result = await revokeModule(client, 'user-2', 'kg-1', 'pool')
+    expect(result).toEqual({ success: true, data: null })
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ deleted_at: expect.any(String) }))
+    expect(mockEq1).toHaveBeenCalledWith('user_id', 'user-2')
+    expect(mockEq2).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(mockEq3).toHaveBeenCalledWith('module_key', 'pool')
+    expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
+  })
+})
+
+describe('listAssignedKindergartens', () => {
+  it('maps the joined kindergarten rows to {id, name}', async () => {
+    const mockEq = vi.fn().mockResolvedValue({
+      data: [{ kindergarten_id: 'kg-1', kindergartens: { id: 'kg-1', name: 'Sunflower' } }],
+      error: null,
+    })
+    const client = {
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: mockEq }) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await listAssignedKindergartens(client, 'user-2')
+    expect(result).toEqual({ success: true, data: [{ id: 'kg-1', name: 'Sunflower' }] })
+    expect(client.from).toHaveBeenCalledWith('user_kindergartens')
+    expect(mockEq).toHaveBeenCalledWith('user_id', 'user-2')
   })
 })

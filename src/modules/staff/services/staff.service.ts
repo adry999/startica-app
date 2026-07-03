@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
+import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 import { STAFF_EXCLUDED_ROLES } from '~/shared/utils/staffFilters'
 
 type Client = SupabaseClient<Database>
@@ -80,4 +81,79 @@ export async function removeFromKindergarten(
 
   if (error) return { success: false, error: error.message }
   return { success: true, data: null }
+}
+
+export type UserModuleRow = Database['public']['Tables']['user_modules']['Row']
+
+export async function listUserModules(
+  client: Client,
+  userId: string,
+  kindergartenId: string,
+): Promise<Result<UserModuleRow[]>> {
+  const { data, error } = await client
+    .from('user_modules')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('kindergarten_id', kindergartenId)
+    .is('deleted_at', null)
+
+  if (error || !data) return { success: false, error: error?.message ?? 'list_failed' }
+  return { success: true, data }
+}
+
+export async function grantModule(
+  client: Client,
+  userId: string,
+  kindergartenId: string,
+  moduleKey: ModuleKey,
+  actorId: string,
+): Promise<Result<UserModuleRow>> {
+  const { data, error } = await client
+    .from('user_modules')
+    .insert({
+      user_id: userId,
+      kindergarten_id: kindergartenId,
+      module_key: moduleKey,
+      granted_by: actorId,
+    })
+    .select('*')
+    .single()
+
+  if (error || !data) return { success: false, error: error?.message ?? 'grant_failed' }
+  return { success: true, data }
+}
+
+export async function revokeModule(
+  client: Client,
+  userId: string,
+  kindergartenId: string,
+  moduleKey: ModuleKey,
+): Promise<Result<null>> {
+  const { error } = await client
+    .from('user_modules')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .eq('kindergarten_id', kindergartenId)
+    .eq('module_key', moduleKey)
+    .is('deleted_at', null)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: null }
+}
+
+export async function listAssignedKindergartens(
+  client: Client,
+  userId: string,
+): Promise<Result<Array<{ id: string; name: string }>>> {
+  const { data, error } = await client
+    .from('user_kindergartens')
+    .select('kindergarten_id, kindergartens!inner(id, name)')
+    .eq('user_id', userId)
+
+  if (error || !data) return { success: false, error: error?.message ?? 'list_failed' }
+  return {
+    success: true,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: data.map((row: any) => ({ id: row.kindergartens.id, name: row.kindergartens.name })),
+  }
 }
