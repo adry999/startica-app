@@ -131,3 +131,35 @@ describe('useStaffStore', () => {
     expect(store.items).toHaveLength(0)
   })
 })
+
+describe('staff.store module grants', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ success: true }))
+  })
+
+  it('saveModuleGrants grants missing keys and revokes removed keys', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'actor-1', email: 'a@b.com', fullName: 'A', role: 'admin', avatarUrl: null, status: 'active' }
+
+    vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
+      success: true,
+      data: [
+        { module_key: 'pool' } as any,          // currently: pool
+        { module_key: 'payroll_own' } as any,   // currently: payroll_own
+      ],
+    })
+    const grantSpy = vi.spyOn(staffService, 'grantModule').mockResolvedValue({ success: true, data: {} as any })
+    const revokeSpy = vi.spyOn(staffService, 'revokeModule').mockResolvedValue({ success: true, data: null })
+
+    const store = useStaffStore()
+    // desired: pool + payroll_all  → add payroll_all, remove payroll_own
+    const ok = await store.saveModuleGrants('user-2', 'kg-1', ['pool', 'payroll_all'])
+
+    expect(ok).toBe(true)
+    expect(grantSpy).toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'payroll_all', 'actor-1')
+    expect(revokeSpy).toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'payroll_own')
+    expect(grantSpy).not.toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'pool', 'actor-1')
+  })
+})
