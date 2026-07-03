@@ -201,11 +201,11 @@ describe('staff.store module grants', () => {
     vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
       success: true,
       data: [
-        { module_key: 'pool' } as any,          // currently: pool
-        { module_key: 'payroll_own' } as any,   // currently: payroll_own
+        { module_key: 'pool' } as unknown as UserModuleRow,          // currently: pool
+        { module_key: 'payroll_own' } as unknown as UserModuleRow,   // currently: payroll_own
       ],
     })
-    const grantSpy = vi.spyOn(staffService, 'grantModule').mockResolvedValue({ success: true, data: {} as any })
+    const grantSpy = vi.spyOn(staffService, 'grantModule').mockResolvedValue({ success: true, data: {} as unknown as UserModuleRow })
     const revokeSpy = vi.spyOn(staffService, 'revokeModule').mockResolvedValue({ success: true, data: null })
 
     const store = useStaffStore()
