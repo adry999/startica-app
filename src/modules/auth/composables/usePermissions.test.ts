@@ -143,4 +143,17 @@ describe('usePermissions — pool/payroll', () => {
     expect(usePermissions().can('view', 'payroll', 'kg-1')).toBe(true)
     expect(usePermissions().can('view', 'payroll', 'kg-2')).toBe(false)
   })
+
+  it('educator grant matches any kindergarten when the id is ALL or omitted', () => {
+    setUser('educator', [{ kindergartenId: 'kg-2', moduleKey: 'pool' }])
+    const { can } = usePermissions()
+    expect(can('view', 'pool', 'ALL')).toBe(true)
+    expect(can('view', 'pool')).toBe(true)
+  })
+
+  it('payrollScope matches any kindergarten when the id is omitted', () => {
+    setUser('educator', [{ kindergartenId: 'kg-2', moduleKey: 'payroll_own' }])
+    expect(usePermissions().payrollScope()).toBe('own')
+    expect(usePermissions().payrollScope('ALL')).toBe('own')
+  })
 })
