@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const { t } = useI18n()
 const { user, logout } = useAuth()
@@ -38,12 +38,22 @@ const navItems = computed(() => [
   { label: t('nav.staff'),         to: '/staff',          icon: 'i-heroicons-user-group',        enabled: can('read', 'staff') },
   { label: t('nav.groups'),        to: '/groups',         icon: 'i-heroicons-users',             enabled: can('read', 'groups') },
   { label: t('nav.children'),      to: '/children',       icon: 'i-heroicons-academic-cap',      enabled: can('read', 'children') },
+  { label: t('nav.pool'),          to: '/pool',           icon: 'i-heroicons-lifebuoy',          enabled: can('view', 'pool', tenantStore.selectedKindergartenId) },
+  { label: t('nav.payroll'),       to: '/payroll',        icon: 'i-heroicons-banknotes',         enabled: can('view', 'payroll', tenantStore.selectedKindergartenId) },
 ])
 
 const userInitials = computed(() => {
   const name = user.value?.fullName ?? ''
   return name.trim().split(/\s+/).slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? '').join('') || '?'
 })
+
+const searchQuery = ref('')
+
+async function onTopbarSearch() {
+  const q = searchQuery.value.trim()
+  await navigateTo({ path: '/children', query: q ? { q } : undefined })
+  searchQuery.value = ''
+}
 
 async function onLogout() {
   await logout()
@@ -86,6 +96,13 @@ async function onLogout() {
         </template>
       </nav>
 
+      <!-- Primary CTA (mockup: "New Registration") -->
+      <div v-if="can('create', 'children')" class="px-3 pb-2">
+        <UButton color="primary" block icon="i-heroicons-plus" @click="navigateTo('/children?add=1')">
+          {{ t('children.addTitle') }}
+        </UButton>
+      </div>
+
       <!-- Bottom: Settings + Logout -->
       <div class="border-t border-white/10 px-2 py-3 space-y-0.5">
         <NuxtLink
@@ -110,8 +127,17 @@ async function onLogout() {
     <div class="flex min-w-0 flex-1 flex-col">
       <!-- Header -->
       <header class="flex h-16 shrink-0 items-center justify-between border-b border-border bg-white px-6 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <!-- Left: breadcrumb / page context (empty placeholder keeps layout stable) -->
-        <div class="flex-1" />
+        <!-- Left: global child search -->
+        <div class="flex flex-1 items-center">
+          <UInput
+            v-model="searchQuery"
+            icon="i-heroicons-magnifying-glass"
+            :placeholder="t('topbar.searchPlaceholder')"
+            size="sm"
+            class="w-64"
+            @keydown.enter="onTopbarSearch"
+          />
+        </div>
 
         <!-- Right: kg selector + user -->
         <div class="flex items-center gap-3">
@@ -154,7 +180,9 @@ async function onLogout() {
 
       <!-- Page content -->
       <main class="flex-1 overflow-auto p-8">
-        <slot />
+        <div class="mx-auto w-full max-w-[1400px]">
+          <slot />
+        </div>
       </main>
     </div>
   </div>

@@ -34,6 +34,11 @@ const filteredItems = computed(() => {
   return items.value
 })
 
+const filterTabs = computed(() =>
+  (['active', 'all', 'archived'] as const)
+    .map(f => ({ label: t(`groups.filter.${f}`), value: f })),
+)
+
 // ── Stats ───────────────────────────────────────────────────────────────────
 const activeItems     = computed(() => items.value.filter(g => g.status === 'active'))
 const totalEnrolled   = computed(() => activeItems.value.reduce((s, g) => s + g.childrenCount, 0))
@@ -144,58 +149,30 @@ async function onArchiveConfirm() {
 <template>
   <div class="space-y-6">
     <!-- Page header -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="text-xl font-semibold text-slate-800">{{ t('groups.pageTitle') }}</h1>
-        <p class="mt-0.5 text-sm text-slate-400">{{ t('groups.pageSubtitle') }}</p>
-      </div>
-      <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openCreate">
-        <UIcon name="i-heroicons-plus" class="mr-1.5 h-5 w-5" />
-        {{ t('groups.createTitle') }}
-      </UButton>
-    </div>
+    <BasePageHeader :title="t('groups.pageTitle')" :subtitle="t('groups.pageSubtitle')">
+      <template #actions>
+        <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openCreate">
+          <UIcon name="i-heroicons-plus" class="mr-1.5 h-5 w-5" />
+          {{ t('groups.createTitle') }}
+        </UButton>
+      </template>
+    </BasePageHeader>
 
     <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <!-- Stats bar -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalGroups') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ activeItems.length }}</p>
-      </div>
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalEnrollment') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ totalEnrolled }}</p>
-      </div>
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.educators') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ educatorsCount }}</p>
-      </div>
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('groups.stats.totalCapacity') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ totalCapacity ?? '—' }}</p>
-      </div>
+      <BaseStatCard :label="t('groups.stats.totalGroups')" :value="activeItems.length" icon="i-heroicons-user-group" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
+      <BaseStatCard :label="t('groups.stats.totalEnrollment')" :value="totalEnrolled" icon="i-heroicons-face-smile" icon-class="bg-brand-yellow/20 text-brand-gold" :loading="loading" />
+      <BaseStatCard :label="t('groups.stats.educators')" :value="educatorsCount" icon="i-heroicons-identification" icon-class="bg-brand-sage/20 text-teal-600" :loading="loading" />
+      <BaseStatCard :label="t('groups.stats.totalCapacity')" :value="totalCapacity ?? '—'" icon="i-heroicons-chart-pie" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
     <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
       <!-- Filter tabs -->
-      <div class="flex gap-1 border-b border-border">
-        <button
-          v-for="f in (['active', 'all', 'archived'] as const)"
-          :key="f"
-          :class="[
-            '-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
-            activeFilter === f
-              ? 'border-teal-600 text-teal-600'
-              : 'border-transparent text-slate-400 hover:text-slate-600',
-          ]"
-          @click="activeFilter = f"
-        >
-          {{ t(`groups.filter.${f}`) }}
-        </button>
-      </div>
+      <BaseFilterTabs v-model="activeFilter" :items="filterTabs" />
 
       <!-- Loading skeletons -->
       <div v-if="loading" class="grid grid-cols-3 gap-6">

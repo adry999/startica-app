@@ -204,7 +204,7 @@ V2 will likely add `PARENT` (and maybe `CHILD`) roles — e.g. a parent who view
 - **Stitch/mockup HTML is reference only — never paste it as production code.** It won't match Nuxt/Vue/Tailwind. Keep exports + screenshots in `design/`.
 - Build screens in the real stack (Nuxt UI + Tailwind + `Base*` components + palette tokens), using mockups as visual reference. Run a screenshot-compare-refine loop.
 - **Asset homes:** `design/` = reference (not shipped) · `public/` = logo/favicon · `assets/images/` = optimized images (Nuxt Image) · Supabase Storage = user uploads (avatars, child photos).
-- **Palette tokens** come from `docs/Startica_DesignPrompt.md`. Never invent color values — use the defined tokens.
+- **Palette tokens** come from `design/mockups/startica_core/DESIGN.md` (single design source of truth since 2026-07-02; `docs/Startica_DesignPrompt.md` is superseded for palette/radius/type-scale). Never invent color values — use the defined tokens.
 - **Figma MCP (optional, later):** if used, reuse our `Base*` components (via Code Connect), build to our stack, and pull palette from tokens — don't copy raw values like `w-[37px]`.
 
 ## Reference docs

@@ -8,6 +8,7 @@ import {
   type UpdateStaffInput,
 } from '~/shared/schemas/staff.schema'
 import type { StaffMember } from '../types/staff.types'
+import ModuleAssignmentPanel from '../components/ModuleAssignmentPanel.vue'
 
 const { t } = useI18n()
 const toast = useToast()
@@ -42,6 +43,11 @@ const filteredItems = computed(() => {
   if (activeFilter.value === 'admins')    return items.value.filter(s => s.role === 'admin')
   return items.value
 })
+
+const filterTabs = computed(() =>
+  (['all', 'educators', 'admins'] as const)
+    .map(f => ({ label: t(`staff.filter.${f}`), value: f })),
+)
 
 // ── Invite modal ───────────────────────────────────────────────────────────
 const inviteModalOpen = ref(false)
@@ -145,6 +151,15 @@ async function onRemoveConfirm() {
   }
 }
 
+// ── Module access drawer ────────────────────────────────────────────────────
+const moduleModalOpen = ref(false)
+const moduleTarget = ref<StaffMember | null>(null)
+
+function openModuleAccess(member: StaffMember) {
+  moduleTarget.value = member
+  moduleModalOpen.value = true
+}
+
 // ── Table ──────────────────────────────────────────────────────────────────
 const roleBadgeColor = (role: StaffMember['role']): 'error' | 'primary' | 'neutral' => {
   if (role === 'super_admin') return 'error'
@@ -186,6 +201,9 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     cell: ({ row }) =>
       h('div', { class: 'flex gap-1' }, [
         canUpdateStaff.value
+          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openModuleAccess(row.original) }, () => t('staff.moduleAccess'))
+          : null,
+        canUpdateStaff.value
           ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
           : null,
         canUpdateStaff.value
@@ -205,39 +223,25 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
 <template>
   <div class="space-y-6">
     <!-- Page header -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="text-xl font-semibold text-slate-800">{{ t('staff.pageTitle') }}</h1>
-        <p class="mt-0.5 text-sm text-slate-400">{{ t('staff.pageSubtitle') }}</p>
-      </div>
-      <UButton
-        v-if="can('create', 'staff') && selectedKgId !== 'ALL'"
-        color="primary"
-        @click="openInvite"
-      >
-        <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
-        {{ t('staff.invite') }}
-      </UButton>
-    </div>
+    <BasePageHeader :title="t('staff.pageTitle')" :subtitle="t('staff.pageSubtitle')">
+      <template #actions>
+        <UButton
+          v-if="can('create', 'staff') && selectedKgId !== 'ALL'"
+          color="primary"
+          @click="openInvite"
+        >
+          <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
+          {{ t('staff.invite') }}
+        </UButton>
+      </template>
+    </BasePageHeader>
 
     <!-- Stat cards — visible only when a specific kindergarten is selected -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('staff.stats.total') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ totalStaff }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('staff.stats.active') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ activeStaff }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('staff.stats.inactive') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ inactiveStaff }}</p>
-      </div>
-      <div class="rounded-xl border border-border bg-white p-5">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">{{ t('staff.stats.admins') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ adminCount }}</p>
-      </div>
+      <BaseStatCard :label="t('staff.stats.total')" :value="totalStaff" />
+      <BaseStatCard :label="t('staff.stats.active')" :value="activeStaff" />
+      <BaseStatCard :label="t('staff.stats.inactive')" :value="inactiveStaff" />
+      <BaseStatCard :label="t('staff.stats.admins')" :value="adminCount" />
     </div>
 
     <!-- Select kindergarten prompt -->
@@ -247,22 +251,10 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
 
     <!-- Tab filter + table -->
     <template v-else>
-      <div class="rounded-xl border border-border bg-white">
+      <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
         <!-- Tabs -->
-        <div class="flex border-b border-border px-4">
-          <button
-            v-for="f in (['all', 'educators', 'admins'] as const)"
-            :key="f"
-            :class="[
-              '-mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-              activeFilter === f
-                ? 'border-teal-600 text-teal-600'
-                : 'border-transparent text-slate-400 hover:text-slate-600',
-            ]"
-            @click="activeFilter = f"
-          >
-            {{ t(`staff.filter.${f}`) }}
-          </button>
+        <div class="border-b border-border px-4 py-3">
+          <BaseFilterTabs v-model="activeFilter" :items="filterTabs" />
         </div>
 
         <UTable :data="filteredItems" :columns="columns" :loading="loading">
@@ -340,6 +332,21 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UButton color="neutral" variant="ghost" @click="removeModalOpen = false">{{ t('common.cancel') }}</UButton>
           <UButton color="error" loading-auto :loading="loading" @click="onRemoveConfirm">{{ t('staff.remove') }}</UButton>
         </div>
+      </template>
+    </UModal>
+
+    <UModal v-model:open="moduleModalOpen">
+      <template #header>
+        <h2 class="text-base font-semibold text-slate-800">
+          {{ moduleTarget ? t('staff.moduleAccessTitle', { name: moduleTarget.fullName }) : '' }}
+        </h2>
+      </template>
+      <template #body>
+        <ModuleAssignmentPanel
+          v-if="moduleTarget"
+          :member="moduleTarget"
+          @saved="moduleModalOpen = false"
+        />
       </template>
     </UModal>
   </div>

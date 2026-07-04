@@ -7,13 +7,19 @@ vi.mock('~/core/supabase/client', () => ({
 
 vi.mock('../services/auth.service')
 
+vi.mock('../services/moduleAccess.service', () => ({
+  listUserModuleGrants: vi.fn(),
+}))
+
 import { useAuthStore } from './auth.store'
 import * as authService from '../services/auth.service'
+import { listUserModuleGrants } from '../services/moduleAccess.service'
 
 describe('useAuthStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
+    vi.mocked(listUserModuleGrants).mockResolvedValue({ success: true, data: [] })
   })
 
   it('sets the user and isAuthenticated on successful login', async () => {
@@ -100,5 +106,29 @@ describe('useAuthStore', () => {
 
     store.setPasswordRecovery(true)
     expect(store.isPasswordRecovery).toBe(true)
+  })
+})
+
+describe('auth.store module grants cache', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+  })
+
+  it('populates moduleGrants via loadModuleGrants and clears them on logout', async () => {
+    vi.mocked(listUserModuleGrants).mockResolvedValue({
+      success: true,
+      data: [{ kindergartenId: 'kg-1', moduleKey: 'pool' }],
+    })
+    vi.mocked(authService.signOut).mockResolvedValue({ success: true, data: null })
+
+    const store = useAuthStore()
+    await store.loadModuleGrants('user-1')
+
+    expect(listUserModuleGrants).toHaveBeenCalledWith({}, 'user-1')
+    expect(store.moduleGrants).toEqual([{ kindergartenId: 'kg-1', moduleKey: 'pool' }])
+
+    await store.logout()
+    expect(store.moduleGrants).toEqual([])
   })
 })

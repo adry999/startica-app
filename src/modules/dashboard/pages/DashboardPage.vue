@@ -71,61 +71,38 @@ function roleInitials(name: string): string {
 <template>
   <div class="space-y-6">
     <!-- ── Page header ───────────────────────────────────────────────────── -->
-    <div>
-      <h1 class="text-xl font-semibold text-slate-800">{{ t('dashboard.pageTitle') }}</h1>
-      <p class="mt-0.5 text-sm text-slate-400">{{ t('dashboard.pageSubtitle') }}</p>
-    </div>
+    <BasePageHeader :title="t('dashboard.pageTitle')" :subtitle="t('dashboard.pageSubtitle')" />
 
     <!-- ── Row 1: Stat cards ─────────────────────────────────────────────── -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('dashboard.stats.children') }}</p>
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-50">
-            <UIcon name="i-heroicons-academic-cap" class="h-5 w-5 text-teal-600" />
-          </div>
-        </div>
-        <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-800">
-          <span v-if="loading" class="animate-pulse text-slate-200">—</span>
-          <span v-else>{{ stats?.totalChildren ?? 0 }}</span>
-        </p>
-      </div>
-
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('dashboard.stats.groups') }}</p>
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-sage/20">
-            <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-teal-600" />
-          </div>
-        </div>
-        <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-800">
-          <span v-if="loading" class="animate-pulse text-slate-200">—</span>
-          <span v-else>{{ stats?.totalGroups ?? 0 }}</span>
-        </p>
-      </div>
-
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('dashboard.stats.staff') }}</p>
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">
-            <UIcon name="i-heroicons-users" class="h-5 w-5 text-slate-500" />
-          </div>
-        </div>
-        <p class="mt-3 text-3xl font-semibold tabular-nums text-slate-800">
-          <span v-if="loading" class="animate-pulse text-slate-200">—</span>
-          <span v-else>{{ stats?.activeStaff ?? 0 }}</span>
-        </p>
-      </div>
-
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <div class="flex items-center justify-between">
-          <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('dashboard.stats.attendance') }}</p>
-          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100">
-            <UIcon name="i-heroicons-chart-bar" class="h-5 w-5 text-slate-300" />
-          </div>
-        </div>
-        <p class="mt-3 text-sm font-medium text-slate-300">{{ t('dashboard.attendanceComingSoon') }}</p>
-      </div>
+      <BaseStatCard
+        :label="t('dashboard.stats.children')"
+        :value="stats?.totalChildren ?? 0"
+        icon="i-heroicons-academic-cap"
+        icon-class="bg-teal-50 text-teal-600"
+        :loading="loading"
+      />
+      <BaseStatCard
+        :label="t('dashboard.stats.groups')"
+        :value="stats?.totalGroups ?? 0"
+        icon="i-heroicons-user-group"
+        icon-class="bg-brand-sage/20 text-teal-600"
+        :loading="loading"
+      />
+      <BaseStatCard
+        :label="t('dashboard.stats.staff')"
+        :value="stats?.activeStaff ?? 0"
+        icon="i-heroicons-users"
+        icon-class="bg-slate-100 text-slate-500"
+        :loading="loading"
+      />
+      <BaseStatCard
+        :label="t('dashboard.stats.attendance')"
+        icon="i-heroicons-chart-bar"
+        icon-class="bg-slate-100 text-slate-300"
+      >
+        <span class="text-sm font-medium text-slate-300">{{ t('dashboard.attendanceComingSoon') }}</span>
+      </BaseStatCard>
     </div>
 
     <!-- ── Row 2: Recent Activity + Quick Actions ─────────────────────────── -->

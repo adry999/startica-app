@@ -11,6 +11,9 @@
     "adminPortal": "Admin Portal",
     "back": "Back"
   },
+  "topbar": {
+    "searchPlaceholder": "Search child…"
+  },
   "auth": {
     "login": "Login",
     "email": "Email",
@@ -49,6 +52,8 @@
     "staff": "Staff",
     "groups": "Groups",
     "children": "Children",
+    "pool": "Pool",
+    "payroll": "Payroll",
     "settings": "Settings",
     "comingSoon": "Coming soon"
   },
@@ -179,6 +184,14 @@
     "reactivate": "Reactivate",
     "remove": "Remove",
     "confirm": "Confirm",
+    "moduleAccess": "Module access",
+    "moduleAccessTitle": "Module access — {name}",
+    "moduleAccessEmpty": "This user is not assigned to any kindergarten.",
+    "modulePool": "Pool",
+    "modulePayrollOwn": "Payroll (own only)",
+    "modulePayrollAll": "Payroll (all)",
+    "moduleSaveSuccess": "Module access updated.",
+    "moduleSaveError": "Could not save module access.",
     "pageSubtitle": "Manage staff members and their roles.",
     "stats": {
       "total": "Total Staff",
@@ -214,6 +227,7 @@
       "graduated": "Graduated"
     },
     "setStatus": "Change status",
+    "viewProfile": "View profile",
     "confirmStatusTitle": "Change child status",
     "confirmStatusBody": "The child will be marked as {status}.",
     "addSuccess": "Child added.",
@@ -302,6 +316,14 @@
       "empty": "No children in this group."
     },
     "notFound": "Group not found."
+  },
+  "pool": {
+    "title": "Pool",
+    "comingSoon": "The Pool module is coming soon."
+  },
+  "payroll": {
+    "title": "Payroll",
+    "comingSoon": "The Payroll module is coming soon."
   },
   "settings": {
     "pageTitle": "Settings",

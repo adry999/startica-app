@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, reactive, ref, computed } from 'vue'
+import { h, reactive, ref, computed, watch } from 'vue'
 import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import { createChildSchema, updateChildSchema, type CreateChildInput, type UpdateChildInput } from '~/shared/schemas/children.schema'
 import type { Child } from '../types/children.types'
@@ -17,6 +17,7 @@ const groupsStore = useGroupsStore()
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
 const BaseAvatar = resolveComponent('BaseAvatar')
+const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const canMutate   = computed(() => can('create', 'children'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
@@ -27,9 +28,19 @@ useLazyAsyncData('children-groups',
   { watch: [selectedKgId] },
 )
 
-// ── Search + filter ────────────────────────────────────────────────────────
-const search = ref('')
+// ── Search + filter (search seeds from ?q= set by the topbar search) ──────
+const route = useRoute()
+const router = useRouter()
+
+const search = ref((route.query.q as string) ?? '')
+watch(() => route.query.q, q => { search.value = (q as string) ?? '' })
+
 const activeFilter = ref<'all' | 'enrolled' | 'withdrawn' | 'graduated'>('enrolled')
+
+const filterTabs = computed(() =>
+  (['enrolled', 'all', 'withdrawn', 'graduated'] as const)
+    .map(f => ({ label: t(`children.filter.${f}`), value: f })),
+)
 
 const filteredItems = computed(() => {
   let list = items.value
@@ -74,6 +85,18 @@ function openAdd() {
   addState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
   addOpen.value = true
 }
+
+// Sidebar CTA lands here with ?add=1 — open the modal once, then strip the param.
+watch(
+  () => route.query.add,
+  add => {
+    if (add === '1' && canMutate.value && selectedKgId.value !== 'ALL') {
+      openAdd()
+      router.replace({ query: { ...route.query, add: undefined } })
+    }
+  },
+  { immediate: true },
+)
 
 async function onAddSubmit(event: FormSubmitEvent<CreateChildInput>) {
   const ok = await create(event.data)
@@ -196,15 +219,22 @@ const columns = computed<TableColumn<Child>[]>(() => [
   {
     id: 'actions',
     header: t('children.table.actions'),
-    cell: ({ row }) =>
-      h('div', { class: 'flex gap-1' }, [
-        canMutate.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
-          : null,
-        canMutate.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openStatus(row.original) }, () => t('children.setStatus'))
-          : null,
-      ]),
+    cell: ({ row }) => {
+      const items = [
+        { label: t('children.viewProfile'), icon: 'i-heroicons-user', onSelect: () => navigateTo(`/children/${row.original.id}`) },
+        canMutate.value ? { label: t('common.edit'), icon: 'i-heroicons-pencil-square', onSelect: () => openEdit(row.original) } : null,
+        canMutate.value ? { label: t('children.setStatus'), icon: 'i-heroicons-arrow-path', onSelect: () => openStatus(row.original) } : null,
+      ].filter((item): item is { label: string; icon: string; onSelect: () => void } => item !== null)
+      return h(UDropdownMenu, { items }, {
+        default: () => h(UButton, {
+          icon: 'i-heroicons-ellipsis-vertical',
+          size: 'xs',
+          color: 'neutral',
+          variant: 'ghost',
+          'aria-label': t('children.table.actions'),
+        }),
+      })
+    },
   },
 ])
 </script>
@@ -212,34 +242,23 @@ const columns = computed<TableColumn<Child>[]>(() => [
 <template>
   <div class="space-y-6">
     <!-- Header -->
-    <div class="flex items-start justify-between">
-      <div>
-        <h1 class="text-xl font-semibold text-slate-800">{{ t('children.pageTitle') }}</h1>
-        <p class="mt-0.5 text-sm text-slate-400">{{ t('children.pageSubtitle') }}</p>
-      </div>
-      <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openAdd">
-        <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
-        {{ t('children.addTitle') }}
-      </UButton>
-    </div>
+    <BasePageHeader :title="t('children.pageTitle')" :subtitle="t('children.pageSubtitle')">
+      <template #actions>
+        <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openAdd">
+          <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
+          {{ t('children.addTitle') }}
+        </UButton>
+      </template>
+    </BasePageHeader>
 
     <!-- Fetch error -->
     <UAlert v-if="error" color="error" variant="soft" :description="error" class="mb-4" />
 
     <!-- Stat cards -->
     <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.all') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ items.length }}</p>
-      </div>
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.enrolled') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-teal-600">{{ enrolledCount }}</p>
-      </div>
-      <div class="rounded-2xl border border-border bg-white p-5 shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
-        <p class="text-xs font-medium uppercase tracking-widest text-slate-400">{{ t('children.filter.withdrawn') }}</p>
-        <p class="mt-2 text-3xl font-semibold tabular-nums text-slate-800">{{ withdrawnCount }}</p>
-      </div>
+      <BaseStatCard :label="t('children.filter.all')" :value="items.length" icon="i-heroicons-academic-cap" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
+      <BaseStatCard :label="t('children.filter.enrolled')" :value="enrolledCount" icon="i-heroicons-check-circle" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
+      <BaseStatCard :label="t('children.filter.withdrawn')" :value="withdrawnCount" icon="i-heroicons-arrow-right-start-on-rectangle" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
     <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
@@ -247,22 +266,8 @@ const columns = computed<TableColumn<Child>[]>(() => [
     <template v-else>
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
         <!-- Search + tabs -->
-        <div class="flex items-center justify-between border-b border-border px-4">
-          <div class="flex">
-            <button
-              v-for="f in (['enrolled', 'all', 'withdrawn', 'graduated'] as const)"
-              :key="f"
-              :class="[
-                '-mb-px border-b-2 px-4 py-3 text-sm font-medium transition-colors',
-                activeFilter === f
-                  ? 'border-teal-600 text-teal-600'
-                  : 'border-transparent text-slate-400 hover:text-slate-600',
-              ]"
-              @click="activeFilter = f"
-            >
-              {{ t(`children.filter.${f}`) }}
-            </button>
-          </div>
+        <div class="flex items-center justify-between border-b border-border px-4 py-3">
+          <BaseFilterTabs v-model="activeFilter" :items="filterTabs" />
           <UInput v-model="search" :placeholder="t('common.search')" size="sm" class="w-52">
             <template #leading>
               <UIcon name="i-heroicons-magnifying-glass" class="h-4 w-4 text-slate-400" />

@@ -10,6 +10,7 @@ vi.mock('../services/staff.service')
 import { useStaffStore } from './staff.store'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import * as staffService from '../services/staff.service'
+import type { UserModuleRow } from '../services/staff.service'
 
 const sampleRow = {
   id: 'user-2',
@@ -129,5 +130,91 @@ describe('useStaffStore', () => {
 
     expect(ok).toBe(true)
     expect(store.items).toHaveLength(0)
+  })
+})
+
+describe('staff.store module grants', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    vi.clearAllMocks()
+    vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ success: true }))
+  })
+
+  it('fetchAssignedKindergartens returns the list and clears any prior error', async () => {
+    vi.spyOn(staffService, 'listAssignedKindergartens').mockResolvedValue({
+      success: true,
+      data: [{ id: 'kg-1', name: 'Grădinița 1' }],
+    })
+
+    const store = useStaffStore()
+    store.error = 'stale_error'
+    const result = await store.fetchAssignedKindergartens('user-2')
+
+    expect(result).toEqual([{ id: 'kg-1', name: 'Grădinița 1' }])
+    expect(store.error).toBeNull()
+  })
+
+  it('fetchAssignedKindergartens sets the store error and returns [] on failure', async () => {
+    vi.spyOn(staffService, 'listAssignedKindergartens').mockResolvedValue({
+      success: false,
+      error: 'list_failed',
+    })
+
+    const store = useStaffStore()
+    const result = await store.fetchAssignedKindergartens('user-2')
+
+    expect(result).toEqual([])
+    expect(store.error).toBe('list_failed')
+  })
+
+  it('fetchUserModules returns the mapped keys and clears any prior error', async () => {
+    vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
+      success: true,
+      data: [{ module_key: 'pool' } as unknown as UserModuleRow],
+    })
+
+    const store = useStaffStore()
+    store.error = 'stale_error'
+    const result = await store.fetchUserModules('user-2', 'kg-1')
+
+    expect(result).toEqual(['pool'])
+    expect(store.error).toBeNull()
+  })
+
+  it('fetchUserModules sets the store error and returns [] on failure', async () => {
+    vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
+      success: false,
+      error: 'list_failed',
+    })
+
+    const store = useStaffStore()
+    const result = await store.fetchUserModules('user-2', 'kg-1')
+
+    expect(result).toEqual([])
+    expect(store.error).toBe('list_failed')
+  })
+
+  it('saveModuleGrants grants missing keys and revokes removed keys', async () => {
+    const authStore = useAuthStore()
+    authStore.user = { id: 'actor-1', email: 'a@b.com', fullName: 'A', role: 'admin', avatarUrl: null, status: 'active' }
+
+    vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
+      success: true,
+      data: [
+        { module_key: 'pool' } as unknown as UserModuleRow,          // currently: pool
+        { module_key: 'payroll_own' } as unknown as UserModuleRow,   // currently: payroll_own
+      ],
+    })
+    const grantSpy = vi.spyOn(staffService, 'grantModule').mockResolvedValue({ success: true, data: {} as unknown as UserModuleRow })
+    const revokeSpy = vi.spyOn(staffService, 'revokeModule').mockResolvedValue({ success: true, data: null })
+
+    const store = useStaffStore()
+    // desired: pool + payroll_all  → add payroll_all, remove payroll_own
+    const ok = await store.saveModuleGrants('user-2', 'kg-1', ['pool', 'payroll_all'])
+
+    expect(ok).toBe(true)
+    expect(grantSpy).toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'payroll_all', 'actor-1')
+    expect(revokeSpy).toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'payroll_own')
+    expect(grantSpy).not.toHaveBeenCalledWith(expect.anything(), 'user-2', 'kg-1', 'pool', 'actor-1')
   })
 })

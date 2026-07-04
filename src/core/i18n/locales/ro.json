@@ -11,6 +11,9 @@
     "adminPortal": "Portal Admin",
     "back": "Înapoi"
   },
+  "topbar": {
+    "searchPlaceholder": "Caută copil…"
+  },
   "auth": {
     "login": "Autentificare",
     "email": "Email",
@@ -49,6 +52,8 @@
     "staff": "Personal",
     "groups": "Grupe",
     "children": "Copii",
+    "pool": "Bazin",
+    "payroll": "Salarii",
     "settings": "Setări",
     "comingSoon": "În curând"
   },
@@ -179,6 +184,14 @@
     "reactivate": "Reactivează",
     "remove": "Elimină",
     "confirm": "Confirmă",
+    "moduleAccess": "Acces module",
+    "moduleAccessTitle": "Acces module — {name}",
+    "moduleAccessEmpty": "Acest utilizator nu este asignat la nicio grădiniță.",
+    "modulePool": "Bazin",
+    "modulePayrollOwn": "Salarii (doar ale lui)",
+    "modulePayrollAll": "Salarii (toate)",
+    "moduleSaveSuccess": "Accesul la module a fost actualizat.",
+    "moduleSaveError": "Nu s-a putut salva accesul la module.",
     "pageSubtitle": "Gestionează membrii și rolurile personalului.",
     "stats": {
       "total": "Total personal",
@@ -214,6 +227,7 @@
       "graduated": "Absolvit"
     },
     "setStatus": "Schimbă status",
+    "viewProfile": "Vezi profilul",
     "confirmStatusTitle": "Schimbă statusul copilului",
     "confirmStatusBody": "Copilul va fi marcat ca {status}. Acțiunea poate fi reversibilă.",
     "addSuccess": "Copil adăugat.",
@@ -302,6 +316,14 @@
       "empty": "Niciun copil în această grupă."
     },
     "notFound": "Grupă negăsită."
+  },
+  "pool": {
+    "title": "Bazin",
+    "comingSoon": "Modulul Bazin va fi disponibil în curând."
+  },
+  "payroll": {
+    "title": "Salarii",
+    "comingSoon": "Modulul Salarii va fi disponibil în curând."
   },
   "settings": {
     "pageTitle": "Setări",

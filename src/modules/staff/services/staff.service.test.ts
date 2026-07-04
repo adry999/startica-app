@@ -4,6 +4,11 @@ import {
   updateStaffProfile,
   setStaffStatus,
   removeFromKindergarten,
+  listUserModules,
+  grantModule,
+  revokeModule,
+  listAssignedKindergartens,
+  type UserModuleRow,
 } from './staff.service'
 
 const sampleRow = {
@@ -164,5 +169,137 @@ describe('removeFromKindergarten', () => {
     const result = await removeFromKindergarten(client, 'user-2', 'kg-1')
 
     expect(result).toEqual({ success: false, error: 'delete failed' })
+  })
+})
+
+const moduleRow = {
+  id: 'um-1',
+  user_id: 'user-2',
+  kindergarten_id: 'kg-1',
+  module_key: 'pool' as const,
+  granted_by: 'user-1',
+  granted_at: '2026-07-02T00:00:00Z',
+  created_at: '2026-07-02T00:00:00Z',
+  updated_at: '2026-07-02T00:00:00Z',
+  created_by: 'user-1',
+  updated_by: 'user-1',
+  deleted_at: null,
+}
+
+describe('listUserModules', () => {
+  it('returns live module rows for a user in a kindergarten', async () => {
+    const mockIs = vi.fn().mockResolvedValue({ data: [moduleRow], error: null })
+    const mockEq2 = vi.fn().mockReturnValue({ is: mockIs })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const client = {
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: mockEq1 }) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await listUserModules(client, 'user-2', 'kg-1')
+    expect(result).toEqual({ success: true, data: [moduleRow] })
+    expect(client.from).toHaveBeenCalledWith('user_modules')
+    expect(mockEq1).toHaveBeenCalledWith('user_id', 'user-2')
+    expect(mockEq2).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
+  })
+})
+
+describe('grantModule', () => {
+  // Builds the lookup chain: select('*').eq().eq().eq().is('deleted_at', null).maybeSingle()
+  function mockLookupChain(existing: UserModuleRow | null) {
+    const mockMaybeSingle = vi.fn().mockResolvedValue({ data: existing, error: null })
+    const mockIsDeleted = vi.fn().mockReturnValue({ maybeSingle: mockMaybeSingle })
+    const mockEq3 = vi.fn().mockReturnValue({ is: mockIsDeleted })
+    const mockEq2 = vi.fn().mockReturnValue({ eq: mockEq3 })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockSelectLookup = vi.fn().mockReturnValue({ eq: mockEq1 })
+    return { mockSelectLookup, mockEq1, mockEq2, mockEq3, mockIsDeleted, mockMaybeSingle }
+  }
+
+  it('no existing row: inserts a grant row with granted_by set to the actor', async () => {
+    const { mockSelectLookup } = mockLookupChain(null)
+
+    const mockSingle = vi.fn().mockResolvedValue({ data: moduleRow, error: null })
+    const mockSelectInsert = vi.fn().mockReturnValue({ single: mockSingle })
+    const mockInsert = vi.fn().mockReturnValue({ select: mockSelectInsert })
+    const mockUpdate = vi.fn()
+
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: mockSelectLookup,
+        insert: mockInsert,
+        update: mockUpdate,
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
+    expect(result).toEqual({ success: true, data: moduleRow })
+    expect(mockInsert).toHaveBeenCalledWith({
+      user_id: 'user-2',
+      kindergarten_id: 'kg-1',
+      module_key: 'pool',
+      granted_by: 'user-1',
+    })
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+
+  it('re-grant of a live row is a no-op: returns the existing row, no insert/update', async () => {
+    const { mockSelectLookup } = mockLookupChain(moduleRow)
+
+    const mockInsert = vi.fn()
+    const mockUpdate = vi.fn()
+
+    const client = {
+      from: vi.fn().mockReturnValue({
+        select: mockSelectLookup,
+        insert: mockInsert,
+        update: mockUpdate,
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await grantModule(client, 'user-2', 'kg-1', 'pool', 'user-1')
+    expect(result).toEqual({ success: true, data: moduleRow })
+    expect(mockInsert).not.toHaveBeenCalled()
+    expect(mockUpdate).not.toHaveBeenCalled()
+  })
+})
+
+describe('revokeModule', () => {
+  it('soft-deletes the live grant row matching user, kindergarten and key', async () => {
+    const mockIs = vi.fn().mockResolvedValue({ error: null })
+    const mockEq3 = vi.fn().mockReturnValue({ is: mockIs })
+    const mockEq2 = vi.fn().mockReturnValue({ eq: mockEq3 })
+    const mockEq1 = vi.fn().mockReturnValue({ eq: mockEq2 })
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockEq1 })
+    const client = { from: vi.fn().mockReturnValue({ update: mockUpdate }) } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const result = await revokeModule(client, 'user-2', 'kg-1', 'pool')
+    expect(result).toEqual({ success: true, data: null })
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({ deleted_at: expect.any(String) }))
+    expect(mockEq1).toHaveBeenCalledWith('user_id', 'user-2')
+    expect(mockEq2).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(mockEq3).toHaveBeenCalledWith('module_key', 'pool')
+    expect(mockIs).toHaveBeenCalledWith('deleted_at', null)
+  })
+})
+
+describe('listAssignedKindergartens', () => {
+  it('maps the joined kindergarten rows to {id, name}', async () => {
+    const mockEq = vi.fn().mockResolvedValue({
+      data: [{ kindergarten_id: 'kg-1', kindergartens: { id: 'kg-1', name: 'Sunflower' } }],
+      error: null,
+    })
+    const client = {
+      from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: mockEq }) }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await listAssignedKindergartens(client, 'user-2')
+    expect(result).toEqual({ success: true, data: [{ id: 'kg-1', name: 'Sunflower' }] })
+    expect(client.from).toHaveBeenCalledWith('user_kindergartens')
+    expect(mockEq).toHaveBeenCalledWith('user_id', 'user-2')
   })
 })
