@@ -45,6 +45,14 @@ describe('listAvailability', () => {
       success: true,
       data: [{ id: 'avail-1', kindergartenId: 'kg-1', trainerUserId: 'user-1', weekday: 1, startTime: '09:00:00', endTime: '12:00:00' }],
     })
+
+    // Assert filter arguments
+    const selectChain = client.from.mock.results[0].value.select()
+    const firstEq = selectChain.eq as ReturnType<typeof vi.fn>
+    expect(firstEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+
+    const secondEq = firstEq.mock.results[0].value.eq as ReturnType<typeof vi.fn>
+    expect(secondEq).toHaveBeenCalledWith('trainer_user_id', 'user-1')
   })
 })
 
@@ -81,5 +89,9 @@ describe('removeAvailability', () => {
     const payload = updateCall.mock.calls[0][0]
     expect(payload.updated_by).toBe('actor-1')
     expect(payload.deleted_at).toBeTruthy()
+
+    // Assert filter argument for ID
+    const eqFilter = updateCall.mock.results[0].value.eq as ReturnType<typeof vi.fn>
+    expect(eqFilter).toHaveBeenCalledWith('id', 'avail-1')
   })
 })
