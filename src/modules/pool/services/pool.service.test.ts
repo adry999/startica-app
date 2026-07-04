@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern } from './pool.service'
+import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern, computeOccurrenceDates } from './pool.service'
 
 const availabilityRow = {
   id: 'avail-1',
@@ -269,5 +269,29 @@ describe('deletePattern', () => {
     expect(payload.updated_by).toBe('actor-1')
     expect(payload.deleted_at).toBeTruthy()
     expect(eqFilter).toHaveBeenCalledWith('id', 'pattern-1')
+  })
+})
+
+describe('computeOccurrenceDates', () => {
+  it('returns weekly dates matching the weekday within the window', () => {
+    // 2026-09-01 is a Tuesday (weekday 2). today = 2026-09-01.
+    const dates = computeOccurrenceDates(2, '2026-09-01', null, 3, new Date('2026-09-01T00:00:00Z'))
+    expect(dates).toEqual(['2026-09-01', '2026-09-08', '2026-09-15', '2026-09-22'])
+  })
+
+  it('does not return dates before activeFrom', () => {
+    const dates = computeOccurrenceDates(2, '2026-09-10', null, 3, new Date('2026-09-01T00:00:00Z'))
+    expect(dates.every(d => d >= '2026-09-10')).toBe(true)
+    expect(dates[0]).toBe('2026-09-15')
+  })
+
+  it('stops at activeUntil when earlier than the window end', () => {
+    const dates = computeOccurrenceDates(2, '2026-09-01', '2026-09-10', 8, new Date('2026-09-01T00:00:00Z'))
+    expect(dates).toEqual(['2026-09-01', '2026-09-08'])
+  })
+
+  it('starts from today when activeFrom is in the past', () => {
+    const dates = computeOccurrenceDates(2, '2026-01-01', null, 1, new Date('2026-09-01T00:00:00Z'))
+    expect(dates[0]).toBe('2026-09-01')
   })
 })

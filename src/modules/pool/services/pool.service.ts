@@ -177,3 +177,39 @@ export async function deletePattern(
   if (error) return { success: false, error: error.message }
   return { success: true, data: undefined }
 }
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+const MS_PER_WEEK = 7 * MS_PER_DAY
+
+export function computeOccurrenceDates(
+  weekday: number,
+  activeFrom: string,
+  activeUntil: string | null,
+  windowWeeks: number,
+  today: Date = new Date(),
+): string[] {
+  const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate())
+
+  const [fy, fm, fd] = activeFrom.split('-').map(Number)
+  const fromUtc = Date.UTC(fy!, fm! - 1, fd!)
+  const rangeStart = Math.max(todayUtc, fromUtc)
+
+  const windowEndUtc = todayUtc + windowWeeks * MS_PER_WEEK
+  let untilUtc = Infinity
+  if (activeUntil) {
+    const [uy, um, ud] = activeUntil.split('-').map(Number)
+    untilUtc = Date.UTC(uy!, um! - 1, ud!)
+  }
+  const rangeEnd = Math.min(windowEndUtc, untilUtc)
+
+  const currentWeekday = new Date(rangeStart).getUTCDay()
+  const daysUntilTarget = (weekday - currentWeekday + 7) % 7
+  let cursor = rangeStart + daysUntilTarget * MS_PER_DAY
+
+  const dates: string[] = []
+  while (cursor <= rangeEnd) {
+    dates.push(new Date(cursor).toISOString().slice(0, 10))
+    cursor += MS_PER_WEEK
+  }
+  return dates
+}
