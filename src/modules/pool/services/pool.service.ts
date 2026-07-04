@@ -5,6 +5,11 @@ import type { TrainerAvailability, SchedulePattern } from '../types/pool.types'
 
 type Client = SupabaseClient<Database>
 
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return (h ?? 0) * 60 + (m ?? 0)
+}
+
 function toAvailability(row: Record<string, unknown>): TrainerAvailability {
   return {
     id: row.id as string,
@@ -110,11 +115,12 @@ export async function createPattern(
 
   if (availabilityError) return { success: false, error: availabilityError.message }
 
-  const fits = (availabilityRows ?? []).some(
-    row =>
-      input.startTime >= (row as { start_time: string }).start_time &&
-      input.endTime <= (row as { end_time: string }).end_time,
-  )
+  const inputStart = timeToMinutes(input.startTime)
+  const inputEnd = timeToMinutes(input.endTime)
+  const fits = (availabilityRows ?? []).some(row => {
+    const availRow = row as { start_time: string; end_time: string }
+    return inputStart >= timeToMinutes(availRow.start_time) && inputEnd <= timeToMinutes(availRow.end_time)
+  })
   if (!fits) return { success: false, error: 'outside_trainer_availability' }
 
   const { data, error } = await client

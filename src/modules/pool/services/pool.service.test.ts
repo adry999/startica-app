@@ -109,22 +109,28 @@ const patternRow = {
   active_until: null,
 }
 
+function mockCreatePatternClient(availabilityRows: Array<{ start_time: string; end_time: string }>) {
+  const weekdayEq = vi.fn().mockReturnValue({
+    is: vi.fn().mockResolvedValue({ data: availabilityRows, error: null }),
+  })
+  const kindergartenEq = vi.fn().mockReturnValue({ eq: weekdayEq })
+  const trainerEq = vi.fn().mockReturnValue({ eq: kindergartenEq })
+  const select = vi.fn().mockReturnValue({ eq: trainerEq })
+  const insert = vi.fn().mockReturnValue({
+    select: vi.fn().mockReturnValue({
+      single: vi.fn().mockResolvedValue({ data: patternRow, error: null }),
+    }),
+  })
+  const client = {
+    from: vi.fn().mockReturnValue({ select, insert }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any
+  return { client, select, trainerEq, kindergartenEq, weekdayEq, insert }
+}
+
 describe('createPattern', () => {
   it('rejects a pattern outside the trainer availability window', async () => {
-    const client = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                is: vi.fn().mockResolvedValue({ data: [], error: null }),
-              }),
-            }),
-          }),
-        }),
-      }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const { client } = mockCreatePatternClient([])
     const result = await createPattern(
       client,
       {
@@ -142,32 +148,9 @@ describe('createPattern', () => {
   })
 
   it('creates a pattern that fits inside an availability window', async () => {
-    const client = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn()
-          .mockReturnValueOnce({
-            eq: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  is: vi.fn().mockResolvedValue({
-                    data: [{ start_time: '09:00:00', end_time: '12:00:00' }],
-                    error: null,
-                  }),
-                }),
-              }),
-            }),
-          })
-          .mockReturnValueOnce({
-            single: vi.fn().mockResolvedValue({ data: patternRow, error: null }),
-          }),
-        insert: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: patternRow, error: null }),
-          }),
-        }),
-      }),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const { client, trainerEq, kindergartenEq, weekdayEq, insert } = mockCreatePatternClient([
+      { start_time: '09:00:00', end_time: '12:00:00' },
+    ])
     const result = await createPattern(
       client,
       {
@@ -183,21 +166,57 @@ describe('createPattern', () => {
       'actor-1',
     )
     expect(result.success).toBe(true)
+
+    expect(trainerEq).toHaveBeenCalledWith('trainer_user_id', 'user-1')
+    expect(kindergartenEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(weekdayEq).toHaveBeenCalledWith('weekday', 1)
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kindergarten_id: 'kg-1',
+        trainer_user_id: 'user-1',
+        weekday: 1,
+        start_time: '10:00',
+        end_time: '11:00',
+        default_group_id: 'group-1',
+        capacity: 8,
+        active_from: '2026-09-01',
+        active_until: null,
+        created_by: 'actor-1',
+        updated_by: 'actor-1',
+      }),
+    )
+  })
+
+  it('accepts a pattern whose boundaries exactly match the availability window', async () => {
+    const { client } = mockCreatePatternClient([{ start_time: '09:00:00', end_time: '12:00:00' }])
+    const result = await createPattern(
+      client,
+      {
+        kindergartenId: 'kg-1',
+        trainerUserId: 'user-1',
+        weekday: 1,
+        startTime: '09:00',
+        endTime: '12:00',
+        capacity: 8,
+        activeFrom: '2026-09-01',
+      },
+      'actor-1',
+    )
+    expect(result.success).toBe(true)
   })
 })
 
 describe('listPatterns', () => {
   it('returns mapped pattern rows', async () => {
-    const client = {
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            is: vi.fn().mockReturnValue({
-              order: vi.fn().mockResolvedValue({ data: [patternRow], error: null }),
-            }),
-          }),
-        }),
+    const kindergartenEq = vi.fn().mockReturnValue({
+      is: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: [patternRow], error: null }),
       }),
+    })
+    const select = vi.fn().mockReturnValue({ eq: kindergartenEq })
+    const client = {
+      from: vi.fn().mockReturnValue({ select }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
     const result = await listPatterns(client, 'kg-1')
@@ -216,20 +235,39 @@ describe('listPatterns', () => {
         activeUntil: null,
       })
     }
+    expect(kindergartenEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+  })
+
+  it('filters by trainer_user_id when trainerUserId is passed', async () => {
+    const trainerEq = vi.fn().mockResolvedValue({ data: [patternRow], error: null })
+    const order = vi.fn().mockReturnValue({ eq: trainerEq })
+    const kindergartenEq = vi.fn().mockReturnValue({ is: vi.fn().mockReturnValue({ order }) })
+    const select = vi.fn().mockReturnValue({ eq: kindergartenEq })
+    const client = {
+      from: vi.fn().mockReturnValue({ select }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+    const result = await listPatterns(client, 'kg-1', 'user-1')
+    expect(result.success).toBe(true)
+    expect(kindergartenEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
+    expect(trainerEq).toHaveBeenCalledWith('trainer_user_id', 'user-1')
   })
 })
 
 describe('deletePattern', () => {
   it('soft-deletes by setting deleted_at', async () => {
+    const eqFilter = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn().mockReturnValue({ eq: eqFilter })
     const client = {
-      from: vi.fn().mockReturnValue({
-        update: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: null }),
-        }),
-      }),
+      from: vi.fn().mockReturnValue({ update }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
     const result = await deletePattern(client, 'pattern-1', 'actor-1')
     expect(result).toEqual({ success: true, data: undefined })
+
+    const payload = update.mock.calls[0][0]
+    expect(payload.updated_by).toBe('actor-1')
+    expect(payload.deleted_at).toBeTruthy()
+    expect(eqFilter).toHaveBeenCalledWith('id', 'pattern-1')
   })
 })
