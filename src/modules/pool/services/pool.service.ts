@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
-import type { TrainerAvailability, SchedulePattern } from '../types/pool.types'
+import type { TrainerAvailability, SchedulePattern, PoolSession } from '../types/pool.types'
 
 type Client = SupabaseClient<Database>
 
@@ -212,4 +212,129 @@ export function computeOccurrenceDates(
     cursor += MS_PER_WEEK
   }
   return dates
+}
+
+const GENERATION_WINDOW_WEEKS = 8
+
+function toSession(row: Record<string, unknown>): PoolSession {
+  const participants = row.pool_session_participants as Array<{ count: number }> | undefined
+  return {
+    id: row.id as string,
+    kindergartenId: row.kindergarten_id as string,
+    trainerUserId: row.trainer_user_id as string,
+    sourcePatternId: (row.source_pattern_id as string | null) ?? null,
+    sessionDate: row.session_date as string,
+    startTime: row.start_time as string,
+    endTime: row.end_time as string,
+    capacity: row.capacity as number,
+    groupId: (row.group_id as string | null) ?? null,
+    status: row.status as 'scheduled' | 'cancelled',
+    participantCount: participants?.[0]?.count ?? 0,
+  }
+}
+
+export async function generateMissingSessions(
+  client: Client,
+  kindergartenId: string,
+  today: Date = new Date(),
+): Promise<Result<void>> {
+  const { data: patterns, error: patternsError } = await client
+    .from('pool_schedule_patterns')
+    .select('*')
+    .eq('kindergarten_id', kindergartenId)
+    .is('deleted_at', null)
+
+  if (patternsError) return { success: false, error: patternsError.message }
+
+  for (const pattern of (patterns ?? []) as Array<Record<string, unknown>>) {
+    const patternId = pattern.id as string
+    const occurrenceDates = computeOccurrenceDates(
+      pattern.weekday as number,
+      pattern.active_from as string,
+      (pattern.active_until as string | null) ?? null,
+      GENERATION_WINDOW_WEEKS,
+      today,
+    )
+
+    const { data: existing, error: existingError } = await client
+      .from('pool_sessions')
+      .select('session_date')
+      .eq('source_pattern_id', patternId)
+      .is('deleted_at', null)
+
+    if (existingError) return { success: false, error: existingError.message }
+
+    const existingDates = new Set((existing ?? []).map(r => (r as { session_date: string }).session_date))
+    const missingDates = occurrenceDates.filter(d => !existingDates.has(d))
+    if (missingDates.length === 0) continue
+
+    const rowsToInsert = missingDates.map(date => ({
+      kindergarten_id: kindergartenId,
+      trainer_user_id: pattern.trainer_user_id as string,
+      source_pattern_id: patternId,
+      session_date: date,
+      start_time: pattern.start_time as string,
+      end_time: pattern.end_time as string,
+      capacity: pattern.capacity as number,
+      group_id: (pattern.default_group_id as string | null) ?? null,
+      status: 'scheduled' as const,
+    }))
+
+    const { data: insertedSessions, error: insertError } = await client
+      .from('pool_sessions')
+      .insert(rowsToInsert)
+      .select()
+
+    if (insertError) return { success: false, error: insertError.message }
+
+    const defaultGroupId = pattern.default_group_id as string | null
+    if (!defaultGroupId) continue
+
+    const { data: activeChildren, error: childrenError } = await client
+      .from('children')
+      .select('id')
+      .eq('group_id', defaultGroupId)
+      .eq('status', 'enrolled')
+      .is('deleted_at', null)
+
+    if (childrenError) return { success: false, error: childrenError.message }
+    if (!activeChildren || activeChildren.length === 0) continue
+
+    const participantRows = (insertedSessions ?? []).flatMap(session =>
+      activeChildren.map(child => ({
+        session_id: (session as { id: string }).id,
+        kindergarten_id: kindergartenId,
+        child_id: (child as { id: string }).id,
+        status: 'enrolled' as const,
+      })),
+    )
+
+    if (participantRows.length > 0) {
+      const { error: participantsError } = await client
+        .from('pool_session_participants')
+        .insert(participantRows)
+      if (participantsError) return { success: false, error: participantsError.message }
+    }
+  }
+
+  return { success: true, data: undefined }
+}
+
+export async function listSessions(
+  client: Client,
+  kindergartenId: string,
+  today: Date = new Date(),
+): Promise<Result<PoolSession[]>> {
+  const generation = await generateMissingSessions(client, kindergartenId, today)
+  if (!generation.success) return generation
+
+  const { data, error } = await client
+    .from('pool_sessions')
+    .select('*, pool_session_participants(count)')
+    .eq('kindergarten_id', kindergartenId)
+    .is('deleted_at', null)
+    .order('session_date')
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: (data ?? []).map(r => toSession(r as Record<string, unknown>)) }
 }

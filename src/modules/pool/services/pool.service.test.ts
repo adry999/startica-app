@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern, computeOccurrenceDates } from './pool.service'
+import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern, computeOccurrenceDates, generateMissingSessions, listSessions } from './pool.service'
 
 const availabilityRow = {
   id: 'avail-1',
@@ -269,6 +269,191 @@ describe('deletePattern', () => {
     expect(payload.updated_by).toBe('actor-1')
     expect(payload.deleted_at).toBeTruthy()
     expect(eqFilter).toHaveBeenCalledWith('id', 'pattern-1')
+  })
+})
+
+describe('generateMissingSessions', () => {
+  it('inserts a session per missing occurrence and seeds participants from the default group', async () => {
+    const generationPattern = {
+      id: 'pattern-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+      weekday: 2, start_time: '10:00:00', end_time: '11:00:00',
+      default_group_id: 'group-1', capacity: 8,
+      active_from: '2026-09-01', active_until: null,
+    }
+    const sessionsInsert = vi.fn((rows: Array<Record<string, unknown>>) => ({
+      select: vi.fn().mockResolvedValue({
+        data: rows.map((r, i) => ({ ...r, id: `session-${i}` })),
+        error: null,
+      }),
+    }))
+    const participantsInsert = vi.fn().mockResolvedValue({ error: null })
+    const childrenStatusEq = vi.fn().mockReturnValue({
+      is: vi.fn().mockResolvedValue({ data: [{ id: 'child-1' }, { id: 'child-2' }], error: null }),
+    })
+    const childrenGroupEq = vi.fn().mockReturnValue({ eq: childrenStatusEq })
+
+    const client = {
+      from: vi.fn((table: string) => {
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [generationPattern], error: null }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+            insert: sessionsInsert,
+          }
+        }
+        if (table === 'children') {
+          return { select: vi.fn().mockReturnValue({ eq: childrenGroupEq }) }
+        }
+        if (table === 'pool_session_participants') {
+          return { insert: participantsInsert }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: true, data: undefined })
+
+    // 8-week window starting Tue 2026-09-01 → 9 Tuesdays
+    expect(sessionsInsert).toHaveBeenCalledTimes(1)
+    const insertedSessions = sessionsInsert.mock.calls[0]![0] as Array<Record<string, unknown>>
+    expect(insertedSessions).toHaveLength(9)
+    expect(insertedSessions[0]).toEqual({
+      kindergarten_id: 'kg-1',
+      trainer_user_id: 'user-1',
+      source_pattern_id: 'pattern-1',
+      session_date: '2026-09-01',
+      start_time: '10:00:00',
+      end_time: '11:00:00',
+      capacity: 8,
+      group_id: 'group-1',
+      status: 'scheduled',
+    })
+
+    // children roster query scoped to the default group, enrolled, live
+    expect(childrenGroupEq).toHaveBeenCalledWith('group_id', 'group-1')
+    expect(childrenStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+
+    // 9 sessions × 2 children = 18 participant rows
+    expect(participantsInsert).toHaveBeenCalledTimes(1)
+    const participantRows = participantsInsert.mock.calls[0]![0] as Array<Record<string, unknown>>
+    expect(participantRows).toHaveLength(18)
+    expect(participantRows[0]).toEqual({
+      session_id: 'session-0',
+      kindergarten_id: 'kg-1',
+      child_id: 'child-1',
+      status: 'enrolled',
+    })
+  })
+
+  it('does not insert when an instance already exists for the date', async () => {
+    const insertFn = vi.fn()
+    const client = {
+      from: vi.fn((table: string) => {
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({
+                  data: [{
+                    id: 'pattern-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+                    weekday: 2, start_time: '10:00:00', end_time: '11:00:00',
+                    default_group_id: null, capacity: 8,
+                    active_from: '2026-09-01', active_until: '2026-09-01',
+                  }],
+                  error: null,
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [{ session_date: '2026-09-01' }], error: null }),
+              }),
+            }),
+            insert: insertFn,
+          }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: true, data: undefined })
+    expect(insertFn).not.toHaveBeenCalled()
+  })
+})
+
+describe('listSessions', () => {
+  it('generates missing instances then returns sessions with participant counts', async () => {
+    const sessionKindergartenEq = vi.fn().mockReturnValue({
+      is: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({
+          data: [{
+            id: 'session-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+            source_pattern_id: null, session_date: '2026-09-01',
+            start_time: '10:00:00', end_time: '11:00:00', capacity: 8,
+            group_id: null, status: 'scheduled',
+            pool_session_participants: [{ count: 2 }],
+          }],
+          error: null,
+        }),
+      }),
+    })
+    const client = {
+      from: vi.fn((table: string) => {
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return { select: vi.fn().mockReturnValue({ eq: sessionKindergartenEq }) }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await listSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data).toEqual([{
+        id: 'session-1',
+        kindergartenId: 'kg-1',
+        trainerUserId: 'user-1',
+        sourcePatternId: null,
+        sessionDate: '2026-09-01',
+        startTime: '10:00:00',
+        endTime: '11:00:00',
+        capacity: 8,
+        groupId: null,
+        status: 'scheduled',
+        participantCount: 2,
+      }])
+    }
+    expect(sessionKindergartenEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
   })
 })
 
