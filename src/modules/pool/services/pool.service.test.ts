@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern, computeOccurrenceDates, generateMissingSessions, listSessions } from './pool.service'
+import { listAvailability, addAvailability, removeAvailability, createPattern, listPatterns, deletePattern, computeOccurrenceDates, generateMissingSessions, listSessions, cancelSession, listParticipants, addParticipant, removeParticipant } from './pool.service'
 
 const availabilityRow = {
   id: 'avail-1',
@@ -655,5 +655,146 @@ describe('computeOccurrenceDates', () => {
   it('starts from today when activeFrom is in the past', () => {
     const dates = computeOccurrenceDates(2, '2026-01-01', null, 1, new Date('2026-09-01T00:00:00Z'))
     expect(dates[0]).toBe('2026-09-01')
+  })
+})
+
+describe('cancelSession', () => {
+  it('sets status to cancelled', async () => {
+    const eqFilter = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn().mockReturnValue({ eq: eqFilter })
+    const client = {
+      from: vi.fn().mockReturnValue({ update }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+    const result = await cancelSession(client, 'session-1', 'actor-1')
+    expect(result).toEqual({ success: true, data: undefined })
+    expect(update).toHaveBeenCalledWith({ status: 'cancelled', updated_by: 'actor-1' })
+    expect(eqFilter).toHaveBeenCalledWith('id', 'session-1')
+  })
+})
+
+describe('listParticipants', () => {
+  it('returns mapped participants with child name', async () => {
+    const isFilter = vi.fn().mockResolvedValue({
+      data: [{
+        id: 'part-1', session_id: 'session-1', child_id: 'child-1', status: 'enrolled',
+        children: { first_name: 'Ana', last_name: 'Pop' },
+      }],
+      error: null,
+    })
+    const sessionEq = vi.fn().mockReturnValue({ is: isFilter })
+    const select = vi.fn().mockReturnValue({ eq: sessionEq })
+    const client = {
+      from: vi.fn().mockReturnValue({ select }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+    const result = await listParticipants(client, 'session-1')
+    expect(result).toEqual({
+      success: true,
+      data: [{ id: 'part-1', sessionId: 'session-1', childId: 'child-1', childName: 'Ana Pop', status: 'enrolled' }],
+    })
+    expect(select).toHaveBeenCalledWith('*, children(first_name, last_name)')
+    expect(sessionEq).toHaveBeenCalledWith('session_id', 'session-1')
+    expect(isFilter).toHaveBeenCalledWith('deleted_at', null)
+  })
+})
+
+describe('addParticipant', () => {
+  it('rejects when the session is at capacity', async () => {
+    const countStatusEq = vi.fn().mockResolvedValue({ count: 1, error: null })
+    const countSessionEq = vi.fn().mockReturnValue({ eq: countStatusEq })
+    const countSelect = vi.fn().mockReturnValue({ eq: countSessionEq })
+
+    const sessionSingle = vi.fn().mockResolvedValue({ data: { capacity: 1, kindergarten_id: 'kg-1' }, error: null })
+    const sessionIdEq = vi.fn().mockReturnValue({ single: sessionSingle })
+    const sessionSelect = vi.fn().mockReturnValue({ eq: sessionIdEq })
+
+    let call = 0
+    const client = {
+      from: vi.fn(() => {
+        call += 1
+        if (call === 1) return { select: sessionSelect }
+        return { select: countSelect }
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await addParticipant(client, 'session-1', 'child-1', 'actor-1')
+    expect(result).toEqual({ success: false, error: 'session_full' })
+
+    expect(sessionSelect).toHaveBeenCalledWith('capacity, kindergarten_id')
+    expect(sessionIdEq).toHaveBeenCalledWith('id', 'session-1')
+    expect(countSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true })
+    expect(countSessionEq).toHaveBeenCalledWith('session_id', 'session-1')
+    expect(countStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+  })
+
+  it('inserts the participant when under capacity', async () => {
+    const countStatusEq = vi.fn().mockResolvedValue({ count: 2, error: null })
+    const countSessionEq = vi.fn().mockReturnValue({ eq: countStatusEq })
+    const countSelect = vi.fn().mockReturnValue({ eq: countSessionEq })
+
+    const sessionSingle = vi.fn().mockResolvedValue({ data: { capacity: 8, kindergarten_id: 'kg-1' }, error: null })
+    const sessionIdEq = vi.fn().mockReturnValue({ single: sessionSingle })
+    const sessionSelect = vi.fn().mockReturnValue({ eq: sessionIdEq })
+
+    const insertSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: 'part-1', session_id: 'session-1', child_id: 'child-1', status: 'enrolled',
+        children: { first_name: 'Ana', last_name: 'Pop' },
+      },
+      error: null,
+    })
+    const insertSelect = vi.fn().mockReturnValue({ single: insertSingle })
+    const insert = vi.fn().mockReturnValue({ select: insertSelect })
+
+    let call = 0
+    const client = {
+      from: vi.fn(() => {
+        call += 1
+        if (call === 1) return { select: sessionSelect }
+        if (call === 2) return { select: countSelect }
+        return { insert }
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await addParticipant(client, 'session-1', 'child-1', 'actor-1')
+    expect(result).toEqual({
+      success: true,
+      data: { id: 'part-1', sessionId: 'session-1', childId: 'child-1', childName: 'Ana Pop', status: 'enrolled' },
+    })
+
+    expect(insert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        session_id: 'session-1',
+        kindergarten_id: 'kg-1',
+        child_id: 'child-1',
+        status: 'enrolled',
+        created_by: 'actor-1',
+        updated_by: 'actor-1',
+      }),
+    )
+    expect(insertSelect).toHaveBeenCalledWith('*, children(first_name, last_name)')
+    expect(countSessionEq).toHaveBeenCalledWith('session_id', 'session-1')
+    expect(countStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+  })
+})
+
+describe('removeParticipant', () => {
+  it('soft-deletes and sets status removed', async () => {
+    const eqFilter = vi.fn().mockResolvedValue({ error: null })
+    const update = vi.fn().mockReturnValue({ eq: eqFilter })
+    const client = {
+      from: vi.fn().mockReturnValue({ update }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+    const result = await removeParticipant(client, 'part-1', 'actor-1')
+    expect(result).toEqual({ success: true, data: undefined })
+    const payload = update.mock.calls[0][0]
+    expect(payload.status).toBe('removed')
+    expect(payload.deleted_at).toBeTruthy()
+    expect(payload.updated_by).toBe('actor-1')
+    expect(eqFilter).toHaveBeenCalledWith('id', 'part-1')
   })
 })

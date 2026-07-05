@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
-import type { TrainerAvailability, SchedulePattern, PoolSession } from '../types/pool.types'
+import type { TrainerAvailability, SchedulePattern, PoolSession, SessionParticipant } from '../types/pool.types'
 
 type Client = SupabaseClient<Database>
 
@@ -345,4 +345,99 @@ export async function listSessions(
 
   if (error) return { success: false, error: error.message }
   return { success: true, data: (data ?? []).map(r => toSession(r as Record<string, unknown>)) }
+}
+
+function toParticipant(row: Record<string, unknown>): SessionParticipant {
+  const child = row.children as { first_name: string; last_name: string } | null
+  return {
+    id: row.id as string,
+    sessionId: row.session_id as string,
+    childId: row.child_id as string,
+    childName: child ? `${child.first_name} ${child.last_name}` : '',
+    status: row.status as 'enrolled' | 'removed',
+  }
+}
+
+export async function cancelSession(
+  client: Client,
+  id: string,
+  actorId: string,
+): Promise<Result<void>> {
+  const { error } = await client
+    .from('pool_sessions')
+    .update({ status: 'cancelled', updated_by: actorId })
+    .eq('id', id)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: undefined }
+}
+
+export async function listParticipants(
+  client: Client,
+  sessionId: string,
+): Promise<Result<SessionParticipant[]>> {
+  const { data, error } = await client
+    .from('pool_session_participants')
+    .select('*, children(first_name, last_name)')
+    .eq('session_id', sessionId)
+    .is('deleted_at', null)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: (data ?? []).map(r => toParticipant(r as Record<string, unknown>)) }
+}
+
+export async function addParticipant(
+  client: Client,
+  sessionId: string,
+  childId: string,
+  actorId: string,
+): Promise<Result<SessionParticipant>> {
+  const { data: session, error: sessionError } = await client
+    .from('pool_sessions')
+    .select('capacity, kindergarten_id')
+    .eq('id', sessionId)
+    .single()
+
+  if (sessionError || !session) return { success: false, error: sessionError?.message ?? 'session_not_found' }
+
+  const { count, error: countError } = await client
+    .from('pool_session_participants')
+    .select('id', { count: 'exact', head: true })
+    .eq('session_id', sessionId)
+    .eq('status', 'enrolled')
+
+  if (countError) return { success: false, error: countError.message }
+  if ((count ?? 0) >= (session as { capacity: number }).capacity) {
+    return { success: false, error: 'session_full' }
+  }
+
+  const { data, error } = await client
+    .from('pool_session_participants')
+    .insert({
+      session_id: sessionId,
+      kindergarten_id: (session as { kindergarten_id: string }).kindergarten_id,
+      child_id: childId,
+      status: 'enrolled',
+      created_by: actorId,
+      updated_by: actorId,
+    })
+    .select('*, children(first_name, last_name)')
+    .single()
+
+  if (error || !data) return { success: false, error: error?.message ?? 'add_participant_failed' }
+  return { success: true, data: toParticipant(data as Record<string, unknown>) }
+}
+
+export async function removeParticipant(
+  client: Client,
+  participantId: string,
+  actorId: string,
+): Promise<Result<void>> {
+  const { error } = await client
+    .from('pool_session_participants')
+    .update({ status: 'removed', deleted_at: new Date().toISOString(), updated_by: actorId })
+    .eq('id', participantId)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: undefined }
 }
