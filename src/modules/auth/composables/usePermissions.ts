@@ -17,6 +17,17 @@ export function usePermissions() {
     return grants.some((g) => keys.includes(g.moduleKey))
   }
 
+  // Trainer self-service: an educator with a live `pool` grant may manage
+  // only their own availability/patterns/sessions; Admin/Super Admin manage
+  // any trainer in their kindergartens (RLS enforces the same rule server-side).
+  function canManagePoolTrainer(kindergartenId: string, trainerUserId: string): boolean {
+    const role = authStore.user?.role
+    if (!role) return false
+    if (role === 'super_admin' || role === 'admin') return true
+    if (role !== 'educator') return false
+    return authStore.user?.id === trainerUserId && hasGrant(kindergartenId, ['pool'])
+  }
+
   function payrollScope(kindergartenId?: string): 'all' | 'own' | null {
     const role = authStore.user?.role
     if (!role) return null
@@ -66,5 +77,5 @@ export function usePermissions() {
     return false
   }
 
-  return { can, payrollScope }
+  return { can, canManagePoolTrainer, payrollScope }
 }
