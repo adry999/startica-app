@@ -701,7 +701,8 @@ describe('listParticipants', () => {
 
 describe('addParticipant', () => {
   it('rejects when the session is at capacity', async () => {
-    const countStatusEq = vi.fn().mockResolvedValue({ count: 1, error: null })
+    const countIs = vi.fn().mockResolvedValue({ count: 1, error: null })
+    const countStatusEq = vi.fn().mockReturnValue({ is: countIs })
     const countSessionEq = vi.fn().mockReturnValue({ eq: countStatusEq })
     const countSelect = vi.fn().mockReturnValue({ eq: countSessionEq })
 
@@ -727,10 +728,12 @@ describe('addParticipant', () => {
     expect(countSelect).toHaveBeenCalledWith('id', { count: 'exact', head: true })
     expect(countSessionEq).toHaveBeenCalledWith('session_id', 'session-1')
     expect(countStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+    expect(countIs).toHaveBeenCalledWith('deleted_at', null)
   })
 
   it('inserts the participant when under capacity', async () => {
-    const countStatusEq = vi.fn().mockResolvedValue({ count: 2, error: null })
+    const countIs = vi.fn().mockResolvedValue({ count: 2, error: null })
+    const countStatusEq = vi.fn().mockReturnValue({ is: countIs })
     const countSessionEq = vi.fn().mockReturnValue({ eq: countStatusEq })
     const countSelect = vi.fn().mockReturnValue({ eq: countSessionEq })
 
@@ -778,6 +781,7 @@ describe('addParticipant', () => {
     expect(insertSelect).toHaveBeenCalledWith('*, children(first_name, last_name)')
     expect(countSessionEq).toHaveBeenCalledWith('session_id', 'session-1')
     expect(countStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+    expect(countIs).toHaveBeenCalledWith('deleted_at', null)
   })
 })
 

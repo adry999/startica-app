@@ -405,6 +405,7 @@ export async function addParticipant(
     .select('id', { count: 'exact', head: true })
     .eq('session_id', sessionId)
     .eq('status', 'enrolled')
+    .is('deleted_at', null)
 
   if (countError) return { success: false, error: countError.message }
   if ((count ?? 0) >= (session as { capacity: number }).capacity) {
