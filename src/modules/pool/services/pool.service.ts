@@ -290,11 +290,19 @@ export async function generateMissingSessions(
     const defaultGroupId = pattern.default_group_id as string | null
     if (!defaultGroupId) continue
 
+    // Accepted tradeoff: if the participant seeding below fails after the
+    // session insert committed, the sessions stay unseeded — a later re-run
+    // skips them (their dates are now "existing") and cannot tell a
+    // never-seeded session apart from one whose participants were all
+    // removed on purpose (removed rows are soft-deleted and RLS-invisible).
+    // Recovery is manual via the participants UI; the failure window is a
+    // single transient DB error between two adjacent statements.
     const { data: activeChildren, error: childrenError } = await client
       .from('children')
       .select('id')
       .eq('group_id', defaultGroupId)
       .eq('status', 'enrolled')
+      .eq('kindergarten_id', kindergartenId)
       .is('deleted_at', null)
 
     if (childrenError) return { success: false, error: childrenError.message }

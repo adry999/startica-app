@@ -287,9 +287,10 @@ describe('generateMissingSessions', () => {
       }),
     }))
     const participantsInsert = vi.fn().mockResolvedValue({ error: null })
-    const childrenStatusEq = vi.fn().mockReturnValue({
+    const childrenKgEq = vi.fn().mockReturnValue({
       is: vi.fn().mockResolvedValue({ data: [{ id: 'child-1' }, { id: 'child-2' }], error: null }),
     })
+    const childrenStatusEq = vi.fn().mockReturnValue({ eq: childrenKgEq })
     const childrenGroupEq = vi.fn().mockReturnValue({ eq: childrenStatusEq })
 
     const client = {
@@ -343,9 +344,10 @@ describe('generateMissingSessions', () => {
       status: 'scheduled',
     })
 
-    // children roster query scoped to the default group, enrolled, live
+    // children roster query scoped to the default group, enrolled, tenant, live
     expect(childrenGroupEq).toHaveBeenCalledWith('group_id', 'group-1')
     expect(childrenStatusEq).toHaveBeenCalledWith('status', 'enrolled')
+    expect(childrenKgEq).toHaveBeenCalledWith('kindergarten_id', 'kg-1')
 
     // 9 sessions × 2 children = 18 participant rows
     expect(participantsInsert).toHaveBeenCalledTimes(1)
@@ -398,6 +400,181 @@ describe('generateMissingSessions', () => {
     const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
     expect(result).toEqual({ success: true, data: undefined })
     expect(insertFn).not.toHaveBeenCalled()
+  })
+
+  it('returns failure and stops when the patterns query errors', async () => {
+    const client = {
+      from: vi.fn((table: string) => {
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: null, error: { message: 'db down' } }),
+              }),
+            }),
+          }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: false, error: 'db down' })
+  })
+
+  it('returns failure on session-insert error and never queries children', async () => {
+    const fromCalls: string[] = []
+    const client = {
+      from: vi.fn((table: string) => {
+        fromCalls.push(table)
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({
+                  data: [{
+                    id: 'pattern-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+                    weekday: 2, start_time: '10:00:00', end_time: '11:00:00',
+                    default_group_id: 'group-1', capacity: 8,
+                    active_from: '2026-09-01', active_until: '2026-09-01',
+                  }],
+                  error: null,
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+            insert: vi.fn().mockReturnValue({
+              select: vi.fn().mockResolvedValue({ data: null, error: { message: 'insert failed' } }),
+            }),
+          }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: false, error: 'insert failed' })
+    expect(fromCalls).not.toContain('children')
+    expect(fromCalls).not.toContain('pool_session_participants')
+  })
+
+  it('skips participant seeding when the pattern has no default group', async () => {
+    const fromCalls: string[] = []
+    const client = {
+      from: vi.fn((table: string) => {
+        fromCalls.push(table)
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({
+                  data: [{
+                    id: 'pattern-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+                    weekday: 2, start_time: '10:00:00', end_time: '11:00:00',
+                    default_group_id: null, capacity: 8,
+                    active_from: '2026-09-01', active_until: '2026-09-01',
+                  }],
+                  error: null,
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+            insert: vi.fn((rows: Array<Record<string, unknown>>) => ({
+              select: vi.fn().mockResolvedValue({
+                data: rows.map((r, i) => ({ ...r, id: `session-${i}` })),
+                error: null,
+              }),
+            })),
+          }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: true, data: undefined })
+    expect(fromCalls).not.toContain('children')
+    expect(fromCalls).not.toContain('pool_session_participants')
+  })
+
+  it('skips participant insert when the default group has no enrolled children', async () => {
+    const fromCalls: string[] = []
+    const client = {
+      from: vi.fn((table: string) => {
+        fromCalls.push(table)
+        if (table === 'pool_schedule_patterns') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({
+                  data: [{
+                    id: 'pattern-1', kindergarten_id: 'kg-1', trainer_user_id: 'user-1',
+                    weekday: 2, start_time: '10:00:00', end_time: '11:00:00',
+                    default_group_id: 'group-1', capacity: 8,
+                    active_from: '2026-09-01', active_until: '2026-09-01',
+                  }],
+                  error: null,
+                }),
+              }),
+            }),
+          }
+        }
+        if (table === 'pool_sessions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+            insert: vi.fn((rows: Array<Record<string, unknown>>) => ({
+              select: vi.fn().mockResolvedValue({
+                data: rows.map((r, i) => ({ ...r, id: `session-${i}` })),
+                error: null,
+              }),
+            })),
+          }
+        }
+        if (table === 'children') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  eq: vi.fn().mockReturnValue({
+                    is: vi.fn().mockResolvedValue({ data: [], error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }
+        }
+        throw new Error(`unexpected table ${table}`)
+      }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+
+    const result = await generateMissingSessions(client, 'kg-1', new Date('2026-09-01T00:00:00Z'))
+    expect(result).toEqual({ success: true, data: undefined })
+    expect(fromCalls).toContain('children')
+    expect(fromCalls).not.toContain('pool_session_participants')
   })
 })
 
