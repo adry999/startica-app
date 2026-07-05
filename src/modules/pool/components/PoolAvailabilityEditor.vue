@@ -7,10 +7,10 @@ const props = defineProps<{ kindergartenId: string; trainerUserId: string; canEd
 
 const { t } = useI18n()
 const toast = useToast()
-const { availability, loading, fetchAvailability, addAvailability, removeAvailability } = usePool()
+const { availability, loading, error, fetchAvailability, addAvailability, removeAvailability } = usePool()
 
 useLazyAsyncData(
-  `pool-availability-${props.trainerUserId}`,
+  `pool-availability-${props.kindergartenId}-${props.trainerUserId}`,
   () => fetchAvailability(props.kindergartenId, props.trainerUserId),
 )
 
@@ -49,6 +49,8 @@ async function onAddSubmit(event: FormSubmitEvent<TrainerAvailabilityInput>) {
         {{ t('pool.availability.add') }}
       </UButton>
     </div>
+
+    <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <div v-if="loading" class="text-sm text-slate-400">…</div>
     <div v-else-if="availability.length === 0" class="text-sm text-slate-400">{{ t('pool.availability.empty') }}</div>

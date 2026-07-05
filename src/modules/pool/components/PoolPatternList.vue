@@ -15,7 +15,7 @@ const toast = useToast()
 const { patterns, loading, error, fetchPatterns, createPattern, deletePattern } = usePool()
 
 useLazyAsyncData(
-  `pool-patterns-${props.trainerUserId}`,
+  `pool-patterns-${props.kindergartenId}-${props.trainerUserId}`,
   () => fetchPatterns(props.kindergartenId, props.trainerUserId),
 )
 
@@ -64,6 +64,8 @@ async function onAddSubmit(event: FormSubmitEvent<SchedulePatternInput>) {
         {{ t('pool.pattern.add') }}
       </UButton>
     </div>
+
+    <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <div v-if="loading" class="text-sm text-slate-400">…</div>
     <div v-else-if="patterns.length === 0" class="text-sm text-slate-400">{{ t('pool.pattern.empty') }}</div>
