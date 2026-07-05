@@ -156,4 +156,32 @@ describe('usePermissions — pool/payroll', () => {
     expect(usePermissions().payrollScope()).toBe('own')
     expect(usePermissions().payrollScope('ALL')).toBe('own')
   })
+
+  it('canManagePoolTrainer: admin and super_admin bypass the trainer-identity check', () => {
+    setUserRole('admin')
+    expect(usePermissions().canManagePoolTrainer('kg-1', 'someone-else')).toBe(true)
+    setUserRole('super_admin')
+    expect(usePermissions().canManagePoolTrainer('kg-1', 'someone-else')).toBe(true)
+  })
+
+  it('canManagePoolTrainer: educator with a pool grant manages only their own schedule', () => {
+    setUser('educator', [{ kindergartenId: 'kg-1', moduleKey: 'pool' }])
+    const { canManagePoolTrainer } = usePermissions()
+    expect(canManagePoolTrainer('kg-1', 'user-1')).toBe(true)
+    expect(canManagePoolTrainer('kg-1', 'other-user')).toBe(false)
+  })
+
+  it('canManagePoolTrainer: educator without a pool grant is denied even for their own id', () => {
+    setUser('educator', [])
+    expect(usePermissions().canManagePoolTrainer('kg-1', 'user-1')).toBe(false)
+  })
+
+  it('canManagePoolTrainer: grant on another kindergarten does not carry over', () => {
+    setUser('educator', [{ kindergartenId: 'kg-2', moduleKey: 'pool' }])
+    expect(usePermissions().canManagePoolTrainer('kg-1', 'user-1')).toBe(false)
+  })
+
+  it('canManagePoolTrainer: denied when no user is logged in', () => {
+    expect(usePermissions().canManagePoolTrainer('kg-1', 'user-1')).toBe(false)
+  })
 })

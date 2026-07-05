@@ -34,6 +34,7 @@ export default defineNuxtConfig({
       '~/modules/groups/components',
       '~/modules/staff/components',
       '~/modules/settings/components',
+      '~/modules/pool/components',
     ],
   },
 
@@ -55,6 +56,8 @@ export default defineNuxtConfig({
       'modules/staff/stores',
       'modules/settings/composables',
       'modules/settings/stores',
+      'modules/pool/composables',
+      'modules/pool/stores',
     ],
   },
 

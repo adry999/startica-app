@@ -59,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
 
       this.loading = false
       this.user = toAuthUser(profileResult.data)
-      await this.loadModuleGrants(profileResult.data.id)
+      await this.loadModuleGrants(profileResult.data.id, client)
       return true
     },
 
@@ -87,11 +87,13 @@ export const useAuthStore = defineStore('auth', {
       }
 
       this.user = toAuthUser(profileResult.data)
-      await this.loadModuleGrants(profileResult.data.id)
+      await this.loadModuleGrants(profileResult.data.id, client)
     },
 
-    async loadModuleGrants(userId: string) {
-      const client = useSupabaseClient()
+    // The client must be captured by the caller BEFORE any await: on SSR,
+    // calling useSupabaseClient() after an await point loses the Nuxt
+    // instance (useRequestEvent throws "composable called outside ...").
+    async loadModuleGrants(userId: string, client: ReturnType<typeof useSupabaseClient> = useSupabaseClient()) {
       const result = await listUserModuleGrants(client, userId)
       this.moduleGrants = result.success ? result.data : []
     },

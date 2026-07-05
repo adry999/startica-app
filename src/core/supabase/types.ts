@@ -468,6 +468,339 @@ export type Database = {
           },
         ]
       }
+      pool_schedule_patterns: {
+        Row: {
+          active_from: string
+          active_until: string | null
+          capacity: number
+          created_at: string
+          created_by: string | null
+          default_group_id: string | null
+          deleted_at: string | null
+          end_time: string
+          id: string
+          kindergarten_id: string
+          start_time: string
+          trainer_user_id: string
+          updated_at: string
+          updated_by: string | null
+          weekday: number
+        }
+        Insert: {
+          active_from: string
+          active_until?: string | null
+          capacity: number
+          created_at?: string
+          created_by?: string | null
+          default_group_id?: string | null
+          deleted_at?: string | null
+          end_time: string
+          id?: string
+          kindergarten_id: string
+          start_time: string
+          trainer_user_id: string
+          updated_at?: string
+          updated_by?: string | null
+          weekday: number
+        }
+        Update: {
+          active_from?: string
+          active_until?: string | null
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          default_group_id?: string | null
+          deleted_at?: string | null
+          end_time?: string
+          id?: string
+          kindergarten_id?: string
+          start_time?: string
+          trainer_user_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_schedule_patterns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_schedule_patterns_default_group_id_fkey"
+            columns: ["default_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_schedule_patterns_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_schedule_patterns_trainer_user_id_fkey"
+            columns: ["trainer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_schedule_patterns_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_session_participants: {
+        Row: {
+          child_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          id: string
+          kindergarten_id: string
+          session_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kindergarten_id: string
+          session_id: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          id?: string
+          kindergarten_id?: string
+          session_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_session_participants_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_session_participants_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_session_participants_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_session_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "pool_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_session_participants_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_sessions: {
+        Row: {
+          capacity: number
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          end_time: string
+          group_id: string | null
+          id: string
+          kindergarten_id: string
+          session_date: string
+          source_pattern_id: string | null
+          start_time: string
+          status: string
+          trainer_user_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          capacity: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_time: string
+          group_id?: string | null
+          id?: string
+          kindergarten_id: string
+          session_date: string
+          source_pattern_id?: string | null
+          start_time: string
+          status?: string
+          trainer_user_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          capacity?: number
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_time?: string
+          group_id?: string | null
+          id?: string
+          kindergarten_id?: string
+          session_date?: string
+          source_pattern_id?: string | null
+          start_time?: string
+          status?: string
+          trainer_user_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_sessions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_sessions_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_sessions_source_pattern_id_fkey"
+            columns: ["source_pattern_id"]
+            isOneToOne: false
+            referencedRelation: "pool_schedule_patterns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_sessions_trainer_user_id_fkey"
+            columns: ["trainer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_sessions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_trainer_availability: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          end_time: string
+          id: string
+          kindergarten_id: string
+          start_time: string
+          trainer_user_id: string
+          updated_at: string
+          updated_by: string | null
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_time: string
+          id?: string
+          kindergarten_id: string
+          start_time: string
+          trainer_user_id: string
+          updated_at?: string
+          updated_by?: string | null
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          end_time?: string
+          id?: string
+          kindergarten_id?: string
+          start_time?: string
+          trainer_user_id?: string
+          updated_at?: string
+          updated_by?: string | null
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_trainer_availability_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_trainer_availability_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_trainer_availability_trainer_user_id_fkey"
+            columns: ["trainer_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_trainer_availability_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_kindergartens: {
         Row: {
           created_at: string
