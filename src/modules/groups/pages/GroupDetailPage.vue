@@ -15,20 +15,36 @@ const { fetchByGroup, groupChildren } = useChildren()
 
 const canMutate = computed(() => can('create', 'groups'))
 
-const group = ref<Group | null>(null)
-
-const { pending: groupLoading } = useLazyAsyncData(
+// The group IS the asyncData payload. Assigning it to a separate ref instead
+// loses it on hydration: only the asyncData payload transfers to the client,
+// and because the handler already has cached data it never re-runs, so the
+// local ref stayed null and the page rendered "not found".
+const { data: group, pending: groupLoading, error: groupError } = useLazyAsyncData<Group | null>(
   `group-${props.id}`,
+  () => groupsStore.fetchById(props.id),
+  { watch: [() => props.id] },
+)
+
+// Kept in their own asyncData so a failure here cannot blank the group payload
+// and render the page as "not found" -- which is exactly what happened when
+// all three ran in one handler.
+useLazyAsyncData(
+  `group-children-${props.id}`,
   async () => {
-    group.value = null
-    const g = await groupsStore.fetchById(props.id)
-    if (g) group.value = g
     await fetchByGroup(props.id)
-    // fetch staff after group loads so we have kindergartenId
-    if (g) await staffStore.fetchAll(g.kindergartenId)
     return true
   },
   { watch: [() => props.id] },
+)
+
+useLazyAsyncData(
+  `group-staff-${props.id}`,
+  async () => {
+    // needs kindergartenId, so it waits for the group
+    if (group.value) await staffStore.fetchAll(group.value.kindergartenId)
+    return true
+  },
+  { watch: [group] },
 )
 
 const editOpen  = ref(false)
@@ -153,7 +169,8 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
     </template>
 
     <div v-else class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400">
-      {{ t('groups.notFound') }}
+      <!-- Distinguish a genuine fetch failure from a group that isn't there -->
+      {{ groupError ? groupError.message : t('groups.notFound') }}
     </div>
 
     <!-- Edit modal -->

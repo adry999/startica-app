@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updateChildSchema, type UpdateChildInput } from '~/shared/schemas/children.schema'
 import { createGuardianSchema, updateGuardianSchema, type CreateGuardianInput, type UpdateGuardianInput } from '~/shared/schemas/guardian.schema'
@@ -18,19 +18,18 @@ const { items: guardians, loading: guardiansLoading, error: guardiansError, fetc
 
 const canMutate = computed(() => can('update', 'children'))
 
-const child = ref<Child | null>(null)
-
-// Each callback returns a non-null value: Nuxt treats undefined as "no
-// payload" and refetches on the client, duplicating every request.
-const { pending: childLoading } = useLazyAsyncData(
+// The child IS the asyncData payload. Assigning it to a separate ref instead
+// loses it on hydration: only the asyncData payload transfers to the client,
+// and because the handler already has cached data it never re-runs, so the
+// local ref stayed null and the page rendered "not found".
+const { data: child, pending: childLoading } = useLazyAsyncData<Child | null>(
   `child-${props.id}`,
-  async () => {
-    child.value = await childrenStore.fetchById(props.id)
-    return true
-  },
+  () => childrenStore.fetchById(props.id),
   { watch: [() => props.id] },
 )
 
+// The remaining callbacks return a non-null value: Nuxt treats undefined as
+// "no payload" and refetches on the client, duplicating every request.
 useLazyAsyncData(
   `child-guardians-${props.id}`,
   async () => {
