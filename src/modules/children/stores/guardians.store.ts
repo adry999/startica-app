@@ -18,17 +18,21 @@ export const useGuardiansStore = defineStore('guardians', {
         (data) => { this.items = data },
       )
     },
-    async create(input: Parameters<typeof guardiansSvc.createGuardian>[1]) {
+    // Returns boolean like update/remove below. It used to return undefined on
+    // success, so the caller's `if (ok)` never fired and adding a guardian
+    // showed no confirmation.
+    async create(input: Parameters<typeof guardiansSvc.createGuardian>[1]): Promise<boolean> {
       this.loading = true
       this.error = null
       try {
         const result = await guardiansSvc.createGuardian(useSupabaseClient(), input)
         if (!result.success) {
           this.error = result.error
-          return
+          return false
         }
         this.items.push(result.data)
         this.items.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+        return true
       } finally {
         this.loading = false
       }

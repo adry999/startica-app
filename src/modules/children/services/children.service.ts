@@ -127,7 +127,9 @@ export async function updateChild(
     enrollmentStartDate: 'enrollment_start_date',
   }
 
-  const payload: any = {}
+  // Built by dynamic field-map lookup, so it is keyed as a plain record and
+  // cast at the call site rather than typed as `any`.
+  const payload: Record<string, unknown> = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value
@@ -136,7 +138,7 @@ export async function updateChild(
 
   const { data, error } = await client
     .from('children')
-    .update(payload)
+    .update(payload as Database['public']['Tables']['children']['Update'])
     .eq('id', id)
     .select('*, groups(name)')
     .single()

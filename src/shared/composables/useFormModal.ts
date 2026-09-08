@@ -1,8 +1,10 @@
 import { reactive, ref } from 'vue'
 
-export function useFormModal<T extends Record<string, any>>(template: T) {
+export function useFormModal<T extends Record<string, unknown>>(template: T) {
   const isOpen = ref(false)
-  const state = reactive<any>({})
+  // reactive() unwraps refs in T, which Partial<T> does not model, so the store
+  // is kept loose here and re-typed as Partial<T> on the way out.
+  const state = reactive<Record<string, unknown>>({})
   const loading = ref(false)
 
   return {

@@ -5,8 +5,12 @@ export interface StoreActionContext {
   error: string | null
 }
 
-export function useStoreAction<T = any>(context: StoreActionContext) {
-  return async (
+// The type parameter sits on the returned function rather than the factory, so
+// each call infers its own payload type from `fn`. Binding it to the factory
+// meant a bare `useStoreAction(this)` fixed T to its default for every
+// subsequent call, which is why it used to be `any`.
+export function useStoreAction(context: StoreActionContext) {
+  return async <T>(
     fn: () => Promise<Result<T>>,
     onSuccess?: (data: T) => void,
   ): Promise<boolean> => {

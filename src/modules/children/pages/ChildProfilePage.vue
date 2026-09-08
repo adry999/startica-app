@@ -112,7 +112,6 @@ async function onAddGuardianSubmit(event: FormSubmitEvent<CreateGuardianInput>) 
       childId: props.id,
       kindergartenId: child.value!.kindergartenId,
     })
-    // @ts-ignore — createGuardian return type
     if (ok) {
       toast.add({ title: t('guardians.addSuccess'), color: 'success' })
     } else if (guardiansError.value) {

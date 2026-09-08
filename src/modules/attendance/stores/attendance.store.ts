@@ -3,7 +3,7 @@ import { useSupabaseClient } from '~/core/supabase/client'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import * as attendanceService from '../services/attendance.service'
-import type { AttendanceStatus } from '../services/attendance.service'
+import type { AttendanceRow, AttendanceStatus } from '../services/attendance.service'
 
 interface AttendanceRecord {
   id: string
@@ -14,7 +14,7 @@ interface AttendanceRecord {
   notes: string | null
 }
 
-function toAttendanceRecord(row: any): AttendanceRecord {
+function toAttendanceRecord(row: AttendanceRow): AttendanceRecord {
   return {
     id: row.id,
     childId: row.child_id,

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useAttendance } from '../composables/useAttendance'
+import type { AttendanceStatus } from '../services/attendance.service'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const toast = useToast()
 const tenantStore = useTenantStore()
 const groupsStore = useGroupsStore()
@@ -53,14 +54,14 @@ const summary = computed(() => {
   return stats as { present: number; absent: number; excused: number; sick: number }
 })
 
-async function handleStatusChange(childId: string, status: string) {
+async function handleStatusChange(childId: string, status: AttendanceStatus) {
   if (!selectedKgId.value || !selectedGroupId.value) return
 
   const ok = await markAttendance(
     selectedKgId.value,
     childId,
     selectedDate.value,
-    status as any,
+    status,
     selectedGroupId.value,
   )
 
@@ -71,7 +72,7 @@ async function handleStatusChange(childId: string, status: string) {
   }
 }
 
-async function markAllStatus(status: string) {
+async function markAllStatus(status: AttendanceStatus) {
   if (!selectedKgId.value || !selectedGroupId.value) return
 
   const childIds = groupChildren.value.map(c => c.id)
@@ -83,7 +84,7 @@ async function markAllStatus(status: string) {
       selectedKgId.value,
       childId,
       selectedDate.value,
-      status as any,
+      status,
       selectedGroupId.value,
     )
   }
@@ -91,7 +92,7 @@ async function markAllStatus(status: string) {
   toast.add({ title: t('attendance.markSuccess'), color: 'success' })
 }
 
-const statusOptions = [
+const statusOptions: Array<{ label: string; value: AttendanceStatus; icon: string; color: string }> = [
   { label: t('attendance.status.present'), value: 'present', icon: '✓', color: 'green' },
   { label: t('attendance.status.absent'), value: 'absent', icon: '✗', color: 'red' },
   { label: t('attendance.status.excused'), value: 'excused', icon: '~', color: 'yellow' },
@@ -114,6 +115,8 @@ const statusButtonClasses: Record<string, string> = {
       <h1 class="text-xl font-semibold text-slate-800">{{ t('attendance.pageTitle') }}</h1>
       <p class="mt-0.5 text-sm text-slate-400">{{ t('attendance.pageSubtitle') }}</p>
     </div>
+
+    <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <div class="space-y-4 rounded-xl border border-border bg-white p-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

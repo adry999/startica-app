@@ -2,9 +2,10 @@
 import { ref, computed } from 'vue'
 import { useSupabaseClient } from '~/core/supabase/client'
 import * as settingsService from '../services/settings.service'
-import { uploadKindergartenAvatar, deleteKindergartenAvatar } from '~/core/storage/avatar.service'
+import type { KindergartenSettings } from '../services/settings.service'
+import { uploadKindergartenAvatar } from '~/core/storage/avatar.service'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const toast = useToast()
 const authStore = useAuthStore()
 const tenantStore = useTenantStore()
@@ -82,12 +83,14 @@ async function loadKindergartenSettings() {
     return
   }
 
-  const settings = result.data.settings as any
+  const settings = (result.data.settings ?? {}) as KindergartenSettings
   timezone.value = settings?.timezone ?? 'Europe/Bucharest'
   kgLocale.value = settings?.default_locale === 'en' ? 'en' : 'ro'
   workingHoursStart.value = settings?.working_hours?.start ?? '07:30'
   workingHoursEnd.value = settings?.working_hours?.end ?? '18:00'
-  kindergartenLogoUrl.value = settings?.logo_url ?? null
+  // logo_url is a column on kindergartens, not a key inside the settings jsonb
+  // (updateKindergartenSettings writes payload.logo_url), so read it off the row.
+  kindergartenLogoUrl.value = result.data.logo_url ?? null
 }
 
 async function saveKindergartenSettings() {

@@ -1,11 +1,12 @@
-/* @ts-ignore — Attendance is deferred (Should Have, not V1). Table not yet in schema. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
 
 type Client = SupabaseClient<Database>
-export type AttendanceRow = any // TODO: regenerate types after migration
-export type AttendanceStatus = 'present' | 'absent' | 'excused' | 'sick'
+// The attendance table now exists in the generated types (migration
+// 20260908000001_attendance_schema.sql), so these no longer need to be `any`.
+export type AttendanceRow = Database['public']['Tables']['attendance']['Row']
+export type AttendanceStatus = Database['public']['Enums']['attendance_status']
 
 export async function listByDate(
   client: Client,

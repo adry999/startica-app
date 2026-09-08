@@ -4,6 +4,15 @@ import type { Result } from '~/shared/types/result'
 
 type Client = SupabaseClient<Database>
 type KindergartenRow = Database['public']['Tables']['kindergartens']['Row']
+type KindergartenUpdate = Database['public']['Tables']['kindergartens']['Update']
+
+// kindergartens.settings is a free-form jsonb column; this is the shape the
+// app actually reads and writes.
+export interface KindergartenSettings {
+  timezone?: string
+  default_locale?: 'ro' | 'en'
+  working_hours?: { start: string; end: string }
+}
 
 export async function updateOwnProfile(
   client: Client,
@@ -26,7 +35,7 @@ export async function updateOwnAvatar(
   file: File,
 ): Promise<Result<string>> {
   const fileName = `${userId}/${Date.now()}-${file.name}`
-  const { error, data } = await client.storage
+  const { error } = await client.storage
     .from('avatars')
     .upload(fileName, file, { upsert: true })
 
@@ -81,8 +90,8 @@ export async function updateKindergartenSettings(
     logoUrl?: string
   },
 ): Promise<Result<KindergartenRow>> {
-  const payload: any = {}
-  const settings: any = {}
+  const payload: KindergartenUpdate = {}
+  const settings: KindergartenSettings = {}
 
   if (input.timezone) settings.timezone = input.timezone
   if (input.defaultLocale) settings.default_locale = input.defaultLocale
@@ -93,7 +102,7 @@ export async function updateKindergartenSettings(
     }
   }
 
-  if (Object.keys(settings).length > 0) payload.settings = settings
+  if (Object.keys(settings).length > 0) payload.settings = settings as KindergartenUpdate['settings']
   if (input.logoUrl) payload.logo_url = input.logoUrl
   payload.updated_by = userId
 

@@ -123,7 +123,9 @@ export async function updateGroup(
     capacity: 'capacity',
   }
 
-  const payload: any = {}
+  // Built by dynamic field-map lookup, so it is keyed as a plain record and
+  // cast at the call site rather than typed as `any`.
+  const payload: Record<string, unknown> = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value
@@ -132,7 +134,7 @@ export async function updateGroup(
 
   const { data, error } = await client
     .from('groups')
-    .update(payload)
+    .update(payload as Database['public']['Tables']['groups']['Update'])
     .eq('id', id)
     .select('*, users!educator_id(full_name)')
     .single()

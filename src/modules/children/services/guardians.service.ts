@@ -99,7 +99,9 @@ export async function updateGuardian(
     notes: 'notes',
   }
 
-  const payload: any = {}
+  // Built by dynamic field-map lookup, so it is keyed as a plain record and
+  // cast at the call site rather than typed as `any`.
+  const payload: Record<string, unknown> = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value
@@ -108,7 +110,7 @@ export async function updateGuardian(
 
   const { data, error } = await client
     .from('guardians')
-    .update(payload)
+    .update(payload as Database['public']['Tables']['guardians']['Update'])
     .eq('id', id)
     .select('*')
     .single()
