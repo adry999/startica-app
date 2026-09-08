@@ -18,7 +18,7 @@ export function useFormModal<T extends Record<string, any>>(template: T): FormMo
   return {
     get isOpen() { return isOpen.value },
     set isOpen(v) { isOpen.value = v },
-    state,
+    state: state as Partial<T>,
     get loading() { return loading.value },
     set loading(v) { loading.value = v },
     open(data?: T) {
@@ -34,7 +34,7 @@ export function useFormModal<T extends Record<string, any>>(template: T): FormMo
     async submit<R>(fn: (data: Partial<T>) => Promise<R>) {
       loading.value = true
       try {
-        return await fn(state)
+        return await fn(state as Partial<T>)
       } finally {
         loading.value = false
       }

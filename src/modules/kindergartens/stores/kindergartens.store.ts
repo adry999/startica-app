@@ -62,33 +62,49 @@ export const useKindergartensStore = defineStore('kindergartens', {
     },
 
     async create(details: DetailsInput) {
+      const authStore = useAuthStore()
+      const actorId = authStore.user?.id
+      if (!actorId) return false
+
       const withLoading = useStoreAction(this)
       return withLoading(
-        () => kindergartensService.createKindergarten(useSupabaseClient(), details),
+        () => kindergartensService.createKindergarten(useSupabaseClient(), details, actorId),
         (data) => { this.items.push(toKindergarten(data)) },
       )
     },
 
     async updateDetails(id: string, details: DetailsInput) {
+      const authStore = useAuthStore()
+      const actorId = authStore.user?.id
+      if (!actorId) return false
+
       const withLoading = useStoreAction(this)
       return withLoading(
-        () => kindergartensService.updateKindergartenDetails(useSupabaseClient(), id, details),
+        () => kindergartensService.updateKindergartenDetails(useSupabaseClient(), id, details, actorId),
         (data) => { this.replaceItem(toKindergarten(data)) },
       )
     },
 
     async updateSettings(id: string, settings: SettingsInput) {
+      const authStore = useAuthStore()
+      const actorId = authStore.user?.id
+      if (!actorId) return false
+
       const withLoading = useStoreAction(this)
       return withLoading(
-        () => kindergartensService.updateKindergartenSettings(useSupabaseClient(), id, settings),
+        () => kindergartensService.updateKindergartenSettings(useSupabaseClient(), id, settings, actorId),
         (data) => { this.replaceItem(toKindergarten(data)) },
       )
     },
 
     async setStatus(id: string, status: KindergartenStatus) {
+      const authStore = useAuthStore()
+      const actorId = authStore.user?.id
+      if (!actorId) return false
+
       const withLoading = useStoreAction(this)
       return withLoading(
-        () => kindergartensService.setKindergartenStatus(useSupabaseClient(), id, status),
+        () => kindergartensService.setKindergartenStatus(useSupabaseClient(), id, status, actorId),
         (data) => { this.replaceItem(toKindergarten(data)) },
       )
     },
