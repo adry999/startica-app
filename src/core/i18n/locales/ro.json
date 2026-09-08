@@ -402,7 +402,11 @@
     "sendResetEmail": "Trimite email de resetare",
     "resetSent": "Email de resetare trimis.",
     "languageSection": "Limbă interfață",
-    "languageHint": "Alege limba în care este afișată aplicația."
+    "languageHint": "Alege limba în care este afișată aplicația.",
+    "kindergartenLogo": "Logo grădiniță",
+    "kindergartenLogoDescription": "Încarcă un logo sau imagine pentru grădiniță.",
+    "kindergartenAvatarUploadSuccess": "Logo grădiniță actualizat.",
+    "kindergartenAvatarUploadError": "Eroare la încărcare logo."
   },
   "guardians": {
     "title": "Contacte tutori",

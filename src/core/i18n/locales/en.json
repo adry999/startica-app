@@ -402,7 +402,11 @@
     "sendResetEmail": "Send reset email",
     "resetSent": "Reset email sent.",
     "languageSection": "Interface Language",
-    "languageHint": "Choose the language in which the application is displayed."
+    "languageHint": "Choose the language in which the application is displayed.",
+    "kindergartenLogo": "Kindergarten Logo",
+    "kindergartenLogoDescription": "Upload a logo or image for your kindergarten.",
+    "kindergartenAvatarUploadSuccess": "Kindergarten logo updated.",
+    "kindergartenAvatarUploadError": "Logo upload failed."
   },
   "guardians": {
     "title": "Guardian Contacts",

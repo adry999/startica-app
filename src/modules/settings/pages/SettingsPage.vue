@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useSupabaseClient } from '~/core/supabase/client'
 import * as settingsService from '../services/settings.service'
+import { uploadKindergartenAvatar, deleteKindergartenAvatar } from '~/core/storage/avatar.service'
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -17,11 +18,13 @@ const saving = ref(false)
 const sending = ref(false)
 const loadingKg = ref(false)
 const savingKg = ref(false)
+const uploadingKgAvatar = ref(false)
 
 const timezone = ref('Europe/Bucharest')
 const kgLocale = ref<'ro' | 'en'>('ro')
 const workingHoursStart = ref('07:30')
 const workingHoursEnd = ref('18:00')
+const kindergartenLogoUrl = ref<string | null>(null)
 
 const navItems = [
   { key: 'profile' as Section, icon: 'i-heroicons-user-circle', labelKey: 'settings.profileSection' },
@@ -84,6 +87,7 @@ async function loadKindergartenSettings() {
   kgLocale.value = settings?.default_locale === 'en' ? 'en' : 'ro'
   workingHoursStart.value = settings?.working_hours?.start ?? '07:30'
   workingHoursEnd.value = settings?.working_hours?.end ?? '18:00'
+  kindergartenLogoUrl.value = settings?.logo_url ?? null
 }
 
 async function saveKindergartenSettings() {
@@ -108,6 +112,36 @@ async function saveKindergartenSettings() {
   }
 
   toast.add({ title: t('settings.saveSuccess'), color: 'success' })
+}
+
+async function handleKindergartenAvatarUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.[0] || !selectedKgId.value) return
+
+  const file = input.files[0]
+  uploadingKgAvatar.value = true
+  const result = await uploadKindergartenAvatar(client, selectedKgId.value, file)
+  uploadingKgAvatar.value = false
+
+  if (!result.success) {
+    toast.add({ title: t('settings.kindergartenAvatarUploadError'), color: 'error' })
+    return
+  }
+
+  kindergartenLogoUrl.value = result.url || null
+  await settingsService.updateKindergartenSettings(
+    client,
+    selectedKgId.value,
+    authStore.user?.id || '',
+    {
+      timezone: timezone.value,
+      defaultLocale: kgLocale.value,
+      workingHoursStart: workingHoursStart.value,
+      workingHoursEnd: workingHoursEnd.value,
+      logoUrl: result.url,
+    },
+  )
+  toast.add({ title: t('settings.kindergartenAvatarUploadSuccess'), color: 'success' })
 }
 
 async function sendPasswordReset() {
@@ -286,9 +320,45 @@ watch(activeSection, (newSection) => {
             <div v-if="loadingKg" class="flex justify-center py-8">
               <UIcon name="i-heroicons-spinner" class="animate-spin h-5 w-5 text-teal-600" />
             </div>
-            <div v-else class="grid grid-cols-1 gap-5 max-w-lg">
-              <div>
-                <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.timezone') }}</label>
+            <div v-else class="space-y-6">
+              <!-- Avatar section -->
+              <div class="flex items-center gap-4 pb-6 border-b border-border">
+                <div class="relative">
+                  <img
+                    v-if="kindergartenLogoUrl"
+                    :src="kindergartenLogoUrl"
+                    alt="Kindergarten logo"
+                    class="inline-flex h-16 w-16 shrink-0 rounded-lg object-cover ring-4 ring-teal-50"
+                  />
+                  <div
+                    v-else
+                    class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-sm font-semibold text-slate-400 ring-4 ring-teal-50"
+                  >
+                    <UIcon name="i-heroicons-building-library" class="h-6 w-6" />
+                  </div>
+                  <label class="absolute bottom-0 right-0 cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleKindergartenAvatarUpload"
+                      :disabled="uploadingKgAvatar"
+                    />
+                    <div class="rounded-full bg-teal-600 p-1.5 text-white hover:bg-teal-700">
+                      <UIcon name="i-heroicons-camera" class="h-3.5 w-3.5" />
+                    </div>
+                  </label>
+                </div>
+                <div>
+                  <p class="font-semibold text-slate-800">{{ t('settings.kindergartenLogo') }}</p>
+                  <p class="text-sm text-slate-400">{{ t('settings.kindergartenLogoDescription') }}</p>
+                </div>
+              </div>
+
+              <!-- Settings fields -->
+              <div class="grid grid-cols-1 gap-5 max-w-lg">
+                <div>
+                  <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.timezone') }}</label>
                 <USelect
                   v-model="timezone"
                   :options="[
@@ -319,6 +389,7 @@ watch(activeSection, (newSection) => {
                   <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.workingHoursEnd') }}</label>
                   <UInput v-model="workingHoursEnd" type="time" class="w-full" />
                 </div>
+              </div>
               </div>
             </div>
           </div>

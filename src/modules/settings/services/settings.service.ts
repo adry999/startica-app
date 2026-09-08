@@ -78,6 +78,7 @@ export async function updateKindergartenSettings(
     defaultLocale?: 'ro' | 'en'
     workingHoursStart?: string
     workingHoursEnd?: string
+    logoUrl?: string
   },
 ): Promise<Result<KindergartenRow>> {
   const payload: any = {}
@@ -93,6 +94,7 @@ export async function updateKindergartenSettings(
   }
 
   if (Object.keys(settings).length > 0) payload.settings = settings
+  if (input.logoUrl) payload.logo_url = input.logoUrl
   payload.updated_by = userId
 
   const { data, error } = await client
