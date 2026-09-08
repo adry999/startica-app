@@ -429,5 +429,31 @@
     "empty": "No guardians added.",
     "confirmRemoveTitle": "Remove guardian?",
     "confirmRemoveBody": "The guardian will be removed from the child's profile."
+  },
+  "attendance": {
+    "pageTitle": "Attendance",
+    "pageSubtitle": "Mark daily attendance for children.",
+    "date": "Date",
+    "group": "Group",
+    "markAll": "Mark All",
+    "markPresent": "Mark Present",
+    "markAbsent": "Mark Absent",
+    "markExcused": "Mark Excused",
+    "markSick": "Mark Sick",
+    "status": {
+      "present": "Present",
+      "absent": "Absent",
+      "excused": "Excused",
+      "sick": "Sick"
+    },
+    "summary": "Summary",
+    "present": "Present",
+    "absent": "Absent",
+    "excused": "Excused",
+    "sick": "Sick",
+    "markSuccess": "Attendance marked.",
+    "markError": "Failed to mark attendance.",
+    "noRecords": "No attendance records for this date.",
+    "notes": "Notes (optional)"
   }
 }

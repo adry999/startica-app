@@ -429,5 +429,31 @@
     "empty": "Niciun tutore adăugat.",
     "confirmRemoveTitle": "Elimină tutorele?",
     "confirmRemoveBody": "Tutorele va fi eliminat din profilul copilului."
+  },
+  "attendance": {
+    "pageTitle": "Prezență",
+    "pageSubtitle": "Marcați prezența zilnică a copiilor.",
+    "date": "Data",
+    "group": "Grupă",
+    "markAll": "Marchează pe toți",
+    "markPresent": "Marchează prezent",
+    "markAbsent": "Marchează absent",
+    "markExcused": "Marchează scuzat",
+    "markSick": "Marchează bolnav",
+    "status": {
+      "present": "Prezent",
+      "absent": "Absent",
+      "excused": "Scuzat",
+      "sick": "Bolnav"
+    },
+    "summary": "Rezumat",
+    "present": "Prezenți",
+    "absent": "Absenți",
+    "excused": "Scuzați",
+    "sick": "Bolnavi",
+    "markSuccess": "Prezența marcată.",
+    "markError": "Eroare la marcarea prezenței.",
+    "noRecords": "Nicio înregistrare de prezență pentru această dată.",
+    "notes": "Note (opțional)"
   }
 }
