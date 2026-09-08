@@ -59,10 +59,10 @@ async function onLogout() {
 <template>
   <div class="flex min-h-screen bg-app-bg font-sans">
     <!-- ── Sidebar ──────────────────────────────────────────────────────── -->
-    <aside class="flex w-64 shrink-0 flex-col bg-sidebar-bg">
+    <aside class="flex w-64 shrink-0 flex-col bg-sidebar-bg" role="navigation" aria-label="Sidebar">
       <!-- Logo -->
       <div class="flex items-center gap-3 px-5 py-5">
-        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-500">
+        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-teal-500" aria-hidden="true">
           <span class="text-sm font-bold text-white">S</span>
         </div>
         <div class="min-w-0">
@@ -72,19 +72,20 @@ async function onLogout() {
       </div>
 
       <!-- Primary nav -->
-      <nav class="flex-1 space-y-0.5 px-3 py-1">
+      <nav class="flex-1 space-y-0.5 px-3 py-1" aria-label="Main navigation">
         <template v-for="item in navItems" :key="item.to">
           <NuxtLink
             v-if="item.enabled"
             :to="item.to"
             class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 transition-colors hover:bg-white/8 hover:text-white/90"
             active-class="bg-white/12 text-white font-semibold"
+            :aria-current="$route.path === item.to ? 'page' : undefined"
           >
-            <UIcon :name="item.icon" class="h-5 w-5 shrink-0" />
+            <UIcon :name="item.icon" class="h-5 w-5 shrink-0" aria-hidden="true" />
             {{ item.label }}
           </NuxtLink>
-          <span v-else class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/20 cursor-default">
-            <UIcon :name="item.icon" class="h-5 w-5 shrink-0" />
+          <span v-else class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/20 cursor-default" role="button" aria-disabled="true" tabindex="-1">
+            <UIcon :name="item.icon" class="h-5 w-5 shrink-0" aria-hidden="true" />
             <span class="flex-1">{{ item.label }}</span>
             <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white/40">{{ t('nav.comingSoon') }}</span>
           </span>
@@ -99,23 +100,24 @@ async function onLogout() {
       </div>
 
       <!-- Bottom: Settings + Logout -->
-      <div class="border-t border-white/10 px-2 py-3 space-y-0.5">
+      <nav class="border-t border-white/10 px-2 py-3 space-y-0.5" aria-label="Secondary navigation">
         <NuxtLink
           to="/settings"
           class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/50 hover:bg-white/5 hover:text-white transition-colors"
           active-class="bg-white/10 text-white"
         >
-          <UIcon name="i-heroicons-cog-6-tooth" class="h-5 w-5 shrink-0" />
+          <UIcon name="i-heroicons-cog-6-tooth" class="h-5 w-5 shrink-0" aria-hidden="true" />
           {{ t('nav.settings') }}
         </NuxtLink>
         <button
           class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-white/50 hover:bg-white/5 hover:text-white transition-colors"
+          :aria-label="t('auth.logout')"
           @click="onLogout"
         >
-          <UIcon name="i-heroicons-arrow-right-on-rectangle" class="h-5 w-5 shrink-0" />
+          <UIcon name="i-heroicons-arrow-right-on-rectangle" class="h-5 w-5 shrink-0" aria-hidden="true" />
           {{ t('auth.logout') }}
         </button>
-      </div>
+      </nav>
     </aside>
 
     <!-- ── Main ─────────────────────────────────────────────────────────── -->
@@ -130,6 +132,7 @@ async function onLogout() {
             :placeholder="t('topbar.searchPlaceholder')"
             size="sm"
             class="w-64"
+            :aria-label="t('topbar.searchPlaceholder')"
             @keydown.enter="onTopbarSearch"
           />
         </div>
@@ -152,7 +155,7 @@ async function onLogout() {
       </header>
 
       <!-- Page content -->
-      <main class="flex-1 overflow-auto p-8">
+      <main class="flex-1 overflow-auto p-8" role="main">
         <div class="mx-auto w-full max-w-[1400px]">
           <slot />
         </div>
