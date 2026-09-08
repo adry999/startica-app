@@ -11,6 +11,9 @@ export const createChildSchema = z.object({
   idType:      z.enum(['CNP', 'IDNP']).nullable().optional(),
   groupId:     z.string().uuid().nullable().optional(),
   kindergartenId: z.string().uuid(),
+  contractNumber: z.string().nullable().optional(),
+  contractSignedAt: z.string().nullable().optional(),
+  enrollmentStartDate: z.string().nullable().optional(),
 })
 export type CreateChildInput = z.infer<typeof createChildSchema>
 
@@ -24,5 +27,8 @@ export const updateChildSchema = z.object({
   nationalId:  z.string().nullable().optional(),
   idType:      z.enum(['CNP', 'IDNP']).nullable().optional(),
   groupId:     z.string().uuid().nullable().optional(),
+  contractNumber: z.string().nullable().optional(),
+  contractSignedAt: z.string().nullable().optional(),
+  enrollmentStartDate: z.string().nullable().optional(),
 })
 export type UpdateChildInput = z.infer<typeof updateChildSchema>

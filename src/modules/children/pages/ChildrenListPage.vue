@@ -22,9 +22,9 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 const canMutate   = computed(() => can('create', 'children'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('children', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
+useLazyAsyncData('children', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
 useLazyAsyncData('children-groups',
-  () => selectedKgId.value !== 'ALL' ? groupsStore.fetchAll(selectedKgId.value) : Promise.resolve(),
+  () => selectedKgId.value ? groupsStore.fetchAll(selectedKgId.value) : Promise.resolve(),
   { watch: [selectedKgId] },
 )
 
@@ -121,7 +121,7 @@ function openAdd() {
   addState.nationalId = null
   addState.idType = null
   addState.groupId = null
-  addState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
+  addState.kindergartenId = selectedKgId.value
   addState.contractNumber = null
   addState.contractSignedAt = null
   addState.enrollmentStartDate = null
@@ -132,7 +132,7 @@ function openAdd() {
 watch(
   () => route.query.add,
   add => {
-    if (add === '1' && canMutate.value && selectedKgId.value !== 'ALL') {
+    if (add === '1' && canMutate.value && selectedKgId.value) {
       openAdd()
       router.replace({ query: { ...route.query, add: undefined } })
     }
@@ -291,7 +291,7 @@ const columns = computed<TableColumn<Child>[]>(() => [
     <!-- Header -->
     <BasePageHeader :title="t('children.pageTitle')" :subtitle="t('children.pageSubtitle')">
       <template #actions>
-        <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openAdd">
+        <UButton v-if="canMutate && selectedKgId" color="primary" @click="openAdd">
           <UIcon name="i-heroicons-user-plus" class="mr-1.5 h-5 w-5" />
           {{ t('children.addTitle') }}
         </UButton>
@@ -302,13 +302,13 @@ const columns = computed<TableColumn<Child>[]>(() => [
     <UAlert v-if="error" color="error" variant="soft" :description="error" class="mb-4" />
 
     <!-- Stat cards -->
-    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-3 gap-4">
+    <div v-if="selectedKgId" class="grid grid-cols-3 gap-4">
       <BaseStatCard :label="t('children.filter.all')" :value="items.length" icon="i-heroicons-academic-cap" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
       <BaseStatCard :label="t('children.filter.enrolled')" :value="enrolledCount" icon="i-heroicons-check-circle" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
       <BaseStatCard :label="t('children.filter.withdrawn')" :value="withdrawnCount" icon="i-heroicons-arrow-right-start-on-rectangle" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
-    <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
+    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">

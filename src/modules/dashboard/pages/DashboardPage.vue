@@ -8,7 +8,7 @@ const { stats, groups, activity, staffOnDuty, loading, error, fetchAll } = useDa
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('dashboard', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
+useLazyAsyncData('dashboard', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
 
 const quickActions = computed(() => {
   const actions = []
@@ -231,7 +231,7 @@ function roleInitials(name: string): string {
         </div>
 
         <p v-else-if="staffOnDuty.length === 0" class="py-10 text-center text-sm text-slate-400">
-          {{ selectedKgId === 'ALL' ? t('staff.selectKindergarten') : t('dashboard.staffOnDutyEmpty') }}
+          {{ t('dashboard.staffOnDutyEmpty') }}
         </p>
 
         <div v-else class="divide-y divide-border">

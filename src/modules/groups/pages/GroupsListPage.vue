@@ -19,10 +19,10 @@ const staffStore = useStaffStore()
 const canMutate = computed(() => can('create', 'groups'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('groups', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
+useLazyAsyncData('groups', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
 useLazyAsyncData(
   'groups-staff',
-  () => selectedKgId.value !== 'ALL' ? staffStore.fetchAll(selectedKgId.value) : Promise.resolve(),
+  () => selectedKgId.value ? staffStore.fetchAll(selectedKgId.value) : Promise.resolve(),
   { watch: [selectedKgId] },
 )
 
@@ -83,7 +83,7 @@ function openCreate() {
   createState.ageRange = null
   createState.educatorId = null
   createState.capacity = null
-  createState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
+  createState.kindergartenId = selectedKgId.value
   createOpen.value = true
 }
 
@@ -144,7 +144,7 @@ async function onArchiveConfirm() {
     <!-- Page header -->
     <BasePageHeader :title="t('groups.pageTitle')" :subtitle="t('groups.pageSubtitle')">
       <template #actions>
-        <UButton v-if="canMutate && selectedKgId !== 'ALL'" color="primary" @click="openCreate">
+        <UButton v-if="canMutate && selectedKgId" color="primary" @click="openCreate">
           <UIcon name="i-heroicons-plus" class="mr-1.5 h-5 w-5" />
           {{ t('groups.createTitle') }}
         </UButton>
@@ -154,14 +154,14 @@ async function onArchiveConfirm() {
     <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <!-- Stats bar -->
-    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
+    <div v-if="selectedKgId" class="grid grid-cols-4 gap-4">
       <BaseStatCard :label="t('groups.stats.totalGroups')" :value="activeItems.length" icon="i-heroicons-user-group" icon-class="bg-teal-50 text-teal-600" :loading="loading" />
       <BaseStatCard :label="t('groups.stats.totalEnrollment')" :value="totalEnrolled" icon="i-heroicons-face-smile" icon-class="bg-brand-yellow/20 text-brand-gold" :loading="loading" />
       <BaseStatCard :label="t('groups.stats.educators')" :value="educatorsCount" icon="i-heroicons-identification" icon-class="bg-brand-sage/20 text-teal-600" :loading="loading" />
       <BaseStatCard :label="t('groups.stats.totalCapacity')" :value="totalCapacity ?? '—'" icon="i-heroicons-chart-pie" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
-    <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
+    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
       <!-- Filter tabs -->

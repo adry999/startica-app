@@ -8,7 +8,7 @@ const { sessions, participants, loading, error, fetchSessions, cancelSession, fe
 const { groupChildren, fetchByGroup } = useChildren()
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
-const canView = computed(() => selectedKgId.value !== 'ALL' && can('view', 'pool', selectedKgId.value))
+const canView = computed(() => selectedKgId.value && can('view', 'pool', selectedKgId.value))
 
 useLazyAsyncData('pool-sessions', () => canView.value ? fetchSessions(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
 

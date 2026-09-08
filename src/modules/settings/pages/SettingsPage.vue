@@ -69,7 +69,7 @@ async function handleAvatarUpload(event: Event) {
 }
 
 async function loadKindergartenSettings() {
-  if (selectedKgId.value === 'ALL') return
+  if (!selectedKgId.value) return
   loadingKg.value = true
   const result = await settingsService.fetchKindergartenSettings(client, selectedKgId.value)
   loadingKg.value = false
@@ -87,7 +87,7 @@ async function loadKindergartenSettings() {
 }
 
 async function saveKindergartenSettings() {
-  if (selectedKgId.value === 'ALL' || !authStore.user) return
+  if (!selectedKgId.value || !authStore.user) return
   savingKg.value = true
   const result = await settingsService.updateKindergartenSettings(
     client,

@@ -9,10 +9,8 @@ const kindergartensStore = useKindergartensStore()
 
 useLazyAsyncData('admin-kindergartens', async () => {
   await kindergartensStore.fetchAll()
-  if (!can('read', 'kindergarten') && tenantStore.selectedKindergartenId === 'ALL') {
-    const first = kindergartensStore.items[0]
-    if (first) tenantStore.selectKindergarten(first.id)
-  }
+  const first = kindergartensStore.items[0]
+  if (first) tenantStore.autoSelectFirst(first.id)
 })
 
 const tenantOptions = computed(() => {
@@ -28,7 +26,7 @@ const tenantOptions = computed(() => {
 
 const selectedKgLabel = computed(() => {
   const id = tenantStore.selectedKindergartenId
-  if (id === 'ALL') return t('tenant.all')
+  if (!id) return '—'
   return kindergartensStore.items.find(k => k.id === id)?.name ?? '—'
 })
 
@@ -140,31 +138,9 @@ async function onLogout() {
           />
         </div>
 
-        <!-- Right: kg selector + user -->
+        <!-- Right: user (kindergarten locked to single) -->
         <div class="flex items-center gap-3">
-          <!-- Kindergarten selector (admin/super-admin with multiple) -->
-          <div
-            v-if="can('read', 'staff') && tenantOptions.length > 1"
-            class="flex items-center gap-2 rounded-lg border border-border bg-app-bg px-3 py-1.5 hover:bg-slate-50 transition-colors"
-          >
-            <UIcon name="i-heroicons-building-office-2" class="h-4 w-4 shrink-0 text-slate-400" />
-            <select
-              :value="tenantStore.selectedKindergartenId"
-              class="max-w-[160px] truncate bg-transparent text-sm font-medium text-slate-700 outline-none cursor-pointer"
-              @change="(e) => tenantStore.selectKindergarten((e.target as HTMLSelectElement).value)"
-            >
-              <option v-for="opt in tenantOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-            </select>
-            <UIcon name="i-heroicons-chevron-down" class="h-3.5 w-3.5 shrink-0 text-slate-400" />
-          </div>
-          <!-- Single kindergarten: just show label -->
-          <div v-else-if="can('read', 'staff') && tenantOptions.length === 1" class="flex items-center gap-2 text-sm text-slate-500">
-            <UIcon name="i-heroicons-building-office-2" class="h-4 w-4 text-slate-400" />
-            <span class="font-medium text-slate-700">{{ selectedKgLabel }}</span>
-          </div>
-
           <!-- Divider -->
-          <div class="h-6 w-px bg-border" />
 
           <!-- User avatar + info -->
           <div class="flex items-center gap-2.5">

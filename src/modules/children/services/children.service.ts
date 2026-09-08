@@ -63,7 +63,7 @@ export async function listChildren(
     .order('last_name')
     .order('first_name')
 
-  if (kindergartenId !== 'ALL') q = q.eq('kindergarten_id', kindergartenId)
+  q = q.eq('kindergarten_id', kindergartenId)
 
   const { data, error } = await q
   if (error) return { success: false, error: error.message }

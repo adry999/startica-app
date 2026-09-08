@@ -7,11 +7,10 @@ export type PermissionResource = 'kindergarten' | 'staff' | 'children' | 'groups
 export function usePermissions() {
   const authStore = useAuthStore()
 
-  // True when the user holds a live grant for one of `keys`. A specific
-  // kindergarten id restricts to that kindergarten; 'ALL'/undefined matches any.
+  // True when the user holds a live grant for one of `keys` in the specified kindergarten.
   function hasGrant(kindergartenId: string | undefined, keys: ModuleKey[]): boolean {
     const grants = authStore.moduleGrants
-    if (kindergartenId && kindergartenId !== 'ALL') {
+    if (kindergartenId) {
       return grants.some((g) => g.kindergartenId === kindergartenId && keys.includes(g.moduleKey))
     }
     return grants.some((g) => keys.includes(g.moduleKey))

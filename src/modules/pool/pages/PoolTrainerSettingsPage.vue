@@ -9,9 +9,9 @@ const { items: groups, fetchAll: fetchGroups } = useGroups()
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 const trainerUserId = computed(() => authStore.user?.id ?? '')
-const canEdit = computed(() => selectedKgId.value !== 'ALL' && canManagePoolTrainer(selectedKgId.value, trainerUserId.value))
+const canEdit = computed(() => selectedKgId.value && canManagePoolTrainer(selectedKgId.value, trainerUserId.value))
 
-useLazyAsyncData('pool-settings-groups', () => selectedKgId.value !== 'ALL' ? fetchGroups(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('pool-settings-groups', () => fetchGroups(selectedKgId.value), { watch: [selectedKgId] })
 
 const groupOptions = computed(() => [
   { label: t('pool.pattern.noGroup'), value: null },
@@ -23,7 +23,7 @@ const groupOptions = computed(() => [
   <div class="space-y-6">
     <BasePageHeader :title="t('pool.pageTitle')" :subtitle="t('pool.settingsTab')" />
 
-    <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
+    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
 
     <template v-else>
       <PoolAvailabilityEditor :kindergarten-id="selectedKgId" :trainer-user-id="trainerUserId" :can-edit="canEdit" />

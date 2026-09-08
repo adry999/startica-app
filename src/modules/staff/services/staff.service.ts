@@ -53,10 +53,16 @@ export async function setStaffStatus(
   client: Client,
   userId: string,
   status: UserStatus,
+  updatedBy?: string,
 ): Promise<Result<UserRow>> {
+  const payload: Database['public']['Tables']['users']['Update'] = {
+    status,
+    ...(updatedBy && { updated_by: updatedBy }),
+  }
+
   const { data, error } = await client
     .from('users')
-    .update({ status })
+    .update(payload)
     .eq('id', userId)
     .select('*')
     .single()

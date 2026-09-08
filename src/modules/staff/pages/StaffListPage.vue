@@ -27,7 +27,7 @@ const router = useRouter()
 
 useLazyAsyncData(
   'staff',
-  () => selectedKgId.value !== 'ALL' ? fetchAll(selectedKgId.value) : Promise.resolve(),
+  () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(),
   { watch: [selectedKgId] },
 )
 
@@ -57,14 +57,14 @@ function openInvite() {
   inviteState.email       = undefined
   inviteState.fullName    = undefined
   inviteState.role        = 'educator'
-  inviteState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
+  inviteState.kindergartenId = selectedKgId.value
   inviteModalOpen.value   = true
 }
 
 watch(
   () => route.query.invite,
   invite => {
-    if (invite === '1' && can('create', 'staff') && selectedKgId.value !== 'ALL') {
+    if (invite === '1' && can('create', 'staff') && selectedKgId.value) {
       openInvite()
       router.replace({ query: { ...route.query, invite: undefined } })
     }
@@ -149,7 +149,7 @@ function openRemoveConfirm(member: StaffMember) {
 }
 
 async function onRemoveConfirm() {
-  if (!removeTarget.value || selectedKgId.value === 'ALL') return
+  if (!removeTarget.value || !selectedKgId.value) return
   const ok = await remove(removeTarget.value.id, selectedKgId.value)
   if (ok) {
     removeModalOpen.value = false
@@ -219,7 +219,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     <BasePageHeader :title="t('staff.pageTitle')" :subtitle="t('staff.pageSubtitle')">
       <template #actions>
         <UButton
-          v-if="can('create', 'staff') && selectedKgId !== 'ALL'"
+          v-if="can('create', 'staff') && selectedKgId"
           color="primary"
           @click="openInvite"
         >
@@ -230,7 +230,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     </BasePageHeader>
 
     <!-- Stat cards — visible only when a specific kindergarten is selected -->
-      <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div v-if="selectedKgId" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <BaseStatCard :label="t('staff.stats.total')" :value="totalStaff" />
       <BaseStatCard :label="t('staff.stats.active')" :value="activeStaff" />
       <BaseStatCard :label="t('staff.stats.inactive')" :value="inactiveStaff" />
@@ -238,7 +238,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     </div>
 
     <!-- Select kindergarten prompt -->
-    <p v-if="selectedKgId === 'ALL'" class="text-sm text-slate-400">
+    <p v-if="!selectedKgId" class="text-sm text-slate-400">
       {{ t('staff.selectKindergarten') }}
     </p>
 

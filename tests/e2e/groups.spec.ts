@@ -63,7 +63,6 @@ test.describe('groups critical flows', () => {
     const timestamp = Date.now()
     const newName = `Updated${timestamp}`
     const nameInput = page.getByLabel(/nume|name/i)
-    await nameInput.triple_click()
     await nameInput.fill(newName)
 
     // Submit

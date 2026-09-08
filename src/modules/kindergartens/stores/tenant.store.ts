@@ -2,12 +2,18 @@ import { defineStore } from 'pinia'
 
 export const useTenantStore = defineStore('tenant', {
   state: () => ({
-    selectedKindergartenId: 'ALL' as string | 'ALL',
+    selectedKindergartenId: null as string | null,
   }),
 
   actions: {
-    selectKindergarten(id: string | 'ALL') {
+    selectKindergarten(id: string) {
       this.selectedKindergartenId = id
+    },
+
+    autoSelectFirst(firstKindergartenId: string) {
+      if (!this.selectedKindergartenId) {
+        this.selectedKindergartenId = firstKindergartenId
+      }
     },
   },
 })

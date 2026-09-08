@@ -984,6 +984,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      anonymize_child: {
+        Args: { p_child_id: string }
+        Returns: void
+      }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]

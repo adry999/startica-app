@@ -35,10 +35,8 @@ export async function listGroups(
     .eq('status', 'enrolled')
     .is('deleted_at', null)
 
-  if (kindergartenId !== 'ALL') {
-    groupsQ = groupsQ.eq('kindergarten_id', kindergartenId)
-    childrenQ = childrenQ.eq('kindergarten_id', kindergartenId)
-  }
+  groupsQ = groupsQ.eq('kindergarten_id', kindergartenId)
+  childrenQ = childrenQ.eq('kindergarten_id', kindergartenId)
 
   const [groupsResult, childrenResult] = await Promise.all([groupsQ, childrenQ])
 

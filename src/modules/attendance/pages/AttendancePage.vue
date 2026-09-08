@@ -14,13 +14,13 @@ const selectedGroupId = ref<string | null>(null)
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 watch(selectedGroupId, async () => {
-  if (selectedGroupId.value && selectedKgId.value !== 'ALL') {
+  if (selectedGroupId.value && selectedKgId.value) {
     await fetchByGroup(selectedGroupId.value, selectedDate.value)
   }
 })
 
 watch(selectedDate, async () => {
-  if (selectedGroupId.value && selectedKgId.value !== 'ALL') {
+  if (selectedGroupId.value && selectedKgId.value) {
     await fetchByGroup(selectedGroupId.value, selectedDate.value)
   }
 })
@@ -54,7 +54,7 @@ const summary = computed(() => {
 })
 
 async function handleStatusChange(childId: string, status: string) {
-  if (!selectedKgId.value || selectedKgId.value === 'ALL' || !selectedGroupId.value) return
+  if (!selectedKgId.value || !selectedGroupId.value) return
 
   const ok = await markAttendance(
     selectedKgId.value,
@@ -72,7 +72,7 @@ async function handleStatusChange(childId: string, status: string) {
 }
 
 async function markAllStatus(status: string) {
-  if (!selectedKgId.value || selectedKgId.value === 'ALL' || !selectedGroupId.value) return
+  if (!selectedKgId.value || !selectedGroupId.value) return
 
   const childIds = groupChildren.value.map(c => c.id)
   if (!childIds.length) return

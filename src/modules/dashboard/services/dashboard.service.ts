@@ -10,39 +10,27 @@ export async function fetchStats(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<DashboardStats>> {
-  const isAll = kindergartenId === 'ALL'
-
   const childrenQuery = client
     .from('children')
     .select('id', { count: 'exact', head: true })
+    .eq('kindergarten_id', kindergartenId)
     .is('deleted_at', null)
     .eq('status', 'enrolled')
 
   const groupsQuery = client
     .from('groups')
     .select('id', { count: 'exact', head: true })
+    .eq('kindergarten_id', kindergartenId)
     .is('deleted_at', null)
     .eq('status', 'active')
 
-  const staffQuery = isAll
-    ? client
-        .from('users')
-        .select('id', { count: 'exact', head: true })
-        .is('deleted_at', null)
-        .eq('status', 'active')
-        .neq('role', STAFF_EXCLUDED_ROLES[0])
-    : client
-        .from('users')
-        .select('id, user_kindergartens!inner(kindergarten_id)', { count: 'exact', head: true })
-        .eq('user_kindergartens.kindergarten_id', kindergartenId)
-        .eq('status', 'active')
-        .is('deleted_at', null)
-        .neq('role', STAFF_EXCLUDED_ROLES[0])
-
-  if (!isAll) {
-    childrenQuery.eq('kindergarten_id', kindergartenId)
-    groupsQuery.eq('kindergarten_id', kindergartenId)
-  }
+  const staffQuery = client
+    .from('users')
+    .select('id, user_kindergartens!inner(kindergarten_id)', { count: 'exact', head: true })
+    .eq('user_kindergartens.kindergarten_id', kindergartenId)
+    .eq('status', 'active')
+    .is('deleted_at', null)
+    .neq('role', STAFF_EXCLUDED_ROLES[0])
 
   const [childrenRes, groupsRes, staffRes] = await Promise.all([childrenQuery, groupsQuery, staffQuery])
 
@@ -64,11 +52,10 @@ export async function fetchActiveGroups(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<GroupSummary[]>> {
-  const isAll = kindergartenId === 'ALL'
-
   const groupsQuery = client
     .from('groups')
     .select('id, name, age_range, users!educator_id(full_name)')
+    .eq('kindergarten_id', kindergartenId)
     .eq('status', 'active')
     .is('deleted_at', null)
     .order('name')
@@ -77,14 +64,10 @@ export async function fetchActiveGroups(
   const childrenQuery = client
     .from('children')
     .select('group_id', { count: 'exact' })
+    .eq('kindergarten_id', kindergartenId)
     .eq('status', 'enrolled')
     .is('deleted_at', null)
     .not('group_id', 'is', null)
-
-  if (!isAll) {
-    groupsQuery.eq('kindergarten_id', kindergartenId)
-    childrenQuery.eq('kindergarten_id', kindergartenId)
-  }
 
   const [groupsRes, childrenRes] = await Promise.all([groupsQuery, childrenQuery])
 
@@ -116,12 +99,9 @@ export async function fetchRecentActivity(
   const query = client
     .from('audit_logs')
     .select('id, action, entity, entity_id, created_at, users!audit_logs_user_id_fkey(full_name)')
+    .eq('kindergarten_id', kindergartenId)
     .order('created_at', { ascending: false })
     .limit(8)
-
-  if (kindergartenId !== 'ALL') {
-    query.eq('kindergarten_id', kindergartenId)
-  }
 
   const { data, error } = await query
 
@@ -144,8 +124,6 @@ export async function fetchStaffOnDuty(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<StaffDuty[]>> {
-  if (kindergartenId === 'ALL') return { success: true, data: [] }
-
   const { data, error } = await client
     .from('users')
     .select('id, full_name, role, user_kindergartens!inner(kindergarten_id)')
