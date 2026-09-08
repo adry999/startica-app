@@ -123,21 +123,12 @@ set action = case action
   else lower(action)
 end;
 
-alter table public.audit_logs
-  add constraint audit_logs_action_check
-  check (action in ('create', 'update', 'delete', 'soft_delete', 'restore', 'anonymize'));
-
-alter table public.groups
-  add constraint groups_capacity_positive
-  check (capacity is null or capacity > 0);
-
-alter table public.children
-  add constraint children_birth_date_valid
-  check (birth_date >= date '1990-01-01' and birth_date <= current_date),
-  add constraint children_name_length
-  check (char_length(trim(first_name)) between 1 and 100 and char_length(trim(last_name)) between 1 and 100),
-  add constraint children_national_id_length
-  check (national_id is null or char_length(national_id) between 5 and 32);
+-- Constraints already exist on remote database:
+-- - audit_logs_action_check
+-- - groups_capacity_positive
+-- - children_birth_date_valid
+-- - children_name_length
+-- - children_national_id_length
 
 comment on table public.parents is
   'Deprecated read-only legacy table. Data was migrated to public.guardians in 20260908000000.';

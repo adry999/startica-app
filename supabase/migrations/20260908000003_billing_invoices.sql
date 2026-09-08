@@ -37,7 +37,7 @@ create policy "invoices_delete" on invoices for delete
 
 -- Auto-update trigger
 create trigger update_invoices_updated_at before update on invoices
-  for each row execute function update_updated_at_column();
+  for each row execute function fn_update_timestamp();
 
 -- Indexes
 create index idx_invoices_kg_date on invoices(kindergarten_id, due_date) where deleted_at is null;

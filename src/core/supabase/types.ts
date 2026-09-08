@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -34,6 +39,97 @@ export type Database = {
   }
   public: {
     Tables: {
+      attendance: {
+        Row: {
+          child_id: string
+          created_at: string
+          created_by: string
+          date: string
+          deleted_at: string | null
+          group_id: string | null
+          id: string
+          kindergarten_id: string
+          marked_by: string
+          notes: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          created_by: string
+          date: string
+          deleted_at?: string | null
+          group_id?: string | null
+          id?: string
+          kindergarten_id: string
+          marked_by: string
+          notes?: string | null
+          status: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          created_by?: string
+          date?: string
+          deleted_at?: string | null
+          group_id?: string | null
+          id?: string
+          kindergarten_id?: string
+          marked_by?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["attendance_status"]
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -85,9 +181,12 @@ export type Database = {
           birth_date: string
           blood_group: string | null
           consent: Json
+          contract_number: string | null
+          contract_signed_at: string | null
           created_at: string
           created_by: string | null
           deleted_at: string | null
+          enrollment_start_date: string | null
           first_name: string
           group_id: string | null
           id: string
@@ -106,9 +205,12 @@ export type Database = {
           birth_date: string
           blood_group?: string | null
           consent?: Json
+          contract_number?: string | null
+          contract_signed_at?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          enrollment_start_date?: string | null
           first_name: string
           group_id?: string | null
           id?: string
@@ -127,9 +229,12 @@ export type Database = {
           birth_date?: string
           blood_group?: string | null
           consent?: Json
+          contract_number?: string | null
+          contract_signed_at?: string | null
           created_at?: string
           created_by?: string | null
           deleted_at?: string | null
+          enrollment_start_date?: string | null
           first_name?: string
           group_id?: string | null
           id?: string
@@ -324,6 +429,83 @@ export type Database = {
           },
           {
             foreignKeyName: "guardians_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          child_id: string
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          due_date: string
+          id: string
+          kindergarten_id: string
+          notes: string | null
+          paid_at: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          amount: number
+          child_id: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          due_date: string
+          id?: string
+          kindergarten_id: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          amount?: number
+          child_id?: string
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          due_date?: string
+          id?: string
+          kindergarten_id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
@@ -984,10 +1166,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      anonymize_child: {
-        Args: { p_child_id: string }
-        Returns: void
-      }
+      anonymize_child: { Args: { p_child_id: string }; Returns: undefined }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
@@ -996,8 +1175,10 @@ export type Database = {
       user_kindergarten_ids: { Args: never; Returns: string[] }
     }
     Enums: {
+      attendance_status: "present" | "absent" | "excused" | "sick"
       child_status: "enrolled" | "withdrawn" | "graduated"
       group_status: "active" | "archived"
+      invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
       kindergarten_status: "active" | "suspended"
       national_id_type: "CNP" | "IDNP"
       user_role: "super_admin" | "admin" | "educator" | "parent" | "child"
@@ -1017,12 +1198,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1046,11 +1227,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1071,11 +1252,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1096,11 +1277,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1113,11 +1294,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1132,8 +1313,10 @@ export const Constants = {
   },
   public: {
     Enums: {
+      attendance_status: ["present", "absent", "excused", "sick"],
       child_status: ["enrolled", "withdrawn", "graduated"],
       group_status: ["active", "archived"],
+      invoice_status: ["draft", "issued", "paid", "overdue", "cancelled"],
       kindergarten_status: ["active", "suspended"],
       national_id_type: ["CNP", "IDNP"],
       user_role: ["super_admin", "admin", "educator", "parent", "child"],
@@ -1141,4 +1324,3 @@ export const Constants = {
     },
   },
 } as const
-

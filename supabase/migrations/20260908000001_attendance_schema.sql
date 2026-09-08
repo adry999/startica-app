@@ -62,7 +62,7 @@ create policy attendance_update_own_kindergarten on attendance
 create trigger trg_attendance_audit_log
   after delete on attendance
   for each row
-  execute function fn_audit_log_soft_delete('attendance');
+  execute function fn_audit_log_soft_delete();
 
 -- Update trigger for updated_at
 create trigger trg_attendance_updated_at
