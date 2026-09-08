@@ -41,7 +41,7 @@ const groupChildren = computed(() => {
 })
 
 const summary = computed(() => {
-  const stats = {
+  const stats: Record<string, number> = {
     present: 0,
     absent: 0,
     excused: 0,
@@ -50,7 +50,7 @@ const summary = computed(() => {
   records.value.forEach(r => {
     if (r.status in stats) stats[r.status]++
   })
-  return stats
+  return stats as { present: number; absent: number; excused: number; sick: number }
 })
 
 async function handleStatusChange(childId: string, status: string) {

@@ -3,8 +3,8 @@ import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
 
 type Client = SupabaseClient<Database>
-export type AttendanceRow = Database['public']['Tables']['attendance']['Row']
-export type AttendanceStatus = Database['public']['Enums']['attendance_status']
+export type AttendanceRow = any // TODO: regenerate types after migration
+export type AttendanceStatus = 'present' | 'absent' | 'excused' | 'sick'
 
 export async function listByDate(
   client: Client,
