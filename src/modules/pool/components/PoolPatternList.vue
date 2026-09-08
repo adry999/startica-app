@@ -16,7 +16,10 @@ const { patterns, loading, error, fetchPatterns, createPattern, deletePattern } 
 
 useLazyAsyncData(
   `pool-patterns-${props.kindergartenId}-${props.trainerUserId}`,
-  () => fetchPatterns(props.kindergartenId, props.trainerUserId),
+  async () => {
+    await fetchPatterns(props.kindergartenId, props.trainerUserId)
+    return true
+  },
 )
 
 const weekdayOptions = [0, 1, 2, 3, 4, 5, 6].map(d => ({ label: t(`pool.weekday.${d}`), value: d }))

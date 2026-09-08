@@ -27,7 +27,7 @@ const router = useRouter()
 
 useLazyAsyncData(
   'staff',
-  async () => { selectedKgId.value && await fetchAll(selectedKgId.value) },
+  async () => { if (selectedKgId.value) await fetchAll(selectedKgId.value); return true },
   { watch: [selectedKgId] },
 )
 

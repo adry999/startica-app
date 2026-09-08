@@ -153,9 +153,10 @@ const createForm = ref(emptyExpenseForm())
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData('expenses', async () => {
-  if (!selectedKgId.value) return Promise.resolve()
+  if (!selectedKgId.value) return true
   await fetchAll(selectedKgId.value)
   await fetchSummary(selectedKgId.value)
+  return true
 }, { watch: [selectedKgId] })
 
 function formatCurrency(amount: number): string {

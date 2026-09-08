@@ -29,17 +29,24 @@ export const useChildrenStore = defineStore('children', {
         (data) => { this.items = data },
       )
     },
-    async fetchById(id: string) {
+    // Returns the child so a profile page can render it directly. Previously
+    // this returned undefined on success, so `if (result) child.value = result`
+    // in ChildProfilePage was dead code and the profile never populated.
+    async fetchById(id: string): Promise<Child | null> {
       this.loading = true
       this.error = null
       try {
         const result = await childrenService.getChild(useSupabaseClient(), id)
         if (!result.success) {
           this.error = result.error
-          return
+          return null
         }
         const existing = this.items.findIndex(c => c.id === id)
+        // Visiting a profile directly skips the list fetch, so the child may
+        // not be in `items` yet.
         if (existing !== -1) this.items[existing] = result.data
+        else this.items.push(result.data)
+        return result.data
       } finally {
         this.loading = false
       }

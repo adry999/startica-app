@@ -6,7 +6,10 @@ const tenantStore = useTenantStore()
 const { activity, loading, error, fetchAuditLog } = useDashboard()
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('audit-log', () => selectedKgId.value ? fetchAuditLog(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('audit-log', async () => {
+  if (selectedKgId.value) await fetchAuditLog(selectedKgId.value)
+  return true
+}, { watch: [selectedKgId] })
 
 function activityLabel(action: string, entity: string): string {
   const key = `dashboard.activity.${action}_${entity}`

@@ -7,10 +7,14 @@ const { can } = usePermissions()
 const tenantStore = useTenantStore()
 const kindergartensStore = useKindergartensStore()
 
+// These callbacks feed the Pinia stores rather than asyncData's own `data`,
+// but they must still resolve to a non-null value: Nuxt treats undefined as
+// "no payload" and refetches on the client, duplicating every request.
 useLazyAsyncData('admin-kindergartens', async () => {
   await kindergartensStore.fetchAll()
   const first = kindergartensStore.items[0]
   if (first) tenantStore.autoSelectFirst(first.id)
+  return true
 })
 
 // Single-KG mode: the tenant switcher is hidden, so the header renders no

@@ -20,32 +20,31 @@ const canMutate = computed(() => can('update', 'children'))
 
 const child = ref<Child | null>(null)
 
-// @ts-ignore — useLazyAsyncData typing
+// Each callback returns a non-null value: Nuxt treats undefined as "no
+// payload" and refetches on the client, duplicating every request.
 const { pending: childLoading } = useLazyAsyncData(
   `child-${props.id}`,
   async () => {
-    child.value = null
-    const result = await childrenStore.fetchById(props.id)
-    // @ts-ignore — fetchById return type
-    if (result) child.value = result
+    child.value = await childrenStore.fetchById(props.id)
+    return true
   },
   { watch: [() => props.id] },
 )
 
-// @ts-ignore — useAsyncData void handling
 useLazyAsyncData(
   `child-guardians-${props.id}`,
   async () => {
     await fetchForChild(props.id)
+    return true
   },
   { watch: [() => props.id] },
 )
 
-// @ts-ignore — useAsyncData void handling
 useLazyAsyncData(
   'child-profile-groups',
   async () => {
     if (child.value) await groupsStore.fetchAll(child.value.kindergartenId)
+    return true
   },
   { watch: [child] },
 )

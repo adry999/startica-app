@@ -12,9 +12,10 @@ const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 const statusFilter = ref<'all' | 'draft' | 'issued' | 'paid' | 'overdue'>('all')
 
 useLazyAsyncData('billing', async () => {
-  if (!selectedKgId.value) return Promise.resolve()
+  if (!selectedKgId.value) return true
   await fetchAll(selectedKgId.value)
   await fetchSummary(selectedKgId.value)
+  return true
 }, { watch: [selectedKgId] })
 
 const filteredItems = computed(() => {
@@ -60,7 +61,7 @@ function formatDate(date: string): string {
 
     <div class="rounded-xl border border-border bg-white p-6">
       <div class="mb-4 flex items-center gap-2">
-        <span class="text-sm font-medium text-slate-700">{{ t('billing.filter') }}</span>
+        <span class="text-sm font-medium text-slate-700">{{ t('billing.filterLabel') }}</span>
         <select v-model="statusFilter" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
           <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
         </select>
@@ -75,7 +76,7 @@ function formatDate(date: string): string {
               <th class="px-4 py-3 text-left font-medium text-slate-700">{{ t('billing.childName') }}</th>
               <th class="px-4 py-3 text-right font-medium text-slate-700">{{ t('billing.amount') }}</th>
               <th class="px-4 py-3 text-left font-medium text-slate-700">{{ t('billing.dueDate') }}</th>
-              <th class="px-4 py-3 text-left font-medium text-slate-700">{{ t('billing.status') }}</th>
+              <th class="px-4 py-3 text-left font-medium text-slate-700">{{ t('billing.statusLabel') }}</th>
               <th class="px-4 py-3 text-left font-medium text-slate-700">{{ t('common.actions') }}</th>
             </tr>
           </thead>

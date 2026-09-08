@@ -9,7 +9,8 @@
     "loading": "Loading...",
     "search": "Search",
     "adminPortal": "Admin Portal",
-    "back": "Back"
+    "back": "Back",
+    "create": "Create"
   },
   "topbar": {
     "searchPlaceholder": "Search child…"
@@ -469,24 +470,30 @@
   "billing": {
     "pageTitle": "Billing",
     "pageSubtitle": "Manage invoices and payments",
-    "filter": "Filter:",
-    "filter.all": "All",
-    "status.draft": "Draft",
-    "status.issued": "Issued",
-    "status.paid": "Paid",
-    "status.overdue": "Overdue",
-    "status.cancelled": "Cancelled",
+    "filterLabel": "Filter:",
+    "filter": {
+      "all": "All"
+    },
+    "status": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    },
     "childName": "Child",
     "amount": "Amount",
     "dueDate": "Due Date",
-    "status": "Status",
+    "statusLabel": "Status",
     "markPaid": "Mark as paid",
     "markPaidSuccess": "Invoice marked as paid.",
     "noInvoices": "No invoices found.",
-    "stats.totalIssued": "Total Issued",
-    "stats.totalPaid": "Total Paid",
-    "stats.totalOverdue": "Total Overdue",
-    "stats.pending": "Pending"
+    "stats": {
+      "totalIssued": "Total Issued",
+      "totalPaid": "Total Paid",
+      "totalOverdue": "Total Overdue",
+      "pending": "Pending"
+    }
   },
   "payments": {
     "pageTitle": "Payments",

@@ -26,6 +26,7 @@ const { pending: groupLoading } = useLazyAsyncData(
     await fetchByGroup(props.id)
     // fetch staff after group loads so we have kindergartenId
     if (g) await staffStore.fetchAll(g.kindergartenId)
+    return true
   },
   { watch: [() => props.id] },
 )

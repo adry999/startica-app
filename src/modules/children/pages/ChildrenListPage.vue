@@ -22,9 +22,9 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 const canMutate   = computed(() => can('create', 'children'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('children', async () => { selectedKgId.value && await fetchAll(selectedKgId.value) }, { watch: [selectedKgId] })
+useLazyAsyncData('children', async () => { if (selectedKgId.value) await fetchAll(selectedKgId.value); return true }, { watch: [selectedKgId] })
 useLazyAsyncData('children-groups',
-  async () => { selectedKgId.value && await groupsStore.fetchAll(selectedKgId.value) },
+  async () => { if (selectedKgId.value) await groupsStore.fetchAll(selectedKgId.value); return true },
   { watch: [selectedKgId] },
 )
 

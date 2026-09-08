@@ -8,7 +8,10 @@ const { stats, groups, activity, staffOnDuty, loading, error, fetchAll } = useDa
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('dashboard', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('dashboard', async () => {
+  if (selectedKgId.value) await fetchAll(selectedKgId.value)
+  return true
+}, { watch: [selectedKgId] })
 
 const quickActions = computed(() => {
   const actions = []

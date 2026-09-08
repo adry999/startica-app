@@ -120,8 +120,9 @@ const createForm = ref(emptyPaymentForm())
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData('payments', async () => {
-  if (!selectedKgId.value) return Promise.resolve()
+  if (!selectedKgId.value) return true
   await fetchByInvoice(selectedKgId.value, '')
+  return true
 }, { watch: [selectedKgId] })
 
 const pendingCount = computed(() => items.value.filter(p => p.status === 'pending').length)

@@ -9,7 +9,8 @@
     "loading": "Se încarcă...",
     "search": "Caută",
     "adminPortal": "Portal Admin",
-    "back": "Înapoi"
+    "back": "Înapoi",
+    "create": "Creează"
   },
   "topbar": {
     "searchPlaceholder": "Caută copil…"
@@ -469,24 +470,30 @@
   "billing": {
     "pageTitle": "Facturare",
     "pageSubtitle": "Gestionează facturi și plăți",
-    "filter": "Filtru:",
-    "filter.all": "Toate",
-    "status.draft": "Ciornă",
-    "status.issued": "Emisă",
-    "status.paid": "Plătită",
-    "status.overdue": "Întârziate",
-    "status.cancelled": "Anulată",
+    "filterLabel": "Filtru:",
+    "filter": {
+      "all": "Toate"
+    },
+    "status": {
+      "draft": "Ciornă",
+      "issued": "Emisă",
+      "paid": "Plătită",
+      "overdue": "Întârziate",
+      "cancelled": "Anulată"
+    },
     "childName": "Copil",
     "amount": "Suma",
     "dueDate": "Scadență",
-    "status": "Stare",
+    "statusLabel": "Stare",
     "markPaid": "Marchează ca plătită",
     "markPaidSuccess": "Factura a fost marcată ca plătită.",
     "noInvoices": "Nicio factură găsită.",
-    "stats.totalIssued": "Total emis",
-    "stats.totalPaid": "Total plătit",
-    "stats.totalOverdue": "Total întârziat",
-    "stats.pending": "În așteptare"
+    "stats": {
+      "totalIssued": "Total emis",
+      "totalPaid": "Total plătit",
+      "totalOverdue": "Total întârziat",
+      "pending": "În așteptare"
+    }
   },
   "payments": {
     "pageTitle": "Plăți",

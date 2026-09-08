@@ -11,7 +11,10 @@ const { availability, loading, error, fetchAvailability, addAvailability, remove
 
 useLazyAsyncData(
   `pool-availability-${props.kindergartenId}-${props.trainerUserId}`,
-  () => fetchAvailability(props.kindergartenId, props.trainerUserId),
+  async () => {
+    await fetchAvailability(props.kindergartenId, props.trainerUserId)
+    return true
+  },
 )
 
 const weekdayOptions = [0, 1, 2, 3, 4, 5, 6].map(d => ({ label: t(`pool.weekday.${d}`), value: d }))
