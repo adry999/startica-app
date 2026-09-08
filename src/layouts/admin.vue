@@ -14,14 +14,8 @@ useLazyAsyncData('admin-kindergartens', async () => {
 })
 
 const tenantOptions = computed(() => {
-  const options: Array<{ label: string; value: string }> = []
-  if (can('read', 'kindergarten')) {
-    options.push({ label: t('tenant.all'), value: 'ALL' })
-  }
-  for (const kg of kindergartensStore.items) {
-    options.push({ label: kg.name, value: kg.id })
-  }
-  return options
+  // Single-KG mode: only return available kindergartens, no 'ALL' option
+  return kindergartensStore.items.map(kg => ({ label: kg.name, value: kg.id }))
 })
 
 const selectedKgLabel = computed(() => {
