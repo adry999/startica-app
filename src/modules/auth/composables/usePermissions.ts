@@ -2,7 +2,7 @@ import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 
 export type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'assign-role' | 'view'
-export type PermissionResource = 'kindergarten' | 'staff' | 'children' | 'groups' | 'settings' | 'attendance' | 'pool' | 'payroll'
+export type PermissionResource = 'kindergarten' | 'staff' | 'children' | 'groups' | 'settings' | 'attendance' | 'pool' | 'payroll' | 'billing' | 'payments' | 'expenses'
 
 export function usePermissions() {
   const authStore = useAuthStore()
@@ -68,6 +68,13 @@ export function usePermissions() {
       // Educators can mark attendance for their groups
       if (action === 'read') return true
       return role === 'super_admin' || role === 'admin' || role === 'educator'
+    }
+
+    // Financial data (invoices, payments, expenses) is Admin / Super Admin
+    // only — educators have no access to money. RLS enforces the same rule
+    // server-side; see 20260908000008_fix_financial_rls.sql.
+    if (resource === 'billing' || resource === 'payments' || resource === 'expenses') {
+      return role === 'super_admin' || role === 'admin'
     }
 
     if (resource === 'pool') {

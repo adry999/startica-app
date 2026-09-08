@@ -1,7 +1,8 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'admin' })
+import BillingListPage from '~/modules/billing/pages/BillingListPage.vue'
+definePageMeta({ layout: 'admin', middleware: ['role'], roles: ['super_admin', 'admin'] })
 </script>
 
 <template>
-  <LazyBillingListPage />
+  <BillingListPage />
 </template>
