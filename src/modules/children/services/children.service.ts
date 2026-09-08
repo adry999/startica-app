@@ -119,7 +119,7 @@ export async function updateChild(
     groupId: 'group_id',
   }
 
-  const payload: Database['public']['Tables']['children']['Update'] = {}
+  const payload: any = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value

@@ -125,7 +125,7 @@ export async function updateGroup(
     capacity: 'capacity',
   }
 
-  const payload: Database['public']['Tables']['groups']['Update'] = {}
+  const payload: any = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value

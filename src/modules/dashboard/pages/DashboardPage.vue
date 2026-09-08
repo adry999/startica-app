@@ -10,12 +10,14 @@ const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData('dashboard', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
 
-const quickActions = computed(() => [
-  can('create', 'children') && { label: t('dashboard.actions.addChild'), icon: 'i-heroicons-user-plus', to: '/children?add=1', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' },
-  can('create', 'staff') && { label: t('dashboard.actions.inviteStaff'), icon: 'i-heroicons-paper-airplane', to: '/staff?invite=1', bgColor: 'bg-brand-yellow/20', iconColor: 'text-brand-gold' },
-  can('read', 'groups') && { label: t('dashboard.actions.groups'), icon: 'i-heroicons-users', to: '/groups', bgColor: 'bg-slate-100', iconColor: 'text-slate-500' },
-  can('read', 'children') && { label: t('dashboard.actions.children'), icon: 'i-heroicons-academic-cap', to: '/children', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' },
-].filter(Boolean))
+const quickActions = computed(() => {
+  const actions = []
+  if (can('create', 'children')) actions.push({ label: t('dashboard.actions.addChild'), icon: 'i-heroicons-user-plus', to: '/children?add=1', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' })
+  if (can('create', 'staff')) actions.push({ label: t('dashboard.actions.inviteStaff'), icon: 'i-heroicons-paper-airplane', to: '/staff?invite=1', bgColor: 'bg-brand-yellow/20', iconColor: 'text-brand-gold' })
+  if (can('read', 'groups')) actions.push({ label: t('dashboard.actions.groups'), icon: 'i-heroicons-users', to: '/groups', bgColor: 'bg-slate-100', iconColor: 'text-slate-500' })
+  if (can('read', 'children')) actions.push({ label: t('dashboard.actions.children'), icon: 'i-heroicons-academic-cap', to: '/children', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' })
+  return actions
+})
 
 const timeFormatter = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit' })
 

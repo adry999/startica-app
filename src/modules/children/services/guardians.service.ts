@@ -99,7 +99,7 @@ export async function updateGuardian(
     notes: 'notes',
   }
 
-  const payload: Database['public']['Tables']['guardians']['Update'] = {}
+  const payload: any = {}
   Object.entries(input).forEach(([key, value]) => {
     if (value !== undefined) {
       payload[fieldMap[key]] = value
