@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as groupsService from '../services/groups.service'
 import type { Group } from '../types/groups.types'
 
@@ -12,53 +12,63 @@ export const useGroupsStore = defineStore('groups', {
   }),
   actions: {
     async fetchAll(kindergartenId: string) {
-      this.loading = true
-      this.error = null
-      const result = await groupsService.listGroups(useSupabaseClient(), kindergartenId)
-      this.loading = false
-      if (!result.success) { this.error = result.error; return }
-      this.items = result.data
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => groupsService.listGroups(useSupabaseClient(), kindergartenId),
+        (data) => { this.items = data },
+      )
     },
     async fetchById(id: string) {
       this.loading = true
       this.error = null
-      const result = await groupsService.getGroup(useSupabaseClient(), id)
-      this.loading = false
-      if (!result.success) { this.error = result.error; return null }
-      const existing = this.items.findIndex(g => g.id === id)
-      if (existing !== -1) this.items[existing] = result.data
-      return result.data
+      try {
+        const result = await groupsService.getGroup(useSupabaseClient(), id)
+        if (!result.success) {
+          this.error = result.error
+          return null
+        }
+        const existing = this.items.findIndex(g => g.id === id)
+        if (existing !== -1) this.items[existing] = result.data
+        return result.data
+      } finally {
+        this.loading = false
+      }
     },
     async create(input: Parameters<typeof groupsService.createGroup>[1]) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result = await groupsService.createGroup(useSupabaseClient(), input, actorId)
-      if (!result.success) { this.error = result.error; return false }
-      this.items.unshift(result.data)
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => groupsService.createGroup(useSupabaseClient(), input),
+        (data) => { this.items.unshift(data) },
+      )
     },
     async update(id: string, input: Parameters<typeof groupsService.updateGroup>[2]) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result = await groupsService.updateGroup(useSupabaseClient(), id, input, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await groupsService.updateGroup(useSupabaseClient(), id, input)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       const idx = this.items.findIndex(g => g.id === id)
       if (idx !== -1) {
-        // Preserve childrenCount — updateGroup does not re-fetch it
         this.items[idx] = { ...result.data, childrenCount: this.items[idx]!.childrenCount }
       }
       return true
     },
     async archive(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result = await groupsService.archiveGroup(useSupabaseClient(), id, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await groupsService.archiveGroup(useSupabaseClient(), id)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       const idx = this.items.findIndex(g => g.id === id)
       if (idx !== -1) this.items[idx]!.status = 'archived'
       return true
     },
     async restore(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result = await groupsService.restoreGroup(useSupabaseClient(), id, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await groupsService.restoreGroup(useSupabaseClient(), id)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       const idx = this.items.findIndex(g => g.id === id)
       if (idx !== -1) this.items[idx]!.status = 'active'
       return true

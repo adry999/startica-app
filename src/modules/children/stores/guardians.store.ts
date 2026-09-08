@@ -1,28 +1,29 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as guardiansSvc from '../services/guardians.service'
 import type { Guardian, GuardianRelationship } from '../types/guardian.types'
 
 export const useGuardiansStore = defineStore('guardians', {
   state: () => ({
-    items:   [] as Guardian[],
+    items: [] as Guardian[],
     loading: false,
-    error:   null as string | null,
+    error: null as string | null,
   }),
   actions: {
     async fetchForChild(childId: string) {
-      this.loading = true
-      this.error   = null
-      const result = await guardiansSvc.listGuardians(useSupabaseClient(), childId)
-      this.loading = false
-      if (!result.success) { this.error = result.error; return }
-      this.items = result.data
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => guardiansSvc.listGuardians(useSupabaseClient(), childId),
+        (data) => { this.items = data },
+      )
     },
     async create(input: Parameters<typeof guardiansSvc.createGuardian>[1]) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result  = await guardiansSvc.createGuardian(useSupabaseClient(), input, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await guardiansSvc.createGuardian(useSupabaseClient(), input)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       this.items.push(result.data)
       this.items.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
       return true
@@ -35,17 +36,21 @@ export const useGuardiansStore = defineStore('guardians', {
         relationship?: GuardianRelationship; isPrimary?: boolean; notes?: string | null
       },
     ) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result  = await guardiansSvc.updateGuardian(useSupabaseClient(), id, input, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await guardiansSvc.updateGuardian(useSupabaseClient(), id, input)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       const idx = this.items.findIndex(g => g.id === id)
       if (idx !== -1) this.items[idx] = result.data
       return true
     },
     async remove(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
-      const result  = await guardiansSvc.removeGuardian(useSupabaseClient(), id, actorId)
-      if (!result.success) { this.error = result.error; return false }
+      const result = await guardiansSvc.removeGuardian(useSupabaseClient(), id)
+      if (!result.success) {
+        this.error = result.error
+        return false
+      }
       this.items = this.items.filter(g => g.id !== id)
       return true
     },

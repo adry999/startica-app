@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as staffService from '../services/staff.service'
 import type { UserRow } from '../services/staff.service'
 import type { StaffMember } from '../types/staff.types'
@@ -26,19 +26,11 @@ export const useStaffStore = defineStore('staff', {
 
   actions: {
     async fetchAll(kindergartenId: string) {
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await staffService.listStaff(client, kindergartenId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        this.items = []
-        return
-      }
-
-      this.items = result.data.map(toStaffMember)
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => staffService.listStaff(useSupabaseClient(), kindergartenId),
+        (data) => { this.items = data.map(toStaffMember) },
+      )
     },
 
     async invite(input: InviteStaffInput) {
@@ -48,70 +40,37 @@ export const useStaffStore = defineStore('staff', {
       try {
         await $fetch('/api/staff/invite', { method: 'POST', body: input })
         await this.fetchAll(input.kindergartenId)
-        this.loading = false
         return true
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'invite_failed'
-        this.error = msg
-        this.loading = false
+        this.error = err instanceof Error ? err.message : 'invite_failed'
         return false
+      } finally {
+        this.loading = false
       }
     },
 
     async updateProfile(userId: string, data: UpdateStaffInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await staffService.updateStaffProfile(client, userId, data, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.replaceItem(toStaffMember(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => staffService.updateStaffProfile(useSupabaseClient(), userId, data),
+        (data) => { this.replaceItem(toStaffMember(data)) },
+      )
     },
 
     async setStatus(userId: string, status: 'active' | 'inactive') {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await staffService.setStaffStatus(client, userId, status, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.replaceItem(toStaffMember(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => staffService.setStaffStatus(useSupabaseClient(), userId, status),
+        (data) => { this.replaceItem(toStaffMember(data)) },
+      )
     },
 
     async remove(userId: string, kindergartenId: string) {
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await staffService.removeFromKindergarten(client, userId, kindergartenId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.items = this.items.filter((item) => item.id !== userId)
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => staffService.removeFromKindergarten(useSupabaseClient(), userId, kindergartenId),
+        () => { this.items = this.items.filter((item) => item.id !== userId) },
+      )
     },
 
     replaceItem(updated: StaffMember) {

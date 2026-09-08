@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as kindergartensService from '../services/kindergartens.service'
 import type { KindergartenRow } from '../services/kindergartens.service'
 import type { Kindergarten, KindergartenStatus } from '../types/kindergarten.types'
@@ -54,99 +54,43 @@ export const useKindergartensStore = defineStore('kindergartens', {
 
   actions: {
     async fetchAll() {
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await kindergartensService.listKindergartens(client)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        this.items = []
-        return
-      }
-
-      this.items = result.data.map(toKindergarten)
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => kindergartensService.listKindergartens(useSupabaseClient()),
+        (data) => { this.items = data.map(toKindergarten) },
+      )
     },
 
     async create(details: DetailsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await kindergartensService.createKindergarten(client, details, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.items.push(toKindergarten(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => kindergartensService.createKindergarten(useSupabaseClient(), details),
+        (data) => { this.items.push(toKindergarten(data)) },
+      )
     },
 
     async updateDetails(id: string, details: DetailsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await kindergartensService.updateKindergartenDetails(client, id, details, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.replaceItem(toKindergarten(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => kindergartensService.updateKindergartenDetails(useSupabaseClient(), id, details),
+        (data) => { this.replaceItem(toKindergarten(data)) },
+      )
     },
 
     async updateSettings(id: string, settings: SettingsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await kindergartensService.updateKindergartenSettings(client, id, settings, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.replaceItem(toKindergarten(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => kindergartensService.updateKindergartenSettings(useSupabaseClient(), id, settings),
+        (data) => { this.replaceItem(toKindergarten(data)) },
+      )
     },
 
     async setStatus(id: string, status: KindergartenStatus) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
-      if (!actorId) return false
-
-      this.loading = true
-      this.error = null
-      const client = useSupabaseClient()
-
-      const result = await kindergartensService.setKindergartenStatus(client, id, status, actorId)
-      this.loading = false
-      if (!result.success) {
-        this.error = result.error
-        return false
-      }
-
-      this.replaceItem(toKindergarten(result.data))
-      return true
+      const withLoading = useStoreAction(this)
+      return withLoading(
+        () => kindergartensService.setKindergartenStatus(useSupabaseClient(), id, status),
+        (data) => { this.replaceItem(toKindergarten(data)) },
+      )
     },
 
     replaceItem(updated: Kindergarten) {
