@@ -36,11 +36,10 @@ export const useChildrenStore = defineStore('children', {
         const result = await childrenService.getChild(useSupabaseClient(), id)
         if (!result.success) {
           this.error = result.error
-          return null
+          return
         }
         const existing = this.items.findIndex(c => c.id === id)
         if (existing !== -1) this.items[existing] = result.data
-        return result.data
       } finally {
         this.loading = false
       }
@@ -69,11 +68,10 @@ export const useChildrenStore = defineStore('children', {
         const result = await childrenService.setChildStatus(useSupabaseClient(), id, status)
         if (!result.success) {
           this.error = result.error
-          return false
+          return
         }
         const idx = this.items.findIndex(c => c.id === id)
         if (idx !== -1) this.items[idx]!.status = status
-        return true
       } finally {
         this.loading = false
       }

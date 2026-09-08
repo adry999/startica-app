@@ -19,14 +19,19 @@ export const useGuardiansStore = defineStore('guardians', {
       )
     },
     async create(input: Parameters<typeof guardiansSvc.createGuardian>[1]) {
-      const result = await guardiansSvc.createGuardian(useSupabaseClient(), input)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await guardiansSvc.createGuardian(useSupabaseClient(), input)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        this.items.push(result.data)
+        this.items.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+      } finally {
+        this.loading = false
       }
-      this.items.push(result.data)
-      this.items.sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
-      return true
     },
     async update(
       id: string,
@@ -36,23 +41,33 @@ export const useGuardiansStore = defineStore('guardians', {
         relationship?: GuardianRelationship; isPrimary?: boolean; notes?: string | null
       },
     ) {
-      const result = await guardiansSvc.updateGuardian(useSupabaseClient(), id, input)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await guardiansSvc.updateGuardian(useSupabaseClient(), id, input)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        const idx = this.items.findIndex(g => g.id === id)
+        if (idx !== -1) this.items[idx] = result.data
+      } finally {
+        this.loading = false
       }
-      const idx = this.items.findIndex(g => g.id === id)
-      if (idx !== -1) this.items[idx] = result.data
-      return true
     },
     async remove(id: string) {
-      const result = await guardiansSvc.removeGuardian(useSupabaseClient(), id)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await guardiansSvc.removeGuardian(useSupabaseClient(), id)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        this.items = this.items.filter(g => g.id !== id)
+      } finally {
+        this.loading = false
       }
-      this.items = this.items.filter(g => g.id !== id)
-      return true
     },
   },
 })

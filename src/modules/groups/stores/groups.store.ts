@@ -25,11 +25,10 @@ export const useGroupsStore = defineStore('groups', {
         const result = await groupsService.getGroup(useSupabaseClient(), id)
         if (!result.success) {
           this.error = result.error
-          return null
+          return
         }
         const existing = this.items.findIndex(g => g.id === id)
         if (existing !== -1) this.items[existing] = result.data
-        return result.data
       } finally {
         this.loading = false
       }
@@ -42,36 +41,51 @@ export const useGroupsStore = defineStore('groups', {
       )
     },
     async update(id: string, input: Parameters<typeof groupsService.updateGroup>[2]) {
-      const result = await groupsService.updateGroup(useSupabaseClient(), id, input)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await groupsService.updateGroup(useSupabaseClient(), id, input)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        const idx = this.items.findIndex(g => g.id === id)
+        if (idx !== -1) {
+          this.items[idx] = { ...result.data, childrenCount: this.items[idx]!.childrenCount }
+        }
+      } finally {
+        this.loading = false
       }
-      const idx = this.items.findIndex(g => g.id === id)
-      if (idx !== -1) {
-        this.items[idx] = { ...result.data, childrenCount: this.items[idx]!.childrenCount }
-      }
-      return true
     },
     async archive(id: string) {
-      const result = await groupsService.archiveGroup(useSupabaseClient(), id)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await groupsService.archiveGroup(useSupabaseClient(), id)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        const idx = this.items.findIndex(g => g.id === id)
+        if (idx !== -1) this.items[idx]!.status = 'archived'
+      } finally {
+        this.loading = false
       }
-      const idx = this.items.findIndex(g => g.id === id)
-      if (idx !== -1) this.items[idx]!.status = 'archived'
-      return true
     },
     async restore(id: string) {
-      const result = await groupsService.restoreGroup(useSupabaseClient(), id)
-      if (!result.success) {
-        this.error = result.error
-        return false
+      this.loading = true
+      this.error = null
+      try {
+        const result = await groupsService.restoreGroup(useSupabaseClient(), id)
+        if (!result.success) {
+          this.error = result.error
+          return
+        }
+        const idx = this.items.findIndex(g => g.id === id)
+        if (idx !== -1) this.items[idx]!.status = 'active'
+      } finally {
+        this.loading = false
       }
-      const idx = this.items.findIndex(g => g.id === id)
-      if (idx !== -1) this.items[idx]!.status = 'active'
-      return true
     },
   },
 })

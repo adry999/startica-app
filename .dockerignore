@@ -1,0 +1,13 @@
+.git
+.claude
+.worktrees
+.nuxt
+.output
+node_modules
+test-results
+playwright-report
+.env
+.env.*
+!.env.example
+docs
+design

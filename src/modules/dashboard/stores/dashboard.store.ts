@@ -60,7 +60,7 @@ export const useDashboardStore = defineStore('dashboard', {
 
     async fetchAuditLog(kindergartenId: string) {
       const withLoading = useStoreAction(this)
-      return withLoading(
+      await withLoading(
         () => dashboardService.fetchActivity(useSupabaseClient(), kindergartenId, 100),
         (data) => { this.activity = data },
       )
