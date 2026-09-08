@@ -1,24 +1,36 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useSupabaseClient } from '~/core/supabase/client'
+import * as settingsService from '../services/settings.service'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const toast = useToast()
 const authStore = useAuthStore()
+const tenantStore = useTenantStore()
 const client = useSupabaseClient()
 
-type Section = 'profile' | 'password' | 'language'
+type Section = 'profile' | 'password' | 'language' | 'kindergarten'
 const activeSection = ref<Section>('profile')
 
 const fullName = ref(authStore.user?.fullName ?? '')
-const saving   = ref(false)
-const sending  = ref(false)
+const saving = ref(false)
+const sending = ref(false)
+const loadingKg = ref(false)
+const savingKg = ref(false)
+
+const timezone = ref('Europe/Bucharest')
+const kgLocale = ref<'ro' | 'en'>('ro')
+const workingHoursStart = ref('07:30')
+const workingHoursEnd = ref('18:00')
 
 const navItems = [
-  { key: 'profile'  as Section, icon: 'i-heroicons-user-circle',  labelKey: 'settings.profileSection'  },
-  { key: 'password' as Section, icon: 'i-heroicons-lock-closed',   labelKey: 'settings.passwordSection' },
-  { key: 'language' as Section, icon: 'i-heroicons-language',      labelKey: 'settings.languageSection' },
+  { key: 'profile' as Section, icon: 'i-heroicons-user-circle', labelKey: 'settings.profileSection' },
+  { key: 'kindergarten' as Section, icon: 'i-heroicons-building-library', labelKey: 'settings.kindergartenSection' },
+  { key: 'password' as Section, icon: 'i-heroicons-lock-closed', labelKey: 'settings.passwordSection' },
+  { key: 'language' as Section, icon: 'i-heroicons-language', labelKey: 'settings.languageSection' },
 ]
+
+const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 const userInitials = computed(() => {
   const name = authStore.user?.fullName ?? ''
@@ -28,12 +40,9 @@ const userInitials = computed(() => {
 async function saveProfile() {
   if (!authStore.user) return
   saving.value = true
-  const { error } = await client
-    .from('users')
-    .update({ full_name: fullName.value, updated_by: authStore.user.id })
-    .eq('id', authStore.user.id)
+  const result = await settingsService.updateOwnProfile(client, authStore.user.id, fullName.value)
   saving.value = false
-  if (error) {
+  if (!result.success) {
     toast.add({ title: t('settings.saveError'), color: 'error' })
     return
   }
@@ -41,17 +50,93 @@ async function saveProfile() {
   toast.add({ title: t('settings.saveSuccess'), color: 'success' })
 }
 
+async function handleAvatarUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.[0] || !authStore.user) return
+
+  const file = input.files[0]
+  saving.value = true
+  const result = await settingsService.updateOwnAvatar(client, authStore.user.id, file)
+  saving.value = false
+
+  if (!result.success) {
+    toast.add({ title: t('settings.avatarUploadError'), color: 'error' })
+    return
+  }
+
+  authStore.user.avatarUrl = result.data
+  toast.add({ title: t('settings.avatarUploadSuccess'), color: 'success' })
+}
+
+async function loadKindergartenSettings() {
+  if (selectedKgId.value === 'ALL') return
+  loadingKg.value = true
+  const result = await settingsService.fetchKindergartenSettings(client, selectedKgId.value)
+  loadingKg.value = false
+
+  if (!result.success) {
+    toast.add({ title: t('settings.loadError'), color: 'error' })
+    return
+  }
+
+  const settings = result.data.settings as any
+  timezone.value = settings?.timezone ?? 'Europe/Bucharest'
+  kgLocale.value = settings?.default_locale === 'en' ? 'en' : 'ro'
+  workingHoursStart.value = settings?.working_hours?.start ?? '07:30'
+  workingHoursEnd.value = settings?.working_hours?.end ?? '18:00'
+}
+
+async function saveKindergartenSettings() {
+  if (selectedKgId.value === 'ALL' || !authStore.user) return
+  savingKg.value = true
+  const result = await settingsService.updateKindergartenSettings(
+    client,
+    selectedKgId.value,
+    authStore.user.id,
+    {
+      timezone: timezone.value,
+      defaultLocale: kgLocale.value,
+      workingHoursStart: workingHoursStart.value,
+      workingHoursEnd: workingHoursEnd.value,
+    },
+  )
+  savingKg.value = false
+
+  if (!result.success) {
+    toast.add({ title: t('settings.saveError'), color: 'error' })
+    return
+  }
+
+  toast.add({ title: t('settings.saveSuccess'), color: 'success' })
+}
+
 async function sendPasswordReset() {
   if (!authStore.user?.email) return
   sending.value = true
-  const { error } = await client.auth.resetPasswordForEmail(authStore.user.email)
+  const result = await settingsService.requestOwnPasswordReset(
+    client,
+    authStore.user.email,
+    `${window.location.origin}/reset-password`,
+  )
   sending.value = false
-  if (error) {
-    toast.add({ title: error.message, color: 'error' })
+  if (!result.success) {
+    toast.add({ title: result.error, color: 'error' })
     return
   }
   toast.add({ title: t('settings.resetSent'), color: 'success' })
 }
+
+onMounted(() => {
+  if (activeSection.value === 'kindergarten') {
+    loadKindergartenSettings()
+  }
+})
+
+watch(activeSection, (newSection) => {
+  if (newSection === 'kindergarten' && !timezone.value) {
+    loadKindergartenSettings()
+  }
+})
 </script>
 
 <template>
@@ -60,10 +145,10 @@ async function sendPasswordReset() {
     <BasePageHeader :title="t('settings.pageTitle')" :subtitle="t('settings.pageSubtitle')" />
 
     <!-- Two-column layout -->
-    <div class="flex gap-8 items-start">
+    <div class="flex flex-col gap-6 lg:flex-row lg:gap-8 lg:items-start">
 
       <!-- ── Left sub-nav ──────────────────────────────────────────────── -->
-      <nav class="w-[220px] shrink-0 space-y-0.5">
+      <nav class="grid w-full grid-cols-3 gap-1 lg:block lg:w-[220px] lg:shrink-0 lg:space-y-0.5">
         <button
           v-for="item in navItems"
           :key="item.key"
@@ -107,9 +192,32 @@ async function sendPasswordReset() {
           <div class="p-6 space-y-6">
             <!-- Avatar row -->
             <div class="flex items-center gap-4 pb-6 border-b border-border">
-              <span class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xl font-semibold text-white ring-4 ring-teal-50">
-                {{ userInitials }}
-              </span>
+              <div class="relative">
+                <img
+                  v-if="authStore.user?.avatarUrl"
+                  :src="authStore.user.avatarUrl"
+                  :alt="authStore.user.fullName"
+                  class="inline-flex h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-teal-50"
+                />
+                <span
+                  v-else
+                  class="inline-flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-teal-600 text-xl font-semibold text-white ring-4 ring-teal-50"
+                >
+                  {{ userInitials }}
+                </span>
+                <label class="absolute bottom-0 right-0 cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleAvatarUpload"
+                    :disabled="saving"
+                  />
+                  <div class="rounded-full bg-teal-600 p-1.5 text-white hover:bg-teal-700">
+                    <UIcon name="i-heroicons-camera" class="h-3.5 w-3.5" />
+                  </div>
+                </label>
+              </div>
               <div>
                 <p class="font-semibold text-slate-800">{{ authStore.user?.fullName }}</p>
                 <p class="text-sm text-slate-400">{{ authStore.user?.email }}</p>
@@ -156,6 +264,63 @@ async function sendPasswordReset() {
               <UIcon name="i-heroicons-envelope" class="mr-2 h-4 w-4" />
               {{ t('settings.sendResetEmail') }}
             </UButton>
+          </div>
+        </div>
+
+        <!-- Kindergarten section -->
+        <div
+          v-else-if="activeSection === 'kindergarten'"
+          class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]"
+        >
+          <div class="flex items-center justify-between border-b border-border px-6 py-5">
+            <div>
+              <h2 class="text-base font-semibold text-slate-800">{{ t('settings.kindergartenSection') }}</h2>
+              <p class="mt-0.5 text-sm text-slate-400">{{ t('settings.kindergartenDescription') }}</p>
+            </div>
+            <UButton color="primary" :loading="savingKg" @click="saveKindergartenSettings">
+              {{ t('settings.save') }}
+            </UButton>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div v-if="loadingKg" class="flex justify-center py-8">
+              <UIcon name="i-heroicons-spinner" class="animate-spin h-5 w-5 text-teal-600" />
+            </div>
+            <div v-else class="grid grid-cols-1 gap-5 max-w-lg">
+              <div>
+                <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.timezone') }}</label>
+                <USelect
+                  v-model="timezone"
+                  :options="[
+                    { label: 'Europe/Bucharest', value: 'Europe/Bucharest' },
+                    { label: 'Europe/Chisinau', value: 'Europe/Chisinau' },
+                    { label: 'UTC', value: 'UTC' },
+                  ]"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.defaultLocale') }}</label>
+                <USelect
+                  v-model="kgLocale"
+                  :options="[
+                    { label: 'Română', value: 'ro' },
+                    { label: 'English', value: 'en' },
+                  ]"
+                  class="w-full"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.workingHoursStart') }}</label>
+                  <UInput v-model="workingHoursStart" type="time" class="w-full" />
+                </div>
+                <div>
+                  <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.workingHoursEnd') }}</label>
+                  <UInput v-model="workingHoursEnd" type="time" class="w-full" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

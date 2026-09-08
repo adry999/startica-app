@@ -129,14 +129,18 @@
       "children": "Copii"
     },
     "activity": {
-      "INSERT_children": "Copil adăugat",
-      "UPDATE_children": "Copil actualizat",
+      "create_children": "Copil adăugat",
+      "update_children": "Copil actualizat",
+      "soft_delete_children": "Copil retras",
+      "restore_children": "Copil restaurat",
+      "anonymize_children": "Date copil anonimizate",
       "DELETE_children": "Copil eliminat",
-      "INSERT_groups": "Grupă creată",
-      "UPDATE_groups": "Grupă actualizată",
+      "create_groups": "Grupă creată",
+      "update_groups": "Grupă actualizată",
       "DELETE_groups": "Grupă arhivată",
-      "INSERT_staff": "Personal invitat",
-      "UPDATE_staff": "Personal actualizat",
+      "create_users": "Membru al personalului creat",
+      "update_users": "Personal actualizat",
+      "create_user_kindergartens": "Membru adăugat în grădiniță",
       "DELETE_staff": "Personal eliminat",
       "default": "Înregistrare actualizată"
     }
@@ -319,6 +323,58 @@
     },
     "notFound": "Grupă negăsită."
   },
+  "pool": {
+    "pageTitle": "Bazin",
+    "pageSubtitle": "Program de înot și antrenori.",
+    "calendarTab": "Calendar",
+    "settingsTab": "Setări antrenor",
+    "session": {
+      "capacity": "Locuri: {enrolled}/{capacity}",
+      "cancelled": "Anulată",
+      "cancel": "Anulează sesiunea",
+      "confirmCancelTitle": "Anulează sesiunea",
+      "confirmCancelBody": "Sesiunea va fi marcată ca anulată.",
+      "viewParticipants": "Vezi participanții",
+      "empty": "Nicio sesiune programată."
+    },
+    "participants": {
+      "title": "Participanți",
+      "addChild": "Adaugă copil",
+      "remove": "Elimină",
+      "full": "Sesiunea este completă.",
+      "empty": "Niciun copil înscris."
+    },
+    "availability": {
+      "title": "Disponibilitate",
+      "add": "Adaugă interval",
+      "remove": "Elimină",
+      "weekday": "Zi",
+      "startTime": "Ora început",
+      "endTime": "Ora sfârșit",
+      "empty": "Niciun interval de disponibilitate."
+    },
+    "pattern": {
+      "title": "Program recurent",
+      "add": "Adaugă tipar",
+      "remove": "Elimină",
+      "group": "Grupă implicită",
+      "noGroup": "Fără grupă implicită",
+      "capacity": "Capacitate",
+      "activeFrom": "Activ de la",
+      "activeUntil": "Activ până la",
+      "outsideAvailability": "Intervalul ales nu se încadrează în disponibilitatea antrenorului.",
+      "empty": "Niciun tipar de program."
+    },
+    "weekday": {
+      "0": "Duminică",
+      "1": "Luni",
+      "2": "Marți",
+      "3": "Miercuri",
+      "4": "Joi",
+      "5": "Vineri",
+      "6": "Sâmbătă"
+    }
+  },
   "settings": {
     "pageTitle": "Setări",
     "pageSubtitle": "Gestionează profilul și preferințele contului tău.",
@@ -329,8 +385,18 @@
     "role": "Rol",
     "emailReadonly": "Adresa de email nu poate fi modificată din aplicație.",
     "saveProfile": "Salvează profilul",
-    "saveSuccess": "Profil actualizat.",
+    "avatarUploadSuccess": "Avatar actualizat.",
+    "avatarUploadError": "Eroare la încărcare.",
+    "saveSuccess": "Salvat cu succes.",
     "saveError": "Eroare la salvare.",
+    "loadError": "Eroare la încărcare.",
+    "save": "Salvează",
+    "kindergartenSection": "Setări grădiniță",
+    "kindergartenDescription": "Configurează timezone, limbă și orare de funcționare pentru grădiniță.",
+    "timezone": "Fus orar",
+    "defaultLocale": "Limbă implicită",
+    "workingHoursStart": "Ora deschidere",
+    "workingHoursEnd": "Ora închidere",
     "passwordSection": "Schimbă parola",
     "passwordHint": "Vei primi un email cu link de resetare a parolei.",
     "sendResetEmail": "Trimite email de resetare",

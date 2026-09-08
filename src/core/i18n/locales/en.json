@@ -129,14 +129,18 @@
       "children": "Children"
     },
     "activity": {
-      "INSERT_children": "Child added",
-      "UPDATE_children": "Child updated",
+      "create_children": "Child added",
+      "update_children": "Child updated",
+      "soft_delete_children": "Child withdrawn",
+      "restore_children": "Child restored",
+      "anonymize_children": "Child data anonymized",
       "DELETE_children": "Child removed",
-      "INSERT_groups": "Group created",
-      "UPDATE_groups": "Group updated",
+      "create_groups": "Group created",
+      "update_groups": "Group updated",
       "DELETE_groups": "Group archived",
-      "INSERT_staff": "Staff invited",
-      "UPDATE_staff": "Staff updated",
+      "create_users": "Staff member created",
+      "update_users": "Staff updated",
+      "create_user_kindergartens": "Staff member added to kindergarten",
       "DELETE_staff": "Staff removed",
       "default": "Record updated"
     }
@@ -319,6 +323,58 @@
     },
     "notFound": "Group not found."
   },
+  "pool": {
+    "pageTitle": "Pool",
+    "pageSubtitle": "Swim schedule and trainers.",
+    "calendarTab": "Calendar",
+    "settingsTab": "Trainer settings",
+    "session": {
+      "capacity": "Spots: {enrolled}/{capacity}",
+      "cancelled": "Cancelled",
+      "cancel": "Cancel session",
+      "confirmCancelTitle": "Cancel session",
+      "confirmCancelBody": "The session will be marked as cancelled.",
+      "viewParticipants": "View participants",
+      "empty": "No sessions scheduled."
+    },
+    "participants": {
+      "title": "Participants",
+      "addChild": "Add child",
+      "remove": "Remove",
+      "full": "This session is full.",
+      "empty": "No children enrolled."
+    },
+    "availability": {
+      "title": "Availability",
+      "add": "Add window",
+      "remove": "Remove",
+      "weekday": "Day",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "empty": "No availability windows."
+    },
+    "pattern": {
+      "title": "Recurring schedule",
+      "add": "Add pattern",
+      "remove": "Remove",
+      "group": "Default group",
+      "noGroup": "No default group",
+      "capacity": "Capacity",
+      "activeFrom": "Active from",
+      "activeUntil": "Active until",
+      "outsideAvailability": "The chosen window doesn't fit the trainer's availability.",
+      "empty": "No schedule patterns."
+    },
+    "weekday": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
+  },
   "settings": {
     "pageTitle": "Settings",
     "pageSubtitle": "Manage your profile and account preferences.",
@@ -329,8 +385,18 @@
     "role": "Role",
     "emailReadonly": "Email address cannot be changed from the app.",
     "saveProfile": "Save profile",
-    "saveSuccess": "Profile updated.",
+    "avatarUploadSuccess": "Avatar updated.",
+    "avatarUploadError": "Upload failed.",
+    "saveSuccess": "Saved successfully.",
     "saveError": "Save failed.",
+    "loadError": "Load failed.",
+    "save": "Save",
+    "kindergartenSection": "Kindergarten Settings",
+    "kindergartenDescription": "Configure timezone, language, and working hours for your kindergarten.",
+    "timezone": "Time zone",
+    "defaultLocale": "Default language",
+    "workingHoursStart": "Opening time",
+    "workingHoursEnd": "Closing time",
     "passwordSection": "Change Password",
     "passwordHint": "You will receive an email with a password reset link.",
     "sendResetEmail": "Send reset email",
