@@ -5,6 +5,7 @@ import * as staffService from '../services/staff.service'
 import type { UserRow } from '../services/staff.service'
 import type { StaffMember } from '../types/staff.types'
 import type { InviteStaffInput, UpdateStaffInput } from '~/shared/schemas/staff.schema'
+import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 
 function toStaffMember(row: UserRow): StaffMember {
   return {
@@ -75,6 +76,61 @@ export const useStaffStore = defineStore('staff', {
       const index = this.items.findIndex((item) => item.id === updated.id)
       if (index === -1) return
       this.items[index] = updated
+    },
+
+    async fetchAssignedKindergartens(userId: string) {
+      this.error = null
+      const client = useSupabaseClient()
+      const result = await staffService.listAssignedKindergartens(client, userId)
+      if (!result.success) {
+        this.error = result.error
+        return []
+      }
+      return result.data
+    },
+
+    async fetchUserModules(userId: string, kindergartenId: string): Promise<ModuleKey[]> {
+      this.error = null
+      const client = useSupabaseClient()
+      const result = await staffService.listUserModules(client, userId, kindergartenId)
+      if (!result.success) {
+        this.error = result.error
+        return []
+      }
+      return result.data.map((row) => row.module_key as ModuleKey)
+    },
+
+    async saveModuleGrants(userId: string, kindergartenId: string, desiredKeys: ModuleKey[]): Promise<boolean> {
+      const authStore = useAuthStore()
+      const actorId = authStore.user?.id
+      if (!actorId) return false
+
+      const client = useSupabaseClient()
+      this.loading = true
+      this.error = null
+
+      const currentResult = await staffService.listUserModules(client, userId, kindergartenId)
+      if (!currentResult.success) {
+        this.loading = false
+        this.error = currentResult.error
+        return false
+      }
+      const current = currentResult.data.map((row) => row.module_key as ModuleKey)
+
+      const toAdd = desiredKeys.filter((k) => !current.includes(k))
+      const toRemove = current.filter((k) => !desiredKeys.includes(k))
+
+      for (const key of toAdd) {
+        const r = await staffService.grantModule(client, userId, kindergartenId, key, actorId)
+        if (!r.success) { this.loading = false; this.error = r.error; return false }
+      }
+      for (const key of toRemove) {
+        const r = await staffService.revokeModule(client, userId, kindergartenId, key)
+        if (!r.success) { this.loading = false; this.error = r.error; return false }
+      }
+
+      this.loading = false
+      return true
     },
   },
 })

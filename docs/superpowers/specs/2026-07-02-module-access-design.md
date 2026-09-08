@@ -148,7 +148,7 @@ No hardcoded user-facing strings.
 ## Definition of done (A)
 
 - [ ] Migration created + types regenerated (`user_modules`).
-- [ ] Educator with no rows → sees only Settings + their group/children (no Pool/Payroll in sidebar).
+- [ ] Educator with no rows → Pool/Payroll appear disabled (coming-soon style) in the sidebar, not hidden.
 - [ ] `can('view','pool')` / `can('view','payroll')` check the cache for EDUCATOR, bypass for Admin/Super Admin.
 - [ ] `payroll_own` vs `payroll_all` are distinct keys; `payrollScope()` returns the right scope.
 - [ ] Sidebar entries appear/disappear per grant, per selected kindergarten — not hardcoded per role.

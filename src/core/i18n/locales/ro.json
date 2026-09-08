@@ -455,5 +455,63 @@
     "markError": "Eroare la marcarea prezenței.",
     "noRecords": "Nicio înregistrare de prezență pentru această dată.",
     "notes": "Note (opțional)"
+  },
+  "pool": {
+    "title": "Piscină",
+    "comingSoon": "Modulul Piscină vine în curând.",
+    "pageTitle": "Piscină",
+    "pageSubtitle": "Program înotători și antrenori.",
+    "calendarTab": "Calendar",
+    "settingsTab": "Setări antrenor",
+    "session": {
+      "capacity": "Locuri: {enrolled}/{capacity}",
+      "cancelled": "Anulat",
+      "cancel": "Anulează ședința",
+      "confirmCancelTitle": "Anulează ședința",
+      "confirmCancelBody": "Ședința va fi marcată ca anulată.",
+      "viewParticipants": "Vezi participanți",
+      "empty": "Nicio ședință planificată."
+    },
+    "participants": {
+      "title": "Participanți",
+      "addChild": "Adaugă copil",
+      "remove": "Elimină",
+      "full": "Această ședință este plină.",
+      "empty": "Niciun copil înscris."
+    },
+    "availability": {
+      "title": "Disponibilitate",
+      "add": "Adaugă interval",
+      "remove": "Elimină",
+      "weekday": "Zi",
+      "startTime": "Ora de început",
+      "endTime": "Ora de sfârşit",
+      "empty": "Nicio fereastră de disponibilitate."
+    },
+    "pattern": {
+      "title": "Program recurent",
+      "add": "Adaugă model",
+      "remove": "Elimină",
+      "group": "Grup implicit",
+      "noGroup": "Fără grup implicit",
+      "capacity": "Capacitate",
+      "activeFrom": "Activ din",
+      "activeUntil": "Activ până",
+      "outsideAvailability": "Intervalul ales nu se potrivește cu disponibilitatea antrenorului.",
+      "empty": "Niciun model de program."
+    },
+    "weekday": {
+      "0": "Duminică",
+      "1": "Luni",
+      "2": "Marți",
+      "3": "Miercuri",
+      "4": "Joi",
+      "5": "Vineri",
+      "6": "Sâmbătă"
+    }
+  },
+  "payroll": {
+    "title": "Salarizare",
+    "comingSoon": "Modulul Salarizare vine în curând."
   }
 }

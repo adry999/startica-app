@@ -137,12 +137,12 @@ values
 insert into public.groups (id, kindergarten_id, name, age_range, educator_id, status, created_at, updated_at, created_by)
 values
   (
-    'bbbbbbbb-0001-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0001-4bbb-8bbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Fluturași', '3-4 ani', '33333333-3333-3333-3333-333333333333', 'active',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    'bbbbbbbb-0002-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0002-4bbb-8bbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     'Albinuțe', '4-5 ani', null, 'active',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   );
@@ -158,29 +158,29 @@ insert into public.children (
   created_at, updated_at, created_by
 ) values
   (
-    'cccccccc-0001-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    'bbbbbbbb-0001-0000-0000-000000000000', 'Andrei', 'Vasilescu', date '2021-05-14',
+    'cccccccc-0001-4ccc-8ccc-cccccccccccc', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0001-4bbb-8bbb-bbbbbbbbbbbb', 'Andrei', 'Vasilescu', date '2021-05-14',
     'A+', 'Alergie la arahide', 'Poartă EpiPen în ghiozdan, anunțat și familiei.',
     '5210514123456', 'CNP', 'enrolled',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    'cccccccc-0002-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    'bbbbbbbb-0001-0000-0000-000000000000', 'Ioana', 'Marin', date '2021-09-02',
+    'cccccccc-0002-4ccc-8ccc-cccccccccccc', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0001-4bbb-8bbb-bbbbbbbbbbbb', 'Ioana', 'Marin', date '2021-09-02',
     'O+', null, null,
     '6210902123457', 'CNP', 'enrolled',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    'cccccccc-0003-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    'bbbbbbbb-0002-0000-0000-000000000000', 'Maxim', 'Rusu', date '2020-11-23',
+    'cccccccc-0003-4ccc-8ccc-cccccccccccc', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0002-4bbb-8bbb-bbbbbbbbbbbb', 'Maxim', 'Rusu', date '2020-11-23',
     null, null, null,
     '2001123456789', 'IDNP', 'enrolled',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    'cccccccc-0004-0000-0000-000000000000', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    'bbbbbbbb-0002-0000-0000-000000000000', 'Sofia', 'Dumitrescu', date '2020-07-30',
+    'cccccccc-0004-4ccc-8ccc-cccccccccccc', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+    'bbbbbbbb-0002-4bbb-8bbb-bbbbbbbbbbbb', 'Sofia', 'Dumitrescu', date '2020-07-30',
     'B+', 'Intoleranță la lactoză', null,
     null, null, 'enrolled',
     now(), now(), '22222222-2222-2222-2222-222222222222'
@@ -195,27 +195,27 @@ insert into public.parents (
   created_at, updated_at, created_by
 ) values
   (
-    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0001-0000-0000-000000000000',
+    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0001-4ccc-8ccc-cccccccccccc',
     'Cristina Vasilescu', '+40 722 111 222', 'cristina.vasilescu@example.com', 'mamă',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0001-0000-0000-000000000000',
+    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0001-4ccc-8ccc-cccccccccccc',
     'Radu Vasilescu', '+40 722 111 223', 'radu.vasilescu@example.com', 'tată',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0002-0000-0000-000000000000',
+    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0002-4ccc-8ccc-cccccccccccc',
     'Mihaela Marin', '+40 722 333 444', 'mihaela.marin@example.com', 'mamă',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0003-0000-0000-000000000000',
+    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0003-4ccc-8ccc-cccccccccccc',
     'Olga Rusu', '+373 691 23 456', 'olga.rusu@example.com', 'mamă',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   ),
   (
-    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0004-0000-0000-000000000000',
+    gen_random_uuid(), 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'cccccccc-0004-4ccc-8ccc-cccccccccccc',
     'Bogdan Dumitrescu', '+40 722 555 666', 'bogdan.dumitrescu@example.com', 'tată',
     now(), now(), '22222222-2222-2222-2222-222222222222'
   );
