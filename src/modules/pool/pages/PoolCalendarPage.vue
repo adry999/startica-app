@@ -60,9 +60,7 @@ function canManageSession(trainerUserId: string): boolean {
 
     <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
-    <p v-if="!canView" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
-
-    <template v-else>
+    <template v-if="canView">
       <div v-if="loading" class="text-sm text-slate-400">…</div>
       <div v-else-if="sessions.length === 0" class="rounded-2xl border border-border bg-white py-16 text-center text-sm text-slate-400">
         {{ t('pool.session.empty') }}

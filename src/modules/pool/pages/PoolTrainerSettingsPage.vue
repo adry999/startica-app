@@ -23,9 +23,7 @@ const groupOptions = computed(() => [
   <div class="space-y-6">
     <BasePageHeader :title="t('pool.pageTitle')" :subtitle="t('pool.settingsTab')" />
 
-    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
-
-    <template v-else>
+    <template v-if="selectedKgId">
       <PoolAvailabilityEditor :kindergarten-id="selectedKgId" :trainer-user-id="trainerUserId" :can-edit="canEdit" />
       <PoolPatternList
         :kindergarten-id="selectedKgId"

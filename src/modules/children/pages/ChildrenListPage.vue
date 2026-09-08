@@ -308,9 +308,7 @@ const columns = computed<TableColumn<Child>[]>(() => [
       <BaseStatCard :label="t('children.filter.withdrawn')" :value="withdrawnCount" icon="i-heroicons-arrow-right-start-on-rectangle" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
-    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
-
-    <template v-else>
+    <template v-if="selectedKgId">
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
         <!-- Search + tabs + filters -->
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">

@@ -237,13 +237,8 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
       <BaseStatCard :label="t('staff.stats.admins')" :value="adminCount" />
     </div>
 
-    <!-- Select kindergarten prompt -->
-    <p v-if="!selectedKgId" class="text-sm text-slate-400">
-      {{ t('staff.selectKindergarten') }}
-    </p>
-
     <!-- Tab filter + table -->
-    <template v-else>
+    <template v-if="selectedKgId">
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)]">
         <!-- Tabs -->
         <div class="border-b border-border px-4 py-3">

@@ -161,9 +161,7 @@ async function onArchiveConfirm() {
       <BaseStatCard :label="t('groups.stats.totalCapacity')" :value="totalCapacity ?? '—'" icon="i-heroicons-chart-pie" icon-class="bg-slate-100 text-slate-500" :loading="loading" />
     </div>
 
-    <p v-if="!selectedKgId" class="text-sm text-slate-400">{{ t('staff.selectKindergarten') }}</p>
-
-    <template v-else>
+    <template v-if="selectedKgId">
       <!-- Filter tabs -->
       <BaseFilterTabs v-model="activeFilter" :items="filterTabs" />
 
