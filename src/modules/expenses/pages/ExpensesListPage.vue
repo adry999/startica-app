@@ -64,6 +64,7 @@
                 <option value="maintenance">{{ t('expenses.categories.maintenance') }}</option>
                 <option value="food">{{ t('expenses.categories.food') }}</option>
                 <option value="transportation">{{ t('expenses.categories.transportation') }}</option>
+                <option value="pool">{{ t('expenses.categories.pool') }}</option>
                 <option value="other">{{ t('expenses.categories.other') }}</option>
               </select>
             </div>

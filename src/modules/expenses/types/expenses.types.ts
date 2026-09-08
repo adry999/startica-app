@@ -1,5 +1,8 @@
-export type ExpenseCategory = 'salaries' | 'rent' | 'utilities' | 'supplies' | 'maintenance' | 'food' | 'transportation' | 'other'
-export type ExpenseStatus = 'draft' | 'approved' | 'rejected'
+import type { expenseCategories, expenseStatuses } from '~/shared/schemas/expense.schema'
+
+// Derived from the Zod schema so the two cannot drift apart.
+export type ExpenseCategory = (typeof expenseCategories)[number]
+export type ExpenseStatus = (typeof expenseStatuses)[number]
 
 export interface Expense {
   id: string

@@ -556,7 +556,8 @@
       "maintenance": "Maintenance",
       "food": "Food",
       "transportation": "Transportation",
-      "other": "Other"
+      "other": "Other",
+      "pool": "Pool"
     },
     "noExpenses": "No expenses recorded.",
     "stats": {

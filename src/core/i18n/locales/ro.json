@@ -556,7 +556,8 @@
       "maintenance": "Întreținere",
       "food": "Alimente",
       "transportation": "Transport",
-      "other": "Altele"
+      "other": "Altele",
+      "pool": "Bazin"
     },
     "noExpenses": "Nicio cheltuială înregistrată.",
     "stats": {

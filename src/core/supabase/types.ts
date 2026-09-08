@@ -1331,6 +1331,15 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
       }
+      expense_summary: {
+        Args: { p_kindergarten_id: string }
+        Returns: {
+          by_category: Json
+          total_approved: number
+          total_pending: number
+          total_spent: number
+        }[]
+      }
       is_super_admin: { Args: never; Returns: boolean }
       user_kindergarten_ids: { Args: never; Returns: string[] }
     }
@@ -1346,6 +1355,7 @@ export type Database = {
         | "food"
         | "transportation"
         | "other"
+        | "pool"
       expense_status: "draft" | "approved" | "rejected"
       group_status: "active" | "archived"
       invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
@@ -1495,6 +1505,7 @@ export const Constants = {
         "food",
         "transportation",
         "other",
+        "pool",
       ],
       expense_status: ["draft", "approved", "rejected"],
       group_status: ["active", "archived"],

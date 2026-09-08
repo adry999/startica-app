@@ -9,6 +9,7 @@ export const expenseCategories = [
   'food',
   'transportation',
   'other',
+  'pool',
 ] as const
 
 export const expenseStatuses = ['draft', 'approved', 'rejected'] as const

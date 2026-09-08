@@ -109,32 +109,31 @@ export async function getSummary(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<ExpenseSummary>> {
+  // Aggregated in Postgres: selecting every row and summing in JS silently
+  // under-reported once a kindergarten passed PostgREST's 1000-row response cap.
   const { data, error } = await client
-    .from('expenses')
-    .select('amount, status, category')
-    .eq('kindergarten_id', kindergartenId)
-    .is('deleted_at', null)
+    .rpc('expense_summary', { p_kindergarten_id: kindergartenId })
+    .single()
 
-  if (error) return { success: false, error: error.message }
+  if (error || !data) return { success: false, error: error?.message ?? 'summary_failed' }
 
-  const expenses = data ?? []
-  const byCategory: Record<string, number> = {}
-  let totalApproved = 0
-  let totalPending = 0
-
-  for (const exp of expenses) {
-    const amount = Number(exp.amount)
-    byCategory[exp.category as string] = (byCategory[exp.category as string] ?? 0) + amount
-
-    if (exp.status === 'approved') {
-      totalApproved += amount
-    }
-    if (exp.status === 'draft') {
-      totalPending += amount
-    }
+  const row = data as {
+    total_spent: number | string
+    total_approved: number | string
+    total_pending: number | string
+    by_category: Record<string, number | string> | null
   }
 
-  const totalSpent = totalApproved + totalPending
+  const byCategory: Record<string, number> = {}
+  for (const [k, v] of Object.entries(row.by_category ?? {})) byCategory[k] = Number(v)
 
-  return { success: true, data: { totalSpent, totalApproved, totalPending, byCategory } }
+  return {
+    success: true,
+    data: {
+      totalSpent: Number(row.total_spent),
+      totalApproved: Number(row.total_approved),
+      totalPending: Number(row.total_pending),
+      byCategory: byCategory as ExpenseSummary['byCategory'],
+    },
+  }
 }

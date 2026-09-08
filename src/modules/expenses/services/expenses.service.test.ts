@@ -27,7 +27,7 @@ const validInput = {
   expenseDate: '2026-09-01',
 }
 
-function createMockClient(summaryRows: Record<string, unknown>[] = []) {
+function createMockClient(summary: Record<string, unknown> | null = null) {
   const insert = vi.fn().mockReturnValue({
     select: vi.fn().mockReturnValue({
       single: vi.fn().mockResolvedValue({ data: sampleRow, error: null }),
@@ -36,13 +36,12 @@ function createMockClient(summaryRows: Record<string, unknown>[] = []) {
   const client = {
     from: vi.fn().mockReturnValue({
       insert,
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          is: vi.fn().mockResolvedValue({ data: summaryRows, error: null }),
-        }),
-      }),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any),
+    // getSummary aggregates in Postgres via rpc(), not by summing rows client-side
+    rpc: vi.fn().mockReturnValue({
+      single: vi.fn().mockResolvedValue({ data: summary, error: null }),
+    }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
   return { client, insert }
@@ -83,31 +82,39 @@ describe('createExpense validation', () => {
 })
 
 describe('getSummary', () => {
-  it('totals approved and draft separately and groups by category', async () => {
-    const { client } = createMockClient([
-      { amount: '100.00', status: 'approved', category: 'supplies' },
-      { amount: '50.00', status: 'draft', category: 'supplies' },
-      { amount: '25.50', status: 'approved', category: 'food' },
-      { amount: '10.00', status: 'rejected', category: 'food' },
-    ])
+  it('maps the aggregate returned by the expense_summary function', async () => {
+    const { client } = createMockClient({
+      total_spent: '175.50',
+      total_approved: '125.50',
+      total_pending: '50.00',
+      by_category: { supplies: '150.00', food: '35.50' },
+    })
 
     const result = await getSummary(client, KG_ID)
 
     expect(result.success).toBe(true)
     if (!result.success) return
+    expect(result.data.totalSpent).toBe(175.5)
     expect(result.data.totalApproved).toBe(125.5)
     expect(result.data.totalPending).toBe(50)
     expect(result.data.byCategory.supplies).toBe(150)
     expect(result.data.byCategory.food).toBe(35.5)
   })
 
+  it('calls the function with the kindergarten id', async () => {
+    const { client } = createMockClient({ total_spent: 0, total_approved: 0, total_pending: 0, by_category: {} })
+    await getSummary(client, KG_ID)
+    expect(client.rpc).toHaveBeenCalledWith('expense_summary', { p_kindergarten_id: KG_ID })
+  })
+
   it('returns zeroed totals when there are no expenses', async () => {
-    const { client } = createMockClient([])
+    const { client } = createMockClient({ total_spent: 0, total_approved: 0, total_pending: 0, by_category: null })
     const result = await getSummary(client, KG_ID)
 
     expect(result.success).toBe(true)
     if (!result.success) return
     expect(result.data.totalApproved).toBe(0)
     expect(result.data.totalPending).toBe(0)
+    expect(result.data.byCategory).toEqual({})
   })
 })
