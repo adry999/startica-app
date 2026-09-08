@@ -3,6 +3,7 @@ import { h, reactive, ref, computed, watch } from 'vue'
 import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import { createChildSchema, updateChildSchema, type CreateChildInput, type UpdateChildInput } from '~/shared/schemas/children.schema'
 import type { Child } from '../types/children.types'
+import type { PageSize } from '~/shared/ui/BasePagination.vue'
 import type { Database } from '~/core/supabase/types'
 
 type ChildStatus = Database['public']['Enums']['child_status']
@@ -38,7 +39,7 @@ const activeFilter = ref<'all' | 'enrolled' | 'withdrawn' | 'graduated'>('enroll
 const groupFilter = ref<'all' | 'none' | string>('all')
 const ageBucket = ref<'all' | 'under1' | 'oneToThree' | 'threeToFive' | 'fivePlus'>('all')
 const page = ref(1)
-const pageSize = 10
+const pageSize = ref<PageSize>(25)
 
 const filterTabs = computed(() =>
   (['enrolled', 'all', 'withdrawn', 'graduated'] as const)
@@ -79,9 +80,14 @@ const filteredItems = computed(() => {
   return list
 })
 
+// 'all' collapses to a single page holding every filtered row.
+const resolvedPageSize = computed(() =>
+  pageSize.value === 'all' ? Math.max(filteredItems.value.length, 1) : pageSize.value,
+)
+
 const paginatedItems = computed(() => {
-  const start = (page.value - 1) * pageSize
-  return filteredItems.value.slice(start, start + pageSize)
+  const start = (page.value - 1) * resolvedPageSize.value
+  return filteredItems.value.slice(start, start + resolvedPageSize.value)
 })
 
 watch([search, activeFilter, groupFilter, ageBucket], () => {
@@ -89,7 +95,7 @@ watch([search, activeFilter, groupFilter, ageBucket], () => {
 })
 
 watch(filteredItems, (items) => {
-  const lastPage = Math.max(1, Math.ceil(items.length / pageSize))
+  const lastPage = Math.max(1, Math.ceil(items.length / resolvedPageSize.value))
   if (page.value > lastPage) page.value = lastPage
 })
 
@@ -343,7 +349,7 @@ const columns = computed<TableColumn<Child>[]>(() => [
             <p class="py-10 text-center text-sm text-slate-400">{{ t('children.empty') }}</p>
           </template>
         </UTable>
-        <BasePagination v-model:page="page" :page-size="pageSize" :total="filteredItems.length">
+        <BasePagination v-model:page="page" v-model:page-size="pageSize" :total="filteredItems.length">
           <template #summary="{ from, to, total }">
             {{ from }}–{{ to }} / {{ total }}
           </template>

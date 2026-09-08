@@ -10,7 +10,11 @@
     "search": "Caută",
     "adminPortal": "Portal Admin",
     "back": "Înapoi",
-    "create": "Creează"
+    "create": "Creează",
+    "pagination": {
+      "perPage": "pe pagină",
+      "all": "Toate"
+    }
   },
   "topbar": {
     "searchPlaceholder": "Caută copil…"

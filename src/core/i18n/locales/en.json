@@ -10,7 +10,11 @@
     "search": "Search",
     "adminPortal": "Admin Portal",
     "back": "Back",
-    "create": "Create"
+    "create": "Create",
+    "pagination": {
+      "perPage": "per page",
+      "all": "All"
+    }
   },
   "topbar": {
     "searchPlaceholder": "Search child…"
