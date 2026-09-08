@@ -141,7 +141,9 @@ watch(
 )
 
 async function onAddSubmit(event: FormSubmitEvent<CreateChildInput>) {
-  const ok = await create({ ...event.data, kindergartenId: addState.kindergartenId ?? selectedKgId.value })
+  const kgId = addState.kindergartenId ?? selectedKgId.value
+  if (!kgId) return
+  const ok = await create({ ...event.data, kindergartenId: kgId })
   if (ok) {
     addOpen.value = false
     toast.add({ title: t('children.addSuccess'), color: 'success' })

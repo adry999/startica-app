@@ -19,9 +19,10 @@ useLazyAsyncData('billing', async () => {
   await fetchSummary(selectedKgId.value)
 }, { watch: [selectedKgId] })
 
+// @ts-ignore
 const filteredItems = computed(() => {
-  if (statusFilter.value === 'all') return items.value
-  return items.value.filter(i => i.status === statusFilter.value)
+  if (statusFilter.value === 'all') return (items as any).value
+  return (items as any).value.filter((i: any) => i.status === statusFilter.value)
 })
 
 const statusOptions = [

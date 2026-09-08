@@ -83,7 +83,9 @@ const roleOptions = computed(() => {
 })
 
 async function onInviteSubmit(event: FormSubmitEvent<InviteStaffInput>) {
-  const ok = await invite({ ...event.data, kindergartenId: inviteState.kindergartenId ?? selectedKgId.value })
+  const kgId = inviteState.kindergartenId ?? selectedKgId.value
+  if (!kgId) return
+  const ok = await invite({ ...event.data, kindergartenId: kgId })
   if (ok) {
     inviteModalOpen.value = false
     toast.add({ title: t('staff.inviteSuccess'), color: 'success' })
