@@ -108,6 +108,7 @@ const addState = reactive<Partial<CreateChildInput>>({
   firstName: undefined, lastName: undefined, birthDate: undefined,
   bloodGroup: null, allergies: null, medicalNotes: null,
   nationalId: null, idType: null, groupId: null, kindergartenId: undefined,
+  contractNumber: null, contractSignedAt: null, enrollmentStartDate: null,
 })
 
 function openAdd() {
@@ -121,6 +122,9 @@ function openAdd() {
   addState.idType = null
   addState.groupId = null
   addState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
+  addState.contractNumber = null
+  addState.contractSignedAt = null
+  addState.enrollmentStartDate = null
   addOpen.value = true
 }
 
@@ -159,6 +163,9 @@ function openEdit(child: Child) {
   editState.nationalId  = child.nationalId
   editState.idType      = child.idType
   editState.groupId     = child.groupId
+  editState.contractNumber = child.contractNumber
+  editState.contractSignedAt = child.contractSignedAt
+  editState.enrollmentStartDate = child.enrollmentStartDate
   editOpen.value = true
 }
 

@@ -46,6 +46,9 @@ function toChild(row: Record<string, unknown>): Child {
           relationship: primary.relationship,
         }
       : null,
+    contractNumber: (row.contract_number as string | null),
+    contractSignedAt: (row.contract_signed_at as string | null),
+    enrollmentStartDate: (row.enrollment_start_date as string | null),
   }
 }
 
@@ -74,6 +77,7 @@ export async function createChild(
     bloodGroup?: string | null; allergies?: string | null; medicalNotes?: string | null
     nationalId?: string | null; idType?: NationalIdType | null
     groupId?: string | null; kindergartenId: string
+    contractNumber?: string | null; contractSignedAt?: string | null; enrollmentStartDate?: string | null
   },
 ): Promise<Result<Child>> {
   const { data, error } = await client
@@ -89,6 +93,9 @@ export async function createChild(
       id_type:       input.idType ?? null,
       group_id:      input.groupId ?? null,
       kindergarten_id: input.kindergartenId,
+      contract_number: input.contractNumber ?? null,
+      contract_signed_at: input.contractSignedAt ?? null,
+      enrollment_start_date: input.enrollmentStartDate ?? null,
       consent:       {},
     })
     .select('*, groups(name)')
@@ -105,6 +112,7 @@ export async function updateChild(
     firstName?: string; lastName?: string; birthDate?: string
     bloodGroup?: string | null; allergies?: string | null; medicalNotes?: string | null
     nationalId?: string | null; idType?: NationalIdType | null; groupId?: string | null
+    contractNumber?: string | null; contractSignedAt?: string | null; enrollmentStartDate?: string | null
   },
 ): Promise<Result<Child>> {
   const fieldMap: Record<string, string> = {
@@ -117,6 +125,9 @@ export async function updateChild(
     nationalId: 'national_id',
     idType: 'id_type',
     groupId: 'group_id',
+    contractNumber: 'contract_number',
+    contractSignedAt: 'contract_signed_at',
+    enrollmentStartDate: 'enrollment_start_date',
   }
 
   const payload: any = {}

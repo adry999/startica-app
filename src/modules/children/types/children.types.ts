@@ -22,4 +22,7 @@ export interface Child {
   groupName: string | null
   kindergartenId: string
   primaryGuardian: ChildGuardianSummary | null
+  contractNumber: string | null
+  contractSignedAt: string | null
+  enrollmentStartDate: string | null
 }
