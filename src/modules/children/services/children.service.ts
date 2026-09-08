@@ -23,20 +23,20 @@ function toChild(row: Record<string, unknown>): Child {
   const primary = rawGuardians.find(g => g.is_primary && !g.deleted_at) ?? null
 
   return {
-    id:           row.id as string,
+    id: row.id as string,
     firstName,
     lastName,
-    fullName:     `${firstName} ${lastName}`,
+    fullName: `${firstName} ${lastName}`,
     birthDate,
-    age:          computeAge(birthDate),
-    bloodGroup:   (row.blood_group as string | null) ?? null,
-    allergies:    (row.allergies as string | null) ?? null,
-    medicalNotes: (row.medical_notes as string | null) ?? null,
-    nationalId:   (row.national_id as string | null) ?? null,
-    idType:       (row.id_type as NationalIdType | null) ?? null,
-    status:       row.status as ChildStatus,
-    groupId:      (row.group_id as string | null) ?? null,
-    groupName:    ((row.groups as { name: string } | null)?.name) ?? null,
+    age: computeAge(birthDate),
+    bloodGroup: (row.blood_group as string | null),
+    allergies: (row.allergies as string | null),
+    medicalNotes: (row.medical_notes as string | null),
+    nationalId: (row.national_id as string | null),
+    idType: (row.id_type as NationalIdType | null),
+    status: row.status as ChildStatus,
+    groupId: (row.group_id as string | null),
+    groupName: ((row.groups as { name: string } | null)?.name) ?? null,
     kindergartenId: row.kindergarten_id as string,
     primaryGuardian: primary
       ? {
@@ -75,7 +75,6 @@ export async function createChild(
     nationalId?: string | null; idType?: NationalIdType | null
     groupId?: string | null; kindergartenId: string
   },
-  actorId: string,
 ): Promise<Result<Child>> {
   const { data, error } = await client
     .from('children')
@@ -91,8 +90,6 @@ export async function createChild(
       group_id:      input.groupId ?? null,
       kindergarten_id: input.kindergartenId,
       consent:       {},
-      created_by:    actorId,
-      updated_by:    actorId,
     })
     .select('*, groups(name)')
     .single()
@@ -109,18 +106,25 @@ export async function updateChild(
     bloodGroup?: string | null; allergies?: string | null; medicalNotes?: string | null
     nationalId?: string | null; idType?: NationalIdType | null; groupId?: string | null
   },
-  actorId: string,
 ): Promise<Result<Child>> {
-  const payload: Database['public']['Tables']['children']['Update'] = { updated_by: actorId }
-  if (input.firstName   !== undefined) payload.first_name    = input.firstName
-  if (input.lastName    !== undefined) payload.last_name     = input.lastName
-  if (input.birthDate   !== undefined) payload.birth_date    = input.birthDate
-  if (input.bloodGroup  !== undefined) payload.blood_group   = input.bloodGroup
-  if (input.allergies   !== undefined) payload.allergies     = input.allergies
-  if (input.medicalNotes !== undefined) payload.medical_notes = input.medicalNotes
-  if (input.nationalId  !== undefined) payload.national_id   = input.nationalId
-  if (input.idType      !== undefined) payload.id_type       = input.idType
-  if (input.groupId     !== undefined) payload.group_id      = input.groupId
+  const fieldMap: Record<string, string> = {
+    firstName: 'first_name',
+    lastName: 'last_name',
+    birthDate: 'birth_date',
+    bloodGroup: 'blood_group',
+    allergies: 'allergies',
+    medicalNotes: 'medical_notes',
+    nationalId: 'national_id',
+    idType: 'id_type',
+    groupId: 'group_id',
+  }
+
+  const payload: Database['public']['Tables']['children']['Update'] = {}
+  Object.entries(input).forEach(([key, value]) => {
+    if (value !== undefined) {
+      payload[fieldMap[key]] = value
+    }
+  })
 
   const { data, error } = await client
     .from('children')
@@ -137,11 +141,9 @@ export async function setChildStatus(
   client: Client,
   id: string,
   status: ChildStatus,
-  actorId: string,
 ): Promise<Result<void>> {
   const payload: Database['public']['Tables']['children']['Update'] = {
     status,
-    updated_by: actorId,
   }
   const { error } = await client.from('children').update(payload).eq('id', id)
   if (error) return { success: false, error: error.message }

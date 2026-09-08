@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, reactive, ref, computed } from 'vue'
+import { h, reactive, ref, computed, watch } from 'vue'
 import type { TableColumn, FormSubmitEvent } from '@nuxt/ui'
 import {
   inviteStaffSchema,
@@ -22,6 +22,8 @@ const BaseAvatar = resolveComponent('BaseAvatar')
 const canUpdateStaff = computed(() => can('update', 'staff'))
 const canDeleteStaff = computed(() => can('delete', 'staff'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
+const route = useRoute()
+const router = useRouter()
 
 useLazyAsyncData(
   'staff',
@@ -29,13 +31,11 @@ useLazyAsyncData(
   { watch: [selectedKgId] },
 )
 
-// ── Stats (computed from loaded items) ─────────────────────────────────────
 const totalStaff  = computed(() => items.value.length)
 const activeStaff = computed(() => items.value.filter(s => s.status === 'active').length)
 const inactiveStaff = computed(() => items.value.filter(s => s.status === 'inactive').length)
 const adminCount  = computed(() => items.value.filter(s => s.role === 'admin').length)
 
-// ── Tab filter ─────────────────────────────────────────────────────────────
 const activeFilter = ref<'all' | 'educators' | 'admins'>('all')
 const filteredItems = computed(() => {
   if (activeFilter.value === 'educators') return items.value.filter(s => s.role === 'educator')
@@ -48,7 +48,6 @@ const filterTabs = computed(() =>
     .map(f => ({ label: t(`staff.filter.${f}`), value: f })),
 )
 
-// ── Invite modal ───────────────────────────────────────────────────────────
 const inviteModalOpen = ref(false)
 const inviteState = reactive<Partial<InviteStaffInput>>({
   email: undefined, fullName: undefined, role: 'educator', kindergartenId: undefined,
@@ -61,6 +60,17 @@ function openInvite() {
   inviteState.kindergartenId = selectedKgId.value !== 'ALL' ? selectedKgId.value : undefined
   inviteModalOpen.value   = true
 }
+
+watch(
+  () => route.query.invite,
+  invite => {
+    if (invite === '1' && can('create', 'staff') && selectedKgId.value !== 'ALL') {
+      openInvite()
+      router.replace({ query: { ...route.query, invite: undefined } })
+    }
+  },
+  { immediate: true },
+)
 
 const roleOptions = computed(() => {
   if (can('assign-role', 'staff')) {
@@ -80,7 +90,6 @@ async function onInviteSubmit(event: FormSubmitEvent<InviteStaffInput>) {
   }
 }
 
-// ── Edit modal ─────────────────────────────────────────────────────────────
 const editModalOpen = ref(false)
 const editTarget    = ref<StaffMember | null>(null)
 const editState     = reactive<Partial<UpdateStaffInput>>({})
@@ -103,7 +112,6 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateStaffInput>) {
   }
 }
 
-// ── Status confirm modal ───────────────────────────────────────────────────
 const statusModalOpen = ref(false)
 const statusTarget    = ref<StaffMember | null>(null)
 
@@ -132,7 +140,6 @@ async function onStatusConfirm() {
   }
 }
 
-// ── Remove confirm modal ───────────────────────────────────────────────────
 const removeModalOpen = ref(false)
 const removeTarget    = ref<StaffMember | null>(null)
 
@@ -150,7 +157,6 @@ async function onRemoveConfirm() {
   }
 }
 
-// ── Table ──────────────────────────────────────────────────────────────────
 const roleBadgeColor = (role: StaffMember['role']): 'error' | 'primary' | 'neutral' => {
   if (role === 'super_admin') return 'error'
   if (role === 'admin')       return 'primary'
@@ -224,7 +230,7 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     </BasePageHeader>
 
     <!-- Stat cards — visible only when a specific kindergarten is selected -->
-    <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-4 gap-4">
+      <div v-if="selectedKgId !== 'ALL'" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <BaseStatCard :label="t('staff.stats.total')" :value="totalStaff" />
       <BaseStatCard :label="t('staff.stats.active')" :value="activeStaff" />
       <BaseStatCard :label="t('staff.stats.inactive')" :value="inactiveStaff" />

@@ -26,7 +26,6 @@ useLazyAsyncData(
   { watch: [selectedKgId] },
 )
 
-// ── Tab filter ──────────────────────────────────────────────────────────────
 const activeFilter = ref<'all' | 'active' | 'archived'>('active')
 const filteredItems = computed(() => {
   if (activeFilter.value === 'active')   return items.value.filter(g => g.status === 'active')
@@ -39,7 +38,6 @@ const filterTabs = computed(() =>
     .map(f => ({ label: t(`groups.filter.${f}`), value: f })),
 )
 
-// ── Stats ───────────────────────────────────────────────────────────────────
 const activeItems     = computed(() => items.value.filter(g => g.status === 'active'))
 const totalEnrolled   = computed(() => activeItems.value.reduce((s, g) => s + g.childrenCount, 0))
 const educatorsCount  = computed(() => activeItems.value.filter(g => g.educatorId !== null).length)
@@ -48,7 +46,6 @@ const totalCapacity   = computed(() => {
   return withCap.length > 0 ? withCap.reduce((s, g) => s + (g.capacity ?? 0), 0) : null
 })
 
-// ── Card accent colors ──────────────────────────────────────────────────────
 const STRIPE_CLASSES = [
   'bg-teal-600', 'bg-brand-gold', 'bg-success', 'bg-slate-500', 'bg-teal-400',
 ] as const
@@ -69,7 +66,6 @@ function fillBarClass(group: Group): string {
   return 'bg-teal-600'
 }
 
-// ── Educator options ────────────────────────────────────────────────────────
 const educatorOptions = computed(() => [
   { label: t('groups.noEducator'), value: null },
   ...staffStore.items
@@ -77,7 +73,6 @@ const educatorOptions = computed(() => [
     .map(s => ({ label: s.fullName, value: s.id })),
 ])
 
-// ── Create modal ────────────────────────────────────────────────────────────
 const createOpen = ref(false)
 const createState = reactive<Partial<CreateGroupInput>>({
   name: undefined, ageRange: null, educatorId: null, capacity: null, kindergartenId: undefined,
@@ -100,7 +95,6 @@ async function onCreateSubmit(event: FormSubmitEvent<CreateGroupInput>) {
   }
 }
 
-// ── Edit modal ──────────────────────────────────────────────────────────────
 const editOpen   = ref(false)
 const editTarget = ref<Group | null>(null)
 const editState  = reactive<Partial<UpdateGroupInput>>({})
@@ -123,7 +117,6 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateGroupInput>) {
   }
 }
 
-// ── Archive / restore ────────────────────────────────────────────────────────
 const archiveOpen   = ref(false)
 const archiveTarget = ref<Group | null>(null)
 
@@ -261,6 +254,7 @@ async function onArchiveConfirm() {
                     color="neutral"
                     variant="ghost"
                     :icon="'i-heroicons-pencil'"
+                    :aria-label="t('common.edit')"
                     @click="openEdit(group)"
                   />
                   <UButton
@@ -268,6 +262,7 @@ async function onArchiveConfirm() {
                     color="neutral"
                     variant="ghost"
                     :icon="group.status === 'active' ? 'i-heroicons-archive-box' : 'i-heroicons-arrow-path'"
+                    :aria-label="group.status === 'active' ? t('groups.archive') : t('groups.restore')"
                     @click="openArchive(group)"
                   />
                 </template>

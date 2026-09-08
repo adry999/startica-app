@@ -28,7 +28,6 @@ useLazyAsyncData('children-groups',
   { watch: [selectedKgId] },
 )
 
-// ── Search + filter (search seeds from ?q= set by the topbar search) ──────
 const route = useRoute()
 const router = useRouter()
 
@@ -38,6 +37,8 @@ watch(() => route.query.q, q => { search.value = (q as string) ?? '' })
 const activeFilter = ref<'all' | 'enrolled' | 'withdrawn' | 'graduated'>('enrolled')
 const groupFilter = ref<'all' | 'none' | string>('all')
 const ageBucket = ref<'all' | 'under1' | 'oneToThree' | 'threeToFive' | 'fivePlus'>('all')
+const page = ref(1)
+const pageSize = 10
 
 const filterTabs = computed(() =>
   (['enrolled', 'all', 'withdrawn', 'graduated'] as const)
@@ -78,11 +79,23 @@ const filteredItems = computed(() => {
   return list
 })
 
-// ── Stats ──────────────────────────────────────────────────────────────────
+const paginatedItems = computed(() => {
+  const start = (page.value - 1) * pageSize
+  return filteredItems.value.slice(start, start + pageSize)
+})
+
+watch([search, activeFilter, groupFilter, ageBucket], () => {
+  page.value = 1
+})
+
+watch(filteredItems, (items) => {
+  const lastPage = Math.max(1, Math.ceil(items.length / pageSize))
+  if (page.value > lastPage) page.value = lastPage
+})
+
 const enrolledCount  = computed(() => items.value.filter(c => c.status === 'enrolled').length)
 const withdrawnCount = computed(() => items.value.filter(c => c.status === 'withdrawn').length)
 
-// ── Group options ──────────────────────────────────────────────────────────
 const groupOptions = computed(() => [
   { label: t('children.noGroup'), value: null },
   ...groupsStore.items
@@ -90,7 +103,6 @@ const groupOptions = computed(() => [
     .map(g => ({ label: g.name, value: g.id })),
 ])
 
-// ── Add modal ──────────────────────────────────────────────────────────────
 const addOpen  = ref(false)
 const addState = reactive<Partial<CreateChildInput>>({
   firstName: undefined, lastName: undefined, birthDate: undefined,
@@ -132,7 +144,6 @@ async function onAddSubmit(event: FormSubmitEvent<CreateChildInput>) {
   }
 }
 
-// ── Edit modal ─────────────────────────────────────────────────────────────
 const editOpen   = ref(false)
 const editTarget = ref<Child | null>(null)
 const editState  = reactive<Partial<UpdateChildInput>>({})
@@ -160,7 +171,6 @@ async function onEditSubmit(event: FormSubmitEvent<UpdateChildInput>) {
   }
 }
 
-// ── Status modal ───────────────────────────────────────────────────────────
 const statusOpen    = ref(false)
 const statusTarget  = ref<Child | null>(null)
 const nextStatus    = ref<ChildStatus>('withdrawn')
@@ -186,7 +196,6 @@ async function onStatusConfirm() {
   }
 }
 
-// ── Table ──────────────────────────────────────────────────────────────────
 const statusColor = (s: ChildStatus): 'success' | 'warning' | 'neutral' => {
   if (s === 'enrolled')  return 'success'
   if (s === 'withdrawn') return 'warning'
@@ -317,11 +326,16 @@ const columns = computed<TableColumn<Child>[]>(() => [
           </div>
         </div>
 
-        <UTable :data="filteredItems" :columns="columns" :loading="loading">
+        <UTable :data="paginatedItems" :columns="columns" :loading="loading">
           <template #empty>
             <p class="py-10 text-center text-sm text-slate-400">{{ t('children.empty') }}</p>
           </template>
         </UTable>
+        <BasePagination v-model:page="page" :page-size="pageSize" :total="filteredItems.length">
+          <template #summary="{ from, to, total }">
+            {{ from }}–{{ to }} / {{ total }}
+          </template>
+        </BasePagination>
       </div>
     </template>
 

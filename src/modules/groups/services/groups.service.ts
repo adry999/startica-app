@@ -9,12 +9,12 @@ function toGroup(row: Record<string, unknown>, childrenCount = 0): Group {
   return {
     id: row.id as string,
     name: row.name as string,
-    ageRange: (row.age_range as string | null) ?? null,
-    educatorId: (row.educator_id as string | null) ?? null,
+    ageRange: (row.age_range as string | null),
+    educatorId: (row.educator_id as string | null),
     educatorName: ((row.users as { full_name: string } | null)?.full_name) ?? null,
     status: row.status as 'active' | 'archived',
     kindergartenId: row.kindergarten_id as string,
-    capacity: (row.capacity as number | null) ?? null,
+    capacity: (row.capacity as number | null),
     childrenCount,
   }
 }
@@ -43,6 +43,7 @@ export async function listGroups(
   const [groupsResult, childrenResult] = await Promise.all([groupsQ, childrenQ])
 
   if (groupsResult.error) return { success: false, error: groupsResult.error.message }
+  if (childrenResult.error) return { success: false, error: childrenResult.error.message }
 
   const countMap: Record<string, number> = {}
   for (const c of childrenResult.data ?? []) {
@@ -73,6 +74,7 @@ export async function getGroup(
 
   if (groupResult.error || !groupResult.data)
     return { success: false, error: groupResult.error?.message ?? 'not_found' }
+  if (countResult.error) return { success: false, error: countResult.error.message }
 
   return {
     success: true,
@@ -89,7 +91,6 @@ export async function createGroup(
     kindergartenId: string
     capacity?: number | null
   },
-  actorId: string,
 ): Promise<Result<Group>> {
   const { data, error } = await client
     .from('groups')
@@ -99,8 +100,6 @@ export async function createGroup(
       educator_id: input.educatorId ?? null,
       kindergarten_id: input.kindergartenId,
       capacity: input.capacity ?? null,
-      created_by: actorId,
-      updated_by: actorId,
     })
     .select('*, users!educator_id(full_name)')
     .single()
@@ -118,13 +117,20 @@ export async function updateGroup(
     educatorId?: string | null
     capacity?: number | null
   },
-  actorId: string,
 ): Promise<Result<Group>> {
-  const payload: Database['public']['Tables']['groups']['Update'] = { updated_by: actorId }
-  if (input.name !== undefined) payload.name = input.name
-  if (input.ageRange !== undefined) payload.age_range = input.ageRange
-  if (input.educatorId !== undefined) payload.educator_id = input.educatorId
-  if (input.capacity !== undefined) payload.capacity = input.capacity
+  const fieldMap: Record<string, string> = {
+    name: 'name',
+    ageRange: 'age_range',
+    educatorId: 'educator_id',
+    capacity: 'capacity',
+  }
+
+  const payload: Database['public']['Tables']['groups']['Update'] = {}
+  Object.entries(input).forEach(([key, value]) => {
+    if (value !== undefined) {
+      payload[fieldMap[key]] = value
+    }
+  })
 
   const { data, error } = await client
     .from('groups')
@@ -140,11 +146,10 @@ export async function updateGroup(
 export async function archiveGroup(
   client: Client,
   id: string,
-  actorId: string,
 ): Promise<Result<void>> {
   const { error } = await client
     .from('groups')
-    .update({ status: 'archived', updated_by: actorId })
+    .update({ status: 'archived' })
     .eq('id', id)
 
   if (error) return { success: false, error: error.message }
@@ -154,11 +159,10 @@ export async function archiveGroup(
 export async function restoreGroup(
   client: Client,
   id: string,
-  actorId: string,
 ): Promise<Result<void>> {
   const { error } = await client
     .from('groups')
-    .update({ status: 'active', updated_by: actorId })
+    .update({ status: 'active' })
     .eq('id', id)
 
   if (error) return { success: false, error: error.message }

@@ -4,49 +4,21 @@ import { computed } from 'vue'
 const { t } = useI18n()
 const { can } = usePermissions()
 const tenantStore = useTenantStore()
-const { stats, groups, activity, staffOnDuty, loading, fetchAll } = useDashboard()
+const { stats, groups, activity, staffOnDuty, loading, error, fetchAll } = useDashboard()
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 useLazyAsyncData('dashboard', () => fetchAll(selectedKgId.value), { watch: [selectedKgId] })
 
-// ── Quick actions ────────────────────────────────────────────────────────────
 const quickActions = computed(() => [
-  {
-    label: t('dashboard.actions.addChild'),
-    icon: 'i-heroicons-user-plus',
-    to: '/children',
-    bgColor: 'bg-teal-50',
-    iconColor: 'text-teal-600',
-    show: can('create', 'children'),
-  },
-  {
-    label: t('dashboard.actions.inviteStaff'),
-    icon: 'i-heroicons-paper-airplane',
-    to: '/staff',
-    bgColor: 'bg-brand-yellow/20',
-    iconColor: 'text-brand-gold',
-    show: can('create', 'staff'),
-  },
-  {
-    label: t('dashboard.actions.groups'),
-    icon: 'i-heroicons-users',
-    to: '/groups',
-    bgColor: 'bg-slate-100',
-    iconColor: 'text-slate-500',
-    show: can('read', 'groups'),
-  },
-  {
-    label: t('dashboard.actions.children'),
-    icon: 'i-heroicons-academic-cap',
-    to: '/children',
-    bgColor: 'bg-teal-50',
-    iconColor: 'text-teal-600',
-    show: can('read', 'children'),
-  },
-].filter(a => a.show))
+  can('create', 'children') && { label: t('dashboard.actions.addChild'), icon: 'i-heroicons-user-plus', to: '/children?add=1', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' },
+  can('create', 'staff') && { label: t('dashboard.actions.inviteStaff'), icon: 'i-heroicons-paper-airplane', to: '/staff?invite=1', bgColor: 'bg-brand-yellow/20', iconColor: 'text-brand-gold' },
+  can('read', 'groups') && { label: t('dashboard.actions.groups'), icon: 'i-heroicons-users', to: '/groups', bgColor: 'bg-slate-100', iconColor: 'text-slate-500' },
+  can('read', 'children') && { label: t('dashboard.actions.children'), icon: 'i-heroicons-academic-cap', to: '/children', bgColor: 'bg-teal-50', iconColor: 'text-teal-600' },
+].filter(Boolean))
 
-// ── Activity helpers ─────────────────────────────────────────────────────────
+const timeFormatter = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit' })
+
 function activityLabel(action: string, entity: string): string {
   const key = `dashboard.activity.${action}_${entity}`
   const result = t(key)
@@ -54,7 +26,7 @@ function activityLabel(action: string, entity: string): string {
 }
 
 function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return timeFormatter.format(new Date(iso))
 }
 
 function activityDotColor(action: string): string {
@@ -64,7 +36,7 @@ function activityDotColor(action: string): string {
 }
 
 function roleInitials(name: string): string {
-  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('')
+  return name.match(/\b\w/g)?.slice(0, 2).join('').toUpperCase() ?? ''
 }
 </script>
 
@@ -72,6 +44,8 @@ function roleInitials(name: string): string {
   <div class="space-y-6">
     <!-- ── Page header ───────────────────────────────────────────────────── -->
     <BasePageHeader :title="t('dashboard.pageTitle')" :subtitle="t('dashboard.pageSubtitle')" />
+
+    <UAlert v-if="error" color="error" variant="soft" :description="error" />
 
     <!-- ── Row 1: Stat cards ─────────────────────────────────────────────── -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -112,7 +86,7 @@ function roleInitials(name: string): string {
       <div class="rounded-2xl border border-border bg-white shadow-[0_1px_3px_rgba(16,24,40,0.04)] lg:col-span-2">
         <div class="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 class="text-sm font-semibold text-slate-800">{{ t('dashboard.recentActivity') }}</h2>
-          <NuxtLink to="/children" class="text-xs font-medium text-teal-600 hover:text-teal-700">
+          <NuxtLink v-if="can('read', 'staff')" to="/audit-logs" class="text-xs font-medium text-teal-600 hover:text-teal-700">
             {{ t('dashboard.viewAllLog') }}
           </NuxtLink>
         </div>

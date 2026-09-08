@@ -7,19 +7,19 @@ type Client = SupabaseClient<Database>
 
 function toGuardian(row: Record<string, unknown>): Guardian {
   const firstName = row.first_name as string
-  const lastName  = row.last_name as string
+  const lastName = row.last_name as string
   return {
-    id:             row.id as string,
-    childId:        row.child_id as string,
+    id: row.id as string,
+    childId: row.child_id as string,
     kindergartenId: row.kindergarten_id as string,
     firstName,
     lastName,
-    fullName:       `${firstName} ${lastName}`,
-    email:          (row.email as string | null) ?? null,
-    phone:          (row.phone as string | null) ?? null,
-    relationship:   row.relationship as GuardianRelationship,
-    isPrimary:      row.is_primary as boolean,
-    notes:          (row.notes as string | null) ?? null,
+    fullName: `${firstName} ${lastName}`,
+    email: (row.email as string | null),
+    phone: (row.phone as string | null),
+    relationship: row.relationship as GuardianRelationship,
+    isPrimary: row.is_primary as boolean,
+    notes: (row.notes as string | null),
   }
 }
 
@@ -55,17 +55,7 @@ export async function createGuardian(
     isPrimary?: boolean
     notes?: string | null
   },
-  actorId: string,
 ): Promise<Result<Guardian>> {
-  if (input.isPrimary) {
-    await client
-      .from('guardians')
-      .update({ is_primary: false, updated_by: actorId })
-      .eq('child_id', input.childId)
-      .eq('is_primary', true)
-      .is('deleted_at', null)
-  }
-
   const { data, error } = await client
     .from('guardians')
     .insert({
@@ -78,8 +68,6 @@ export async function createGuardian(
       relationship:    input.relationship,
       is_primary:      input.isPrimary ?? false,
       notes:           input.notes ?? null,
-      created_by:      actorId,
-      updated_by:      actorId,
     })
     .select('*')
     .single()
@@ -100,33 +88,23 @@ export async function updateGuardian(
     isPrimary?: boolean
     notes?: string | null
   },
-  actorId: string,
 ): Promise<Result<Guardian>> {
-  const payload: Database['public']['Tables']['guardians']['Update'] = { updated_by: actorId }
-  if (input.firstName    !== undefined) payload.first_name   = input.firstName
-  if (input.lastName     !== undefined) payload.last_name    = input.lastName
-  if (input.email        !== undefined) payload.email        = input.email
-  if (input.phone        !== undefined) payload.phone        = input.phone
-  if (input.relationship !== undefined) payload.relationship = input.relationship
-  if (input.isPrimary    !== undefined) payload.is_primary   = input.isPrimary
-  if (input.notes        !== undefined) payload.notes        = input.notes
-
-  if (input.isPrimary) {
-    const { data: existing } = await client
-      .from('guardians')
-      .select('child_id')
-      .eq('id', id)
-      .single()
-    if (existing?.child_id) {
-      await client
-        .from('guardians')
-        .update({ is_primary: false, updated_by: actorId })
-        .eq('child_id', existing.child_id)
-        .eq('is_primary', true)
-        .neq('id', id)
-        .is('deleted_at', null)
-    }
+  const fieldMap: Record<string, string> = {
+    firstName: 'first_name',
+    lastName: 'last_name',
+    email: 'email',
+    phone: 'phone',
+    relationship: 'relationship',
+    isPrimary: 'is_primary',
+    notes: 'notes',
   }
+
+  const payload: Database['public']['Tables']['guardians']['Update'] = {}
+  Object.entries(input).forEach(([key, value]) => {
+    if (value !== undefined) {
+      payload[fieldMap[key]] = value
+    }
+  })
 
   const { data, error } = await client
     .from('guardians')
@@ -142,11 +120,10 @@ export async function updateGuardian(
 export async function removeGuardian(
   client: Client,
   id: string,
-  actorId: string,
 ): Promise<Result<void>> {
   const { error } = await client
     .from('guardians')
-    .update({ deleted_at: new Date().toISOString(), updated_by: actorId })
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) return { success: false, error: error.message }

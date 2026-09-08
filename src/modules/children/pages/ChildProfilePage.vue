@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { updateChildSchema, type UpdateChildInput } from '~/shared/schemas/children.schema'
 import { createGuardianSchema, updateGuardianSchema, type CreateGuardianInput, type UpdateGuardianInput } from '~/shared/schemas/guardian.schema'
 import type { Child } from '../types/children.types'
 import type { Guardian } from '../types/guardian.types'
+import { useFormModal } from '~/shared/composables/useFormModal'
 
 const props = defineProps<{ id: string }>()
 
@@ -22,14 +23,17 @@ const child = ref<Child | null>(null)
 const { pending: childLoading } = useLazyAsyncData(
   `child-${props.id}`,
   async () => {
+    child.value = null
     const result = await childrenStore.fetchById(props.id)
     if (result) child.value = result
   },
+  { watch: [() => props.id] },
 )
 
 useLazyAsyncData(
   `child-guardians-${props.id}`,
   () => fetchForChild(props.id),
+  { watch: [() => props.id] },
 )
 
 useLazyAsyncData(
@@ -38,125 +42,114 @@ useLazyAsyncData(
   { watch: [child] },
 )
 
-// ── Computed ─────────────────────────────────────────────────────────────────
-const primaryGuardian   = computed(() => guardians.value.find(g => g.isPrimary) ?? null)
+const primaryGuardian = computed(() => guardians.value.find(g => g.isPrimary) ?? null)
 const secondaryGuardians = computed(() => guardians.value.filter(g => !g.isPrimary))
-const hasMedical        = computed(() => !!child.value?.allergies || !!child.value?.medicalNotes)
-
-// ── Edit child modal ──────────────────────────────────────────────────────────
-const editOpen   = ref(false)
-const editState  = reactive<Partial<UpdateChildInput>>({})
-const editLoading = ref(false)
+const hasMedical = computed(() => !!child.value?.allergies || !!child.value?.medicalNotes)
 
 const groupOptions = computed(() => [
   { label: t('children.noGroup'), value: null },
   ...groupsStore.items.filter(g => g.status === 'active').map(g => ({ label: g.name, value: g.id })),
 ])
 
+const editModal = useFormModal<UpdateChildInput>({})
+const addGuardianModal = useFormModal<CreateGuardianInput>({
+  childId: props.id,
+  firstName: undefined,
+  lastName: undefined,
+  email: null,
+  phone: null,
+  relationship: 'guardian',
+  isPrimary: false,
+  notes: null,
+})
+const editGuardianModal = useFormModal<UpdateGuardianInput>({})
+const removeGuardianModal = useFormModal<{ id: string }>({})
+
 function openEdit() {
   if (!child.value) return
-  editState.firstName   = child.value.firstName
-  editState.lastName    = child.value.lastName
-  editState.birthDate   = child.value.birthDate
-  editState.bloodGroup  = child.value.bloodGroup
-  editState.allergies   = child.value.allergies
-  editState.medicalNotes = child.value.medicalNotes
-  editState.nationalId  = child.value.nationalId
-  editState.idType      = child.value.idType
-  editState.groupId     = child.value.groupId
-  editOpen.value        = true
+  editModal.open(child.value as unknown as UpdateChildInput)
 }
 
 async function onEditSubmit(event: FormSubmitEvent<UpdateChildInput>) {
   if (!child.value) return
-  editLoading.value = true
-  const ok = await childrenStore.update(child.value.id, event.data)
-  editLoading.value = false
-  if (!ok) { toast.add({ title: childrenStore.error ?? 'update_failed', color: 'error' }); return }
-  child.value = childrenStore.items.find(c => c.id === props.id) ?? await childrenStore.fetchById(props.id) ?? child.value
-  editOpen.value = false
-  toast.add({ title: t('children.updateSuccess'), color: 'success' })
+  await editModal.submit(async () => {
+    const ok = await childrenStore.update(child.value!.id, event.data)
+    if (!ok) {
+      toast.add({ title: childrenStore.error ?? 'update_failed', color: 'error' })
+      return
+    }
+    child.value = childrenStore.items.find(c => c.id === props.id) ?? await childrenStore.fetchById(props.id) ?? child.value
+    toast.add({ title: t('children.updateSuccess'), color: 'success' })
+  })
 }
 
-// ── Add guardian modal ────────────────────────────────────────────────────────
-const addGuardianOpen  = ref(false)
-const addGuardianState = reactive<Partial<CreateGuardianInput>>({
-  childId: props.id, firstName: undefined, lastName: undefined,
-  email: null, phone: null, relationship: 'guardian', isPrimary: false, notes: null,
-})
-
 function openAddGuardian() {
-  addGuardianState.firstName   = undefined
-  addGuardianState.lastName    = undefined
-  addGuardianState.email       = null
-  addGuardianState.phone       = null
-  addGuardianState.relationship = 'guardian'
-  addGuardianState.isPrimary   = false
-  addGuardianState.notes       = null
-  addGuardianState.childId     = props.id
-  addGuardianOpen.value        = true
+  addGuardianModal.reset({
+    childId: props.id,
+    firstName: undefined,
+    lastName: undefined,
+    email: null,
+    phone: null,
+    relationship: 'guardian',
+    isPrimary: false,
+    notes: null,
+  })
+  addGuardianModal.isOpen = true
 }
 
 async function onAddGuardianSubmit(event: FormSubmitEvent<CreateGuardianInput>) {
   if (!child.value) return
-  const ok = await createGuardian({
-    ...event.data,
-    childId: props.id,
-    kindergartenId: child.value.kindergartenId,
+  await addGuardianModal.submit(async () => {
+    const ok = await createGuardian({
+      ...event.data,
+      childId: props.id,
+      kindergartenId: child.value!.kindergartenId,
+    })
+    if (ok) {
+      toast.add({ title: t('guardians.addSuccess'), color: 'success' })
+    } else if (guardiansError.value) {
+      toast.add({ title: guardiansError.value, color: 'error' })
+    }
   })
-  if (ok) {
-    addGuardianOpen.value = false
-    toast.add({ title: t('guardians.addSuccess'), color: 'success' })
-  } else if (guardiansError.value) {
-    toast.add({ title: guardiansError.value, color: 'error' })
-  }
 }
 
-// ── Edit guardian modal ───────────────────────────────────────────────────────
-const editGuardianOpen   = ref(false)
-const editGuardianTarget = ref<Guardian | null>(null)
-const editGuardianState  = reactive<Partial<UpdateGuardianInput>>({})
-
 function openEditGuardian(g: Guardian) {
-  editGuardianTarget.value   = g
-  editGuardianState.firstName   = g.firstName
-  editGuardianState.lastName    = g.lastName
-  editGuardianState.email       = g.email
-  editGuardianState.phone       = g.phone
-  editGuardianState.relationship = g.relationship
-  editGuardianState.isPrimary   = g.isPrimary
-  editGuardianState.notes       = g.notes
-  editGuardianOpen.value        = true
+  editGuardianModal.open(g as unknown as UpdateGuardianInput)
+  removeGuardianModal.state.id = g.id
 }
 
 async function onEditGuardianSubmit(event: FormSubmitEvent<UpdateGuardianInput>) {
-  if (!editGuardianTarget.value) return
-  const ok = await updateGuardian(editGuardianTarget.value.id, event.data)
-  if (ok) {
-    editGuardianOpen.value = false
-    toast.add({ title: t('guardians.updateSuccess'), color: 'success' })
-  } else if (guardiansError.value) {
-    toast.add({ title: guardiansError.value, color: 'error' })
-  }
+  const guardianId = removeGuardianModal.state.id as string
+  if (!guardianId) return
+  await editGuardianModal.submit(async () => {
+    const ok = await updateGuardian(guardianId, event.data)
+    if (ok) {
+      toast.add({ title: t('guardians.updateSuccess'), color: 'success' })
+    } else if (guardiansError.value) {
+      toast.add({ title: guardiansError.value, color: 'error' })
+    }
+  })
 }
 
-// ── Remove guardian ───────────────────────────────────────────────────────────
-const removeGuardianOpen   = ref(false)
-const removeGuardianTarget = ref<Guardian | null>(null)
-
 function openRemoveGuardian(g: Guardian) {
-  removeGuardianTarget.value = g
-  removeGuardianOpen.value   = true
+  removeGuardianModal.state.id = g.id
+  removeGuardianModal.isOpen = true
 }
 
 async function onRemoveGuardianConfirm() {
-  if (!removeGuardianTarget.value) return
-  const ok = await removeGuardian(removeGuardianTarget.value.id)
-  if (ok) {
-    removeGuardianOpen.value = false
-    toast.add({ title: t('guardians.removeSuccess'), color: 'success' })
-  } else if (guardiansError.value) {
-    toast.add({ title: guardiansError.value, color: 'error' })
+  const guardianId = removeGuardianModal.state.id as string
+  if (!guardianId) return
+  removeGuardianModal.loading = true
+  try {
+    const ok = await removeGuardian(guardianId)
+    if (ok) {
+      removeGuardianModal.isOpen = false
+      toast.add({ title: t('guardians.removeSuccess'), color: 'success' })
+    } else if (guardiansError.value) {
+      toast.add({ title: guardiansError.value, color: 'error' })
+    }
+  } finally {
+    removeGuardianModal.loading = false
   }
 }
 
@@ -184,15 +177,15 @@ function shortId(id: string): string {
     </NuxtLink>
 
     <!-- Loading -->
-    <div v-if="childLoading" class="flex gap-6">
-      <div class="h-96 w-1/3 animate-pulse rounded-2xl bg-white border border-border" />
-      <div class="h-96 flex-1 animate-pulse rounded-2xl bg-white border border-border" />
+    <div v-if="childLoading" class="flex flex-col gap-6 lg:flex-row">
+      <div class="h-96 w-full animate-pulse rounded-2xl border border-border bg-white lg:w-1/3" />
+      <div class="h-96 w-full flex-1 animate-pulse rounded-2xl border border-border bg-white" />
     </div>
 
     <template v-else-if="child">
-      <div class="flex gap-6 items-start">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
         <!-- ── Left panel (1/3) ───────────────────────────────────────────── -->
-        <div class="w-1/3 space-y-4">
+        <div class="w-full space-y-4 lg:w-1/3">
           <!-- Photo + name card -->
           <div class="rounded-2xl border border-border bg-white p-6 text-center">
             <BaseAvatar :name="child.fullName" size="lg" class="mx-auto" />
@@ -268,7 +261,7 @@ function shortId(id: string): string {
         </div>
 
         <!-- ── Right panel (flex-1) ──────────────────────────────────────── -->
-        <div class="flex-1 space-y-4">
+        <div class="w-full flex-1 space-y-4">
           <!-- Medical alerts -->
           <div
             :class="[
@@ -324,7 +317,7 @@ function shortId(id: string): string {
               {{ t('guardians.empty') }}
             </p>
 
-            <div v-else class="mt-4 grid grid-cols-2 gap-4">
+            <div v-else class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <!-- Primary guardian -->
               <div
                 v-if="primaryGuardian"
@@ -335,8 +328,8 @@ function shortId(id: string): string {
                     {{ t('guardians.primary') }}
                   </span>
                   <div v-if="canMutate" class="flex gap-1">
-                    <UButton size="xs" color="neutral" variant="ghost" icon="i-heroicons-pencil" @click="openEditGuardian(primaryGuardian)" />
-                    <UButton size="xs" color="error" variant="ghost" icon="i-heroicons-trash" @click="openRemoveGuardian(primaryGuardian)" />
+                    <UButton size="xs" color="neutral" variant="ghost" icon="i-heroicons-pencil" :aria-label="t('guardians.editGuardian')" @click="openEditGuardian(primaryGuardian)" />
+                    <UButton size="xs" color="error" variant="ghost" icon="i-heroicons-trash" :aria-label="t('guardians.removeGuardian')" @click="openRemoveGuardian(primaryGuardian)" />
                   </div>
                 </div>
                 <div class="mt-3">
@@ -364,8 +357,8 @@ function shortId(id: string): string {
               >
                 <div class="flex items-start justify-end">
                   <div v-if="canMutate" class="flex gap-1">
-                    <UButton size="xs" color="neutral" variant="ghost" icon="i-heroicons-pencil" @click="openEditGuardian(g)" />
-                    <UButton size="xs" color="error" variant="ghost" icon="i-heroicons-trash" @click="openRemoveGuardian(g)" />
+                    <UButton size="xs" color="neutral" variant="ghost" icon="i-heroicons-pencil" :aria-label="t('guardians.editGuardian')" @click="openEditGuardian(g)" />
+                    <UButton size="xs" color="error" variant="ghost" icon="i-heroicons-trash" :aria-label="t('guardians.removeGuardian')" @click="openRemoveGuardian(g)" />
                   </div>
                 </div>
                 <div>
@@ -400,127 +393,121 @@ function shortId(id: string): string {
       {{ t('children.notFound') }}
     </div>
 
-    <!-- ── Modals ──────────────────────────────────────────────────────────── -->
-
-    <!-- Edit child -->
-    <UModal v-model:open="editOpen">
+    <UModal v-model:open="editModal.isOpen">
       <template #header>
         <h2 class="text-base font-semibold text-slate-800">{{ t('children.editTitle') }}</h2>
       </template>
       <template #body>
-        <UForm :schema="updateChildSchema" :state="editState" class="space-y-4" @submit="onEditSubmit">
-          <div class="grid grid-cols-2 gap-4">
+        <UForm :schema="updateChildSchema" :state="editModal.state" class="space-y-4" @submit="onEditSubmit">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField :label="t('children.firstName')" name="firstName">
-              <UInput v-model="editState.firstName" class="w-full" />
+              <UInput v-model="editModal.state.firstName" class="w-full" />
             </UFormField>
             <UFormField :label="t('children.lastName')" name="lastName">
-              <UInput v-model="editState.lastName" class="w-full" />
+              <UInput v-model="editModal.state.lastName" class="w-full" />
             </UFormField>
           </div>
           <UFormField :label="t('children.birthDate')" name="birthDate">
-            <UInput v-model="editState.birthDate" type="date" class="w-full" />
+            <UInput v-model="editModal.state.birthDate" type="date" class="w-full" />
           </UFormField>
           <UFormField :label="t('children.group')" name="groupId">
-            <USelect v-model="editState.groupId" :items="groupOptions" class="w-full" />
+            <USelect v-model="editModal.state.groupId" :items="groupOptions" class="w-full" />
           </UFormField>
           <UFormField :label="t('children.bloodGroup')" name="bloodGroup">
             <USelect
-              v-model="editState.bloodGroup"
+              v-model="editModal.state.bloodGroup"
               :items="[{ label: '—', value: null }, ...['A+','A-','B+','B-','AB+','AB-','O+','O-'].map(bg => ({ label: bg, value: bg }))]"
               class="w-full"
             />
           </UFormField>
           <UFormField :label="t('children.allergies')" name="allergies">
-            <UTextarea v-model="editState.allergies" :rows="2" class="w-full" />
+            <UTextarea v-model="editModal.state.allergies" :rows="2" class="w-full" />
           </UFormField>
           <UFormField :label="t('children.medicalNotes')" name="medicalNotes">
-            <UTextarea v-model="editState.medicalNotes" :rows="2" class="w-full" />
+            <UTextarea v-model="editModal.state.medicalNotes" :rows="2" class="w-full" />
           </UFormField>
-          <UButton type="submit" color="primary" loading-auto :loading="editLoading">{{ t('common.save') }}</UButton>
+          <UButton type="submit" color="primary" loading-auto :loading="editModal.loading">{{ t('common.save') }}</UButton>
         </UForm>
       </template>
     </UModal>
 
-    <!-- Add guardian -->
-    <UModal v-model:open="addGuardianOpen">
+    <UModal v-model:open="addGuardianModal.isOpen">
       <template #header>
         <h2 class="text-base font-semibold text-slate-800">{{ t('guardians.addGuardian') }}</h2>
       </template>
       <template #body>
-        <UForm :schema="createGuardianSchema" :state="addGuardianState" class="space-y-4" @submit="onAddGuardianSubmit">
-          <div class="grid grid-cols-2 gap-4">
+        <UForm :schema="createGuardianSchema" :state="addGuardianModal.state" class="space-y-4" @submit="onAddGuardianSubmit">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField :label="t('guardians.firstName')" name="firstName">
-              <UInput v-model="addGuardianState.firstName" class="w-full" />
+              <UInput v-model="addGuardianModal.state.firstName" class="w-full" />
             </UFormField>
             <UFormField :label="t('guardians.lastName')" name="lastName">
-              <UInput v-model="addGuardianState.lastName" class="w-full" />
+              <UInput v-model="addGuardianModal.state.lastName" class="w-full" />
             </UFormField>
           </div>
           <UFormField :label="t('guardians.relationship')" name="relationship">
-            <USelect v-model="addGuardianState.relationship" :items="relationshipOptions" class="w-full" />
+            <USelect v-model="addGuardianModal.state.relationship" :items="relationshipOptions" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.phone')" name="phone">
-            <UInput v-model="addGuardianState.phone" class="w-full" />
+            <UInput v-model="addGuardianModal.state.phone" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.email')" name="email">
-            <UInput v-model="addGuardianState.email" type="email" class="w-full" />
+            <UInput v-model="addGuardianModal.state.email" type="email" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.notes')" name="notes">
-            <UTextarea v-model="addGuardianState.notes" :rows="2" class="w-full" />
+            <UTextarea v-model="addGuardianModal.state.notes" :rows="2" class="w-full" />
           </UFormField>
           <UFormField name="isPrimary">
-            <UCheckbox v-model="addGuardianState.isPrimary" :label="t('guardians.isPrimary')" />
+            <UCheckbox v-model="addGuardianModal.state.isPrimary" :label="t('guardians.isPrimary')" />
           </UFormField>
           <UButton type="submit" color="primary" block loading-auto>{{ t('guardians.addGuardian') }}</UButton>
         </UForm>
       </template>
     </UModal>
 
-    <!-- Edit guardian -->
-    <UModal v-model:open="editGuardianOpen">
+    <UModal v-model:open="editGuardianModal.isOpen">
       <template #header>
         <h2 class="text-base font-semibold text-slate-800">{{ t('guardians.editGuardian') }}</h2>
       </template>
       <template #body>
-        <UForm :schema="updateGuardianSchema" :state="editGuardianState" class="space-y-4" @submit="onEditGuardianSubmit">
-          <div class="grid grid-cols-2 gap-4">
+        <UForm :schema="updateGuardianSchema" :state="editGuardianModal.state" class="space-y-4" @submit="onEditGuardianSubmit">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <UFormField :label="t('guardians.firstName')" name="firstName">
-              <UInput v-model="editGuardianState.firstName" class="w-full" />
+              <UInput v-model="editGuardianModal.state.firstName" class="w-full" />
             </UFormField>
             <UFormField :label="t('guardians.lastName')" name="lastName">
-              <UInput v-model="editGuardianState.lastName" class="w-full" />
+              <UInput v-model="editGuardianModal.state.lastName" class="w-full" />
             </UFormField>
           </div>
           <UFormField :label="t('guardians.relationship')" name="relationship">
-            <USelect v-model="editGuardianState.relationship" :items="relationshipOptions" class="w-full" />
+            <USelect v-model="editGuardianModal.state.relationship" :items="relationshipOptions" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.phone')" name="phone">
-            <UInput v-model="editGuardianState.phone" class="w-full" />
+            <UInput v-model="editGuardianModal.state.phone" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.email')" name="email">
-            <UInput v-model="editGuardianState.email" type="email" class="w-full" />
+            <UInput v-model="editGuardianModal.state.email" type="email" class="w-full" />
           </UFormField>
           <UFormField :label="t('guardians.notes')" name="notes">
-            <UTextarea v-model="editGuardianState.notes" :rows="2" class="w-full" />
+            <UTextarea v-model="editGuardianModal.state.notes" :rows="2" class="w-full" />
           </UFormField>
           <UFormField name="isPrimary">
-            <UCheckbox v-model="editGuardianState.isPrimary" :label="t('guardians.isPrimary')" />
+            <UCheckbox v-model="editGuardianModal.state.isPrimary" :label="t('guardians.isPrimary')" />
           </UFormField>
-          <UButton type="submit" color="primary" loading-auto>{{ t('common.save') }}</UButton>
+          <UButton type="submit" color="primary" loading-auto :loading="editGuardianModal.loading">{{ t('common.save') }}</UButton>
         </UForm>
       </template>
     </UModal>
 
-    <!-- Remove guardian confirm -->
-    <UModal v-model:open="removeGuardianOpen">
+    <UModal v-model:open="removeGuardianModal.isOpen">
       <template #header>
         <h2 class="text-base font-semibold text-slate-800">{{ t('guardians.confirmRemoveTitle') }}</h2>
       </template>
       <template #body>
         <p class="text-sm text-slate-500">{{ t('guardians.confirmRemoveBody') }}</p>
         <div class="mt-6 flex justify-end gap-3">
-          <UButton color="neutral" variant="ghost" @click="removeGuardianOpen = false">{{ t('common.cancel') }}</UButton>
-          <UButton color="error" loading-auto @click="onRemoveGuardianConfirm">{{ t('guardians.removeGuardian') }}</UButton>
+          <UButton color="neutral" variant="ghost" @click="removeGuardianModal.isOpen = false">{{ t('common.cancel') }}</UButton>
+          <UButton color="error" loading-auto :loading="removeGuardianModal.loading" @click="onRemoveGuardianConfirm">{{ t('guardians.removeGuardian') }}</UButton>
         </div>
       </template>
     </UModal>

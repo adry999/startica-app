@@ -23,7 +23,7 @@ export async function listStaff(
   if (error || !data) return { success: false, error: error?.message ?? 'list_failed' }
   return {
     success: true,
-    data: data.map(({ user_kindergartens: _join, ...user }) => user as UserRow),
+    data: data.map(({ user_kindergartens: _, ...user }) => user as UserRow),
   }
 }
 
@@ -31,11 +31,9 @@ export async function updateStaffProfile(
   client: Client,
   userId: string,
   data: { fullName: string; role?: UserRole },
-  actorId: string,
 ): Promise<Result<UserRow>> {
   const payload: Database['public']['Tables']['users']['Update'] = {
     full_name: data.fullName,
-    updated_by: actorId,
     ...(data.role !== undefined && { role: data.role }),
   }
 
@@ -54,11 +52,10 @@ export async function setStaffStatus(
   client: Client,
   userId: string,
   status: UserStatus,
-  actorId: string,
 ): Promise<Result<UserRow>> {
   const { data, error } = await client
     .from('users')
-    .update({ status, updated_by: actorId })
+    .update({ status })
     .eq('id', userId)
     .select('*')
     .single()

@@ -20,15 +20,16 @@ const group = ref<Group | null>(null)
 const { pending: groupLoading } = useLazyAsyncData(
   `group-${props.id}`,
   async () => {
+    group.value = null
     const g = await groupsStore.fetchById(props.id)
     if (g) group.value = g
     await fetchByGroup(props.id)
     // fetch staff after group loads so we have kindergartenId
     if (g) await staffStore.fetchAll(g.kindergartenId)
   },
+  { watch: [() => props.id] },
 )
 
-// ── Edit modal ──────────────────────────────────────────────────────────────
 const editOpen  = ref(false)
 const editState = reactive<Partial<UpdateGroupInput>>({})
 const updating  = ref(false)
