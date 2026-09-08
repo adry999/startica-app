@@ -53,6 +53,8 @@
     "groups": "Grupe",
     "children": "Copii",
     "settings": "Setări",
+    "pool": "Piscină",
+    "payroll": "Salarizare",
     "comingSoon": "În curând"
   },
   "tenant": {
@@ -322,58 +324,6 @@
       "empty": "Niciun copil în această grupă."
     },
     "notFound": "Grupă negăsită."
-  },
-  "pool": {
-    "pageTitle": "Bazin",
-    "pageSubtitle": "Program de înot și antrenori.",
-    "calendarTab": "Calendar",
-    "settingsTab": "Setări antrenor",
-    "session": {
-      "capacity": "Locuri: {enrolled}/{capacity}",
-      "cancelled": "Anulată",
-      "cancel": "Anulează sesiunea",
-      "confirmCancelTitle": "Anulează sesiunea",
-      "confirmCancelBody": "Sesiunea va fi marcată ca anulată.",
-      "viewParticipants": "Vezi participanții",
-      "empty": "Nicio sesiune programată."
-    },
-    "participants": {
-      "title": "Participanți",
-      "addChild": "Adaugă copil",
-      "remove": "Elimină",
-      "full": "Sesiunea este completă.",
-      "empty": "Niciun copil înscris."
-    },
-    "availability": {
-      "title": "Disponibilitate",
-      "add": "Adaugă interval",
-      "remove": "Elimină",
-      "weekday": "Zi",
-      "startTime": "Ora început",
-      "endTime": "Ora sfârșit",
-      "empty": "Niciun interval de disponibilitate."
-    },
-    "pattern": {
-      "title": "Program recurent",
-      "add": "Adaugă tipar",
-      "remove": "Elimină",
-      "group": "Grupă implicită",
-      "noGroup": "Fără grupă implicită",
-      "capacity": "Capacitate",
-      "activeFrom": "Activ de la",
-      "activeUntil": "Activ până la",
-      "outsideAvailability": "Intervalul ales nu se încadrează în disponibilitatea antrenorului.",
-      "empty": "Niciun tipar de program."
-    },
-    "weekday": {
-      "0": "Duminică",
-      "1": "Luni",
-      "2": "Marți",
-      "3": "Miercuri",
-      "4": "Joi",
-      "5": "Vineri",
-      "6": "Sâmbătă"
-    }
   },
   "settings": {
     "pageTitle": "Setări",

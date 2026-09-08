@@ -53,6 +53,8 @@
     "groups": "Groups",
     "children": "Children",
     "settings": "Settings",
+    "pool": "Pool",
+    "payroll": "Payroll",
     "comingSoon": "Coming soon"
   },
   "tenant": {
@@ -322,58 +324,6 @@
       "empty": "No children in this group."
     },
     "notFound": "Group not found."
-  },
-  "pool": {
-    "pageTitle": "Pool",
-    "pageSubtitle": "Swim schedule and trainers.",
-    "calendarTab": "Calendar",
-    "settingsTab": "Trainer settings",
-    "session": {
-      "capacity": "Spots: {enrolled}/{capacity}",
-      "cancelled": "Cancelled",
-      "cancel": "Cancel session",
-      "confirmCancelTitle": "Cancel session",
-      "confirmCancelBody": "The session will be marked as cancelled.",
-      "viewParticipants": "View participants",
-      "empty": "No sessions scheduled."
-    },
-    "participants": {
-      "title": "Participants",
-      "addChild": "Add child",
-      "remove": "Remove",
-      "full": "This session is full.",
-      "empty": "No children enrolled."
-    },
-    "availability": {
-      "title": "Availability",
-      "add": "Add window",
-      "remove": "Remove",
-      "weekday": "Day",
-      "startTime": "Start time",
-      "endTime": "End time",
-      "empty": "No availability windows."
-    },
-    "pattern": {
-      "title": "Recurring schedule",
-      "add": "Add pattern",
-      "remove": "Remove",
-      "group": "Default group",
-      "noGroup": "No default group",
-      "capacity": "Capacity",
-      "activeFrom": "Active from",
-      "activeUntil": "Active until",
-      "outsideAvailability": "The chosen window doesn't fit the trainer's availability.",
-      "empty": "No schedule patterns."
-    },
-    "weekday": {
-      "0": "Sunday",
-      "1": "Monday",
-      "2": "Tuesday",
-      "3": "Wednesday",
-      "4": "Thursday",
-      "5": "Friday",
-      "6": "Saturday"
-    }
   },
   "settings": {
     "pageTitle": "Settings",
