@@ -72,6 +72,23 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: (id: string) => {
+            if (!id.includes('node_modules')) return
+            if (id.includes('@nuxt/ui')) return 'nuxt-ui'
+            if (id.includes('@nuxtjs/i18n') || id.includes('vue-i18n')) return 'i18n'
+            if (id.includes('supabase')) return 'supabase'
+            return 'vendor'
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600,
+    },
+  },
+
   runtimeConfig: {
     // server-only (never exposed to the client)
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
