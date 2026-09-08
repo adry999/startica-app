@@ -228,6 +228,11 @@ const columns = computed<TableColumn<Child>[]>(() => [
     },
   },
   {
+    accessorKey: 'contractNumber',
+    header: 'Contract #',
+    cell: ({ row }) => h('span', { class: 'text-sm font-mono text-slate-600' }, row.original.contractNumber ?? '—'),
+  },
+  {
     accessorKey: 'age',
     header: t('children.table.age'),
     cell: ({ row }) => h('span', { class: 'text-sm tabular-nums text-slate-500' }, t('children.years', { n: row.original.age })),
@@ -395,6 +400,20 @@ const columns = computed<TableColumn<Child>[]>(() => [
               <UInput v-model="addState.nationalId" class="w-full" />
             </UFormField>
           </div>
+          <div class="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <h3 class="text-sm font-semibold text-slate-800">Contract Info</h3>
+            <UFormField label="Contract Number" name="contractNumber">
+              <UInput v-model="addState.contractNumber" placeholder="e.g., KG-2024-001" class="w-full" />
+            </UFormField>
+            <div class="grid grid-cols-2 gap-4">
+              <UFormField label="Contract Signed" name="contractSignedAt">
+                <UInput v-model="addState.contractSignedAt" type="date" class="w-full" />
+              </UFormField>
+              <UFormField label="Enrollment Start" name="enrollmentStartDate">
+                <UInput v-model="addState.enrollmentStartDate" type="date" class="w-full" />
+              </UFormField>
+            </div>
+          </div>
           <UButton type="submit" color="primary" block loading-auto :loading="loading">
             {{ t('children.addTitle') }}
           </UButton>
@@ -450,6 +469,20 @@ const columns = computed<TableColumn<Child>[]>(() => [
             <UFormField :label="t('children.nationalId')" name="nationalId">
               <UInput v-model="editState.nationalId" class="w-full" />
             </UFormField>
+          </div>
+          <div class="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <h3 class="text-sm font-semibold text-slate-800">Contract Info</h3>
+            <UFormField label="Contract Number" name="contractNumber">
+              <UInput v-model="editState.contractNumber" placeholder="e.g., KG-2024-001" class="w-full" />
+            </UFormField>
+            <div class="grid grid-cols-2 gap-4">
+              <UFormField label="Contract Signed" name="contractSignedAt">
+                <UInput v-model="editState.contractSignedAt" type="date" class="w-full" />
+              </UFormField>
+              <UFormField label="Enrollment Start" name="enrollmentStartDate">
+                <UInput v-model="editState.enrollmentStartDate" type="date" class="w-full" />
+              </UFormField>
+            </div>
           </div>
           <UButton type="submit" color="primary" loading-auto :loading="loading">{{ t('common.save') }}</UButton>
         </UForm>
