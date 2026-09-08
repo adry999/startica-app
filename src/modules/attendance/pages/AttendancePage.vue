@@ -97,6 +97,15 @@ const statusOptions = [
   { label: t('attendance.status.excused'), value: 'excused', icon: '~', color: 'yellow' },
   { label: t('attendance.status.sick'), value: 'sick', icon: '🤒', color: 'orange' },
 ]
+
+// Written out in full rather than built as `bg-${opt.color}-600`: Tailwind
+// scans for literal class strings, so an interpolated name is never generated.
+const statusButtonClasses: Record<string, string> = {
+  present: 'bg-green-600 text-white ring-green-500',
+  absent: 'bg-red-600 text-white ring-red-500',
+  excused: 'bg-yellow-600 text-white ring-yellow-500',
+  sick: 'bg-orange-600 text-white ring-orange-500',
+}
 </script>
 
 <template>
@@ -193,12 +202,13 @@ const statusOptions = [
             <button
               v-for="opt in statusOptions"
               :key="opt.value"
-              @click="handleStatusChange(child.id, opt.value)"
-              :class="{
-                'ring-2 ring-offset-2': child.status === opt.value,
-              }"
               class="rounded-full p-2 text-sm font-medium transition"
-              :class="child.status === opt.value ? `bg-${opt.color}-600 text-white ring-${opt.color}-500` : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+              :class="child.status === opt.value
+                ? `${statusButtonClasses[opt.value]} ring-2 ring-offset-2`
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+              :aria-label="opt.label"
+              :aria-pressed="child.status === opt.value"
+              @click="handleStatusChange(child.id, opt.value)"
             >
               {{ opt.icon }}
             </button>

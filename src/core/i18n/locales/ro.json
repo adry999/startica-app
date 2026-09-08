@@ -55,7 +55,9 @@
     "settings": "Setări",
     "pool": "Piscină",
     "payroll": "Salarizare",
-    "comingSoon": "În curând"
+    "comingSoon": "În curând",
+    "openMenu": "Deschide meniul",
+    "closeMenu": "Închide meniul"
   },
   "tenant": {
     "all": "Toate grădinițele"

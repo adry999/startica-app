@@ -55,7 +55,9 @@
     "settings": "Settings",
     "pool": "Pool",
     "payroll": "Payroll",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "tenant": {
     "all": "All kindergartens"
