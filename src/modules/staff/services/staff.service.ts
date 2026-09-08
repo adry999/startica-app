@@ -15,7 +15,7 @@ export async function listStaff(
 ): Promise<Result<UserRow[]>> {
   const { data, error } = await client
     .from('users')
-    .select('*, user_kindergartens!inner(kindergarten_id)')
+    .select('*, user_kindergartens!user_kindergartens_user_id_fkey!inner(kindergarten_id)')
     .eq('user_kindergartens.kindergarten_id', kindergartenId)
     .is('deleted_at', null)
     .neq('role', STAFF_EXCLUDED_ROLES[0])

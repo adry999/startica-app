@@ -144,17 +144,21 @@ describe('usePermissions — pool/payroll', () => {
     expect(usePermissions().can('view', 'payroll', 'kg-2')).toBe(false)
   })
 
-  it('educator grant matches any kindergarten when the id is ALL or omitted', () => {
+  // Single-kindergarten mode removed the 'ALL' selection, so an omitted id is
+  // now the only "any kindergarten" form; a supplied id is always scoped.
+  it('educator grant matches any kindergarten when the id is omitted', () => {
     setUser('educator', [{ kindergartenId: 'kg-2', moduleKey: 'pool' }])
     const { can } = usePermissions()
-    expect(can('view', 'pool', 'ALL')).toBe(true)
     expect(can('view', 'pool')).toBe(true)
+    expect(can('view', 'pool', 'kg-2')).toBe(true)
+    expect(can('view', 'pool', 'kg-1')).toBe(false)
   })
 
   it('payrollScope matches any kindergarten when the id is omitted', () => {
     setUser('educator', [{ kindergartenId: 'kg-2', moduleKey: 'payroll_own' }])
     expect(usePermissions().payrollScope()).toBe('own')
-    expect(usePermissions().payrollScope('ALL')).toBe('own')
+    expect(usePermissions().payrollScope('kg-2')).toBe('own')
+    expect(usePermissions().payrollScope('kg-1')).toBeNull()
   })
 
   it('canManagePoolTrainer: admin and super_admin bypass the trainer-identity check', () => {

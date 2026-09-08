@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
+import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as kindergartensService from '../services/kindergartens.service'
 import type { KindergartenRow } from '../services/kindergartens.service'

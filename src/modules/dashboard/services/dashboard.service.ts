@@ -26,7 +26,7 @@ export async function fetchStats(
 
   const staffQuery = client
     .from('users')
-    .select('id, user_kindergartens!inner(kindergarten_id)', { count: 'exact', head: true })
+    .select('id, user_kindergartens!user_kindergartens_user_id_fkey!inner(kindergarten_id)', { count: 'exact', head: true })
     .eq('user_kindergartens.kindergarten_id', kindergartenId)
     .eq('status', 'active')
     .is('deleted_at', null)
@@ -134,7 +134,7 @@ export async function fetchStaffOnDuty(
 ): Promise<Result<StaffDuty[]>> {
   const { data, error } = await client
     .from('users')
-    .select('id, full_name, role, user_kindergartens!inner(kindergarten_id)')
+    .select('id, full_name, role, user_kindergartens!user_kindergartens_user_id_fkey!inner(kindergarten_id)')
     .eq('user_kindergartens.kindergarten_id', kindergartenId)
     .eq('status', 'active')
     .is('deleted_at', null)

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
+import { useAuthStore } from '~/modules/auth/stores/auth.store'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as staffService from '../services/staff.service'
 import type { UserRow } from '../services/staff.service'
