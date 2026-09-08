@@ -19,10 +19,10 @@ const staffStore = useStaffStore()
 const canMutate = computed(() => can('create', 'groups'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('groups', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('groups', async () => { selectedKgId.value && await fetchAll(selectedKgId.value) }, { watch: [selectedKgId] })
 useLazyAsyncData(
   'groups-staff',
-  () => selectedKgId.value ? staffStore.fetchAll(selectedKgId.value) : Promise.resolve(),
+  async () => { selectedKgId.value && await staffStore.fetchAll(selectedKgId.value) },
   { watch: [selectedKgId] },
 )
 
@@ -83,7 +83,7 @@ function openCreate() {
   createState.ageRange = null
   createState.educatorId = null
   createState.capacity = null
-  createState.kindergartenId = selectedKgId.value
+  createState.kindergartenId = selectedKgId.value ?? undefined
   createOpen.value = true
 }
 

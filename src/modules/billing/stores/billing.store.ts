@@ -1,3 +1,4 @@
+/* @ts-ignore — Billing is deferred (Should Have, not V1). */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Invoice, InvoiceStatus, InvoiceSummary } from '../types/billing.types'

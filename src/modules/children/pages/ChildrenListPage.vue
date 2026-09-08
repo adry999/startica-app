@@ -22,9 +22,9 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 const canMutate   = computed(() => can('create', 'children'))
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
-useLazyAsyncData('children', () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('children', async () => { selectedKgId.value && await fetchAll(selectedKgId.value) }, { watch: [selectedKgId] })
 useLazyAsyncData('children-groups',
-  () => selectedKgId.value ? groupsStore.fetchAll(selectedKgId.value) : Promise.resolve(),
+  async () => { selectedKgId.value && await groupsStore.fetchAll(selectedKgId.value) },
   { watch: [selectedKgId] },
 )
 
@@ -121,7 +121,7 @@ function openAdd() {
   addState.nationalId = null
   addState.idType = null
   addState.groupId = null
-  addState.kindergartenId = selectedKgId.value
+  addState.kindergartenId = selectedKgId.value ?? undefined
   addState.contractNumber = null
   addState.contractSignedAt = null
   addState.enrollmentStartDate = null

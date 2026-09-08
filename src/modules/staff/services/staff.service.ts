@@ -32,10 +32,12 @@ export async function updateStaffProfile(
   client: Client,
   userId: string,
   data: { fullName: string; role?: UserRole },
+  updatedBy?: string,
 ): Promise<Result<UserRow>> {
   const payload: Database['public']['Tables']['users']['Update'] = {
     full_name: data.fullName,
     ...(data.role !== undefined && { role: data.role }),
+    ...(updatedBy && { updated_by: updatedBy }),
   }
 
   const { data: updated, error } = await client

@@ -32,7 +32,6 @@ const selectedKgLabel = computed(() => {
 
 const navItems = computed(() => [
   { label: t('nav.overview'),      to: '/',               icon: 'i-heroicons-squares-2x2',      enabled: true },
-  { label: t('nav.kindergartens'), to: '/kindergartens',  icon: 'i-heroicons-building-office-2', enabled: can('read', 'kindergarten') },
   { label: t('nav.staff'),         to: '/staff',          icon: 'i-heroicons-user-group',        enabled: can('read', 'staff') },
   { label: t('nav.groups'),        to: '/groups',         icon: 'i-heroicons-users',             enabled: can('read', 'groups') },
   { label: t('nav.children'),      to: '/children',       icon: 'i-heroicons-academic-cap',      enabled: can('read', 'children') },

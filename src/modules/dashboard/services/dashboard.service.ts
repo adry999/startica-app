@@ -96,12 +96,20 @@ export async function fetchRecentActivity(
   client: Client,
   kindergartenId: string,
 ): Promise<Result<ActivityEntry[]>> {
+  return fetchActivity(client, kindergartenId, 8)
+}
+
+export async function fetchActivity(
+  client: Client,
+  kindergartenId: string,
+  limit: number,
+): Promise<Result<ActivityEntry[]>> {
   const query = client
     .from('audit_logs')
     .select('id, action, entity, entity_id, created_at, users!audit_logs_user_id_fkey(full_name)')
     .eq('kindergarten_id', kindergartenId)
     .order('created_at', { ascending: false })
-    .limit(8)
+    .limit(limit)
 
   const { data, error } = await query
 

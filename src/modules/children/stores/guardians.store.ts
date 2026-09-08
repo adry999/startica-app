@@ -40,31 +40,33 @@ export const useGuardiansStore = defineStore('guardians', {
         email?: string | null; phone?: string | null
         relationship?: GuardianRelationship; isPrimary?: boolean; notes?: string | null
       },
-    ) {
+    ): Promise<boolean> {
       this.loading = true
       this.error = null
       try {
         const result = await guardiansSvc.updateGuardian(useSupabaseClient(), id, input)
         if (!result.success) {
           this.error = result.error
-          return
+          return false
         }
         const idx = this.items.findIndex(g => g.id === id)
         if (idx !== -1) this.items[idx] = result.data
+        return true
       } finally {
         this.loading = false
       }
     },
-    async remove(id: string) {
+    async remove(id: string): Promise<boolean> {
       this.loading = true
       this.error = null
       try {
         const result = await guardiansSvc.removeGuardian(useSupabaseClient(), id)
         if (!result.success) {
           this.error = result.error
-          return
+          return false
         }
         this.items = this.items.filter(g => g.id !== id)
+        return true
       } finally {
         this.loading = false
       }

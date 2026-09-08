@@ -10,7 +10,7 @@ const { groupChildren, fetchByGroup } = useChildren()
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 const canView = computed(() => selectedKgId.value && can('view', 'pool', selectedKgId.value))
 
-useLazyAsyncData('pool-sessions', () => canView.value ? fetchSessions(selectedKgId.value) : Promise.resolve(), { watch: [selectedKgId] })
+useLazyAsyncData('pool-sessions', async () => { canView.value && selectedKgId.value && await fetchSessions(selectedKgId.value) }, { watch: [selectedKgId] })
 
 const drawerOpen = ref(false)
 const activeSessionId = ref<string | null>(null)
@@ -50,7 +50,7 @@ async function onCancelConfirm() {
 }
 
 function canManageSession(trainerUserId: string): boolean {
-  return canManagePoolTrainer(selectedKgId.value, trainerUserId)
+  return selectedKgId.value ? canManagePoolTrainer(selectedKgId.value, trainerUserId) : false
 }
 </script>
 

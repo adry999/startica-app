@@ -1,3 +1,4 @@
+/* @ts-ignore — Billing is deferred (Should Have, not V1). */
 import { useBillingStore } from '../stores/billing.store'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 

@@ -1,3 +1,4 @@
+/* @ts-ignore — Attendance is deferred (Should Have, not V1). Table not yet in schema. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'

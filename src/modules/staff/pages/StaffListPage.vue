@@ -27,7 +27,7 @@ const router = useRouter()
 
 useLazyAsyncData(
   'staff',
-  () => selectedKgId.value ? fetchAll(selectedKgId.value) : Promise.resolve(),
+  async () => { selectedKgId.value && await fetchAll(selectedKgId.value) },
   { watch: [selectedKgId] },
 )
 
@@ -57,7 +57,7 @@ function openInvite() {
   inviteState.email       = undefined
   inviteState.fullName    = undefined
   inviteState.role        = 'educator'
-  inviteState.kindergartenId = selectedKgId.value
+  inviteState.kindergartenId = selectedKgId.value ?? undefined
   inviteModalOpen.value   = true
 }
 

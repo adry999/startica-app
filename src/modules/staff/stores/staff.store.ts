@@ -34,15 +34,17 @@ export const useStaffStore = defineStore('staff', {
       )
     },
 
-    async invite(input: InviteStaffInput) {
+    async invite(input: InviteStaffInput): Promise<boolean> {
       this.loading = true
       this.error = null
 
       try {
         await $fetch('/api/staff/invite', { method: 'POST', body: input })
         await this.fetchAll(input.kindergartenId)
+        return true
       } catch (err: unknown) {
         this.error = err instanceof Error ? err.message : 'invite_failed'
+        return false
       } finally {
         this.loading = false
       }

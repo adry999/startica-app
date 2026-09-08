@@ -61,17 +61,18 @@ export const useChildrenStore = defineStore('children', {
         },
       )
     },
-    async setStatus(id: string, status: ChildStatus) {
+    async setStatus(id: string, status: ChildStatus): Promise<boolean> {
       this.loading = true
       this.error = null
       try {
         const result = await childrenService.setChildStatus(useSupabaseClient(), id, status)
         if (!result.success) {
           this.error = result.error
-          return
+          return false
         }
         const idx = this.items.findIndex(c => c.id === id)
         if (idx !== -1) this.items[idx]!.status = status
+        return true
       } finally {
         this.loading = false
       }
