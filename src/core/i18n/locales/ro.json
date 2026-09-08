@@ -532,6 +532,73 @@
     "stats.totalOverdue": "Total întârziat",
     "stats.pending": "În așteptare"
   },
+  "payments": {
+    "pageTitle": "Plăți",
+    "pageSubtitle": "Urmărire plăți și status confirmări.",
+    "title": "Plăți înregistrate",
+    "add": "Adaugă plată",
+    "create": "Adaugă plată nouă",
+    "invoiceId": "Factură",
+    "amount": "Suma",
+    "paidDate": "Data plății",
+    "method": "Metodă",
+    "refNumber": "Număr referință",
+    "notes": "Note",
+    "status": {
+      "pending": "În așteptare",
+      "confirmed": "Confirmată",
+      "failed": "Eșuată"
+    },
+    "confirm": "Confirmă",
+    "noPayments": "Nicio plată înregistrată.",
+    "methods": {
+      "bankTransfer": "Transfer bancar",
+      "cash": "Numerar",
+      "check": "Cec",
+      "online": "Online"
+    },
+    "stats": {
+      "total": "Total plăți confirmări",
+      "pending": "În așteptare",
+      "confirmed": "Confirmate",
+      "failed": "Eșuate"
+    }
+  },
+  "expenses": {
+    "pageTitle": "Cheltuieli",
+    "pageSubtitle": "Urmărire costuri operaționale și buget.",
+    "title": "Cheltuieli înregistrate",
+    "add": "Adaugă cheltuială",
+    "create": "Adaugă cheltuială nouă",
+    "category": "Categorie",
+    "amount": "Suma",
+    "expenseDate": "Data cheltuielii",
+    "description": "Descriere",
+    "approve": "Aprobă",
+    "reject": "Refuză",
+    "status": {
+      "draft": "Ciornă",
+      "approved": "Aprobată",
+      "rejected": "Refuzată"
+    },
+    "categories": {
+      "salaries": "Salarii",
+      "rent": "Chirie",
+      "utilities": "Utilități",
+      "supplies": "Consumabile",
+      "maintenance": "Întreținere",
+      "food": "Alimente",
+      "transportation": "Transport",
+      "other": "Altele"
+    },
+    "noExpenses": "Nicio cheltuială înregistrată.",
+    "stats": {
+      "totalSpent": "Total cheltuit",
+      "approved": "Aprobat",
+      "pending": "În așteptare",
+      "drafts": "Ciorne"
+    }
+  },
   "payroll": {
     "title": "Salarizare",
     "comingSoon": "Modulul Salarizare vine în curând."

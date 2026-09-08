@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -272,6 +272,86 @@ export type Database = {
           },
           {
             foreignKeyName: "children_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          expense_date: string
+          id: string
+          kindergarten_id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["expense_status"]
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          description?: string | null
+          expense_date: string
+          id?: string
+          kindergarten_id: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["expense_status"]
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          description?: string | null
+          expense_date?: string
+          id?: string
+          kindergarten_id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["expense_status"]
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
@@ -643,6 +723,86 @@ export type Database = {
           },
           {
             foreignKeyName: "parents_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          id: string
+          invoice_id: string
+          kindergarten_id: string
+          method: string
+          notes: string | null
+          paid_date: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          id?: string
+          invoice_id: string
+          kindergarten_id: string
+          method: string
+          notes?: string | null
+          paid_date: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          id?: string
+          invoice_id?: string
+          kindergarten_id?: string
+          method?: string
+          notes?: string | null
+          paid_date?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_kindergarten_id_fkey"
+            columns: ["kindergarten_id"]
+            isOneToOne: false
+            referencedRelation: "kindergartens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1177,10 +1337,21 @@ export type Database = {
     Enums: {
       attendance_status: "present" | "absent" | "excused" | "sick"
       child_status: "enrolled" | "withdrawn" | "graduated"
+      expense_category:
+        | "salaries"
+        | "rent"
+        | "utilities"
+        | "supplies"
+        | "maintenance"
+        | "food"
+        | "transportation"
+        | "other"
+      expense_status: "draft" | "approved" | "rejected"
       group_status: "active" | "archived"
       invoice_status: "draft" | "issued" | "paid" | "overdue" | "cancelled"
       kindergarten_status: "active" | "suspended"
       national_id_type: "CNP" | "IDNP"
+      payment_status: "pending" | "confirmed" | "failed"
       user_role: "super_admin" | "admin" | "educator" | "parent" | "child"
       user_status: "active" | "inactive"
     }
@@ -1315,10 +1486,22 @@ export const Constants = {
     Enums: {
       attendance_status: ["present", "absent", "excused", "sick"],
       child_status: ["enrolled", "withdrawn", "graduated"],
+      expense_category: [
+        "salaries",
+        "rent",
+        "utilities",
+        "supplies",
+        "maintenance",
+        "food",
+        "transportation",
+        "other",
+      ],
+      expense_status: ["draft", "approved", "rejected"],
       group_status: ["active", "archived"],
       invoice_status: ["draft", "issued", "paid", "overdue", "cancelled"],
       kindergarten_status: ["active", "suspended"],
       national_id_type: ["CNP", "IDNP"],
+      payment_status: ["pending", "confirmed", "failed"],
       user_role: ["super_admin", "admin", "educator", "parent", "child"],
       user_status: ["active", "inactive"],
     },

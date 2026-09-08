@@ -532,6 +532,73 @@
     "stats.totalOverdue": "Total Overdue",
     "stats.pending": "Pending"
   },
+  "payments": {
+    "pageTitle": "Payments",
+    "pageSubtitle": "Payment tracking and confirmation status.",
+    "title": "Recorded payments",
+    "add": "Add payment",
+    "create": "Add new payment",
+    "invoiceId": "Invoice",
+    "amount": "Amount",
+    "paidDate": "Payment date",
+    "method": "Method",
+    "refNumber": "Reference number",
+    "notes": "Notes",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "failed": "Failed"
+    },
+    "confirm": "Confirm",
+    "noPayments": "No payments recorded.",
+    "methods": {
+      "bankTransfer": "Bank transfer",
+      "cash": "Cash",
+      "check": "Check",
+      "online": "Online"
+    },
+    "stats": {
+      "total": "Total confirmed payments",
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "failed": "Failed"
+    }
+  },
+  "expenses": {
+    "pageTitle": "Expenses",
+    "pageSubtitle": "Track operational costs and budget.",
+    "title": "Recorded expenses",
+    "add": "Add expense",
+    "create": "Add new expense",
+    "category": "Category",
+    "amount": "Amount",
+    "expenseDate": "Expense date",
+    "description": "Description",
+    "approve": "Approve",
+    "reject": "Reject",
+    "status": {
+      "draft": "Draft",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "categories": {
+      "salaries": "Salaries",
+      "rent": "Rent",
+      "utilities": "Utilities",
+      "supplies": "Supplies",
+      "maintenance": "Maintenance",
+      "food": "Food",
+      "transportation": "Transportation",
+      "other": "Other"
+    },
+    "noExpenses": "No expenses recorded.",
+    "stats": {
+      "totalSpent": "Total spent",
+      "approved": "Approved",
+      "pending": "Pending",
+      "drafts": "Drafts"
+    }
+  },
   "payroll": {
     "title": "Payroll",
     "comingSoon": "The Payroll module is coming soon."
