@@ -510,6 +510,28 @@
       "6": "Saturday"
     }
   },
+  "billing": {
+    "pageTitle": "Billing",
+    "pageSubtitle": "Manage invoices and payments",
+    "filter": "Filter:",
+    "filter.all": "All",
+    "status.draft": "Draft",
+    "status.issued": "Issued",
+    "status.paid": "Paid",
+    "status.overdue": "Overdue",
+    "status.cancelled": "Cancelled",
+    "childName": "Child",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "status": "Status",
+    "markPaid": "Mark as paid",
+    "markPaidSuccess": "Invoice marked as paid.",
+    "noInvoices": "No invoices found.",
+    "stats.totalIssued": "Total Issued",
+    "stats.totalPaid": "Total Paid",
+    "stats.totalOverdue": "Total Overdue",
+    "stats.pending": "Pending"
+  },
   "payroll": {
     "title": "Payroll",
     "comingSoon": "The Payroll module is coming soon."

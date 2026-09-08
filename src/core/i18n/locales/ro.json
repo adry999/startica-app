@@ -510,6 +510,28 @@
       "6": "Sâmbătă"
     }
   },
+  "billing": {
+    "pageTitle": "Facturare",
+    "pageSubtitle": "Gestionează facturi și plăți",
+    "filter": "Filtru:",
+    "filter.all": "Toate",
+    "status.draft": "Ciornă",
+    "status.issued": "Emisă",
+    "status.paid": "Plătită",
+    "status.overdue": "Întârziate",
+    "status.cancelled": "Anulată",
+    "childName": "Copil",
+    "amount": "Suma",
+    "dueDate": "Scadență",
+    "status": "Stare",
+    "markPaid": "Marchează ca plătită",
+    "markPaidSuccess": "Factura a fost marcată ca plătită.",
+    "noInvoices": "Nicio factură găsită.",
+    "stats.totalIssued": "Total emis",
+    "stats.totalPaid": "Total plătit",
+    "stats.totalOverdue": "Total întârziat",
+    "stats.pending": "În așteptare"
+  },
   "payroll": {
     "title": "Salarizare",
     "comingSoon": "Modulul Salarizare vine în curând."

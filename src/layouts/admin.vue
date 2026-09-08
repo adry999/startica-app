@@ -37,6 +37,7 @@ const navItems = computed(() => [
   { label: t('nav.groups'),        to: '/groups',         icon: 'i-heroicons-users',             enabled: can('read', 'groups') },
   { label: t('nav.children'),      to: '/children',       icon: 'i-heroicons-academic-cap',      enabled: can('read', 'children') },
   { label: t('attendance.pageTitle'), to: '/attendance',   icon: 'i-heroicons-check-circle',      enabled: can('read', 'attendance') },
+  { label: t('billing.pageTitle'),   to: '/billing',       icon: 'i-heroicons-document-currency-dollar', enabled: can('read', 'children') },
   { label: t('nav.pool'),          to: '/pool',           icon: 'i-heroicons-lifebuoy',          enabled: can('view', 'pool', tenantStore.selectedKindergartenId) },
   { label: t('nav.payroll'),       to: '/payroll',        icon: 'i-heroicons-banknotes',         enabled: can('view', 'payroll', tenantStore.selectedKindergartenId) },
 ])
