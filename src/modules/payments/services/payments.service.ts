@@ -1,7 +1,7 @@
-/* @ts-ignore — Payments module. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
+import { paymentSchema, type PaymentInput } from '~/shared/schemas/payment.schema'
 import type { Payment, PaymentStatus } from '../types/payments.types'
 
 type Client = SupabaseClient<Database>
@@ -45,27 +45,25 @@ export async function listPayments(
 
 export async function createPayment(
   client: Client,
-  input: {
-    kindergartenId: string
-    invoiceId: string
-    amount: number
-    paidDate: string
-    method: string
-    referenceNumber?: string | null
-    notes?: string | null
-  },
+  input: PaymentInput,
   userId: string,
 ): Promise<Result<Payment>> {
+  const parsed = paymentSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'validation_failed' }
+  }
+  const v = parsed.data
+
   const { data, error } = await client
     .from('payments')
     .insert({
-      kindergarten_id: input.kindergartenId,
-      invoice_id: input.invoiceId,
-      amount: input.amount,
-      paid_date: input.paidDate,
-      method: input.method,
-      reference_number: input.referenceNumber ?? null,
-      notes: input.notes ?? null,
+      kindergarten_id: v.kindergartenId,
+      invoice_id: v.invoiceId,
+      amount: v.amount,
+      paid_date: v.paidDate,
+      method: v.method,
+      reference_number: v.referenceNumber ?? null,
+      notes: v.notes ?? null,
       created_by: userId,
       updated_by: userId,
     })

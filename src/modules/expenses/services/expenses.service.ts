@@ -1,7 +1,7 @@
-/* @ts-ignore — Expenses module. */
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
+import { expenseSchema, type ExpenseInput } from '~/shared/schemas/expense.schema'
 import type { Expense, ExpenseCategory, ExpenseStatus, ExpenseSummary } from '../types/expenses.types'
 
 type Client = SupabaseClient<Database>
@@ -45,23 +45,23 @@ export async function listExpenses(
 
 export async function createExpense(
   client: Client,
-  input: {
-    kindergartenId: string
-    category: ExpenseCategory
-    amount: number
-    expenseDate: string
-    description?: string | null
-  },
+  input: ExpenseInput,
   userId: string,
 ): Promise<Result<Expense>> {
+  const parsed = expenseSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'validation_failed' }
+  }
+  const v = parsed.data
+
   const { data, error } = await client
     .from('expenses')
     .insert({
-      kindergarten_id: input.kindergartenId,
-      category: input.category,
-      amount: input.amount,
-      expense_date: input.expenseDate,
-      description: input.description ?? null,
+      kindergarten_id: v.kindergartenId,
+      category: v.category,
+      amount: v.amount,
+      expense_date: v.expenseDate,
+      description: v.description ?? null,
       created_by: userId,
       updated_by: userId,
     })
@@ -119,7 +119,6 @@ export async function getSummary(
 
   const expenses = data ?? []
   const byCategory: Record<string, number> = {}
-  let totalSpent = 0
   let totalApproved = 0
   let totalPending = 0
 
@@ -135,7 +134,7 @@ export async function getSummary(
     }
   }
 
-  totalSpent = totalApproved + totalPending
+  const totalSpent = totalApproved + totalPending
 
   return { success: true, data: { totalSpent, totalApproved, totalPending, byCategory } }
 }

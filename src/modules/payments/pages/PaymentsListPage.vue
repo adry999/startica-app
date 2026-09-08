@@ -93,25 +93,29 @@
 </template>
 
 <script setup lang="ts">
-/* @ts-ignore — Payments module. */
 import { ref, computed } from 'vue'
+import type { PaymentMethod } from '~/shared/schemas/payment.schema'
 import { usePayments } from '../composables/usePayments'
 import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
 
 const { t } = useI18n()
-const toast = useToast()
 const tenantStore = useTenantStore()
 const { items, loading, totalConfirmed, fetchByInvoice, create, confirm } = usePayments()
 
 const isCreateModalOpen = ref(false)
-const createForm = ref({
-  invoiceId: '',
-  amount: 0,
-  paidDate: new Date().toISOString().split('T')[0],
-  method: 'bank_transfer',
-  referenceNumber: '',
-  notes: '',
-})
+
+function emptyPaymentForm() {
+  return {
+    invoiceId: '',
+    amount: 0,
+    paidDate: new Date().toISOString().split('T')[0] as string,
+    method: 'bank_transfer' as PaymentMethod,
+    referenceNumber: '',
+    notes: '',
+  }
+}
+
+const createForm = ref(emptyPaymentForm())
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
@@ -120,11 +124,8 @@ useLazyAsyncData('payments', async () => {
   await fetchByInvoice(selectedKgId.value, '')
 }, { watch: [selectedKgId] })
 
-// @ts-ignore
 const pendingCount = computed(() => items.value.filter(p => p.status === 'pending').length)
-// @ts-ignore
 const confirmedCount = computed(() => items.value.filter(p => p.status === 'confirmed').length)
-// @ts-ignore
 const failedCount = computed(() => items.value.filter(p => p.status === 'failed').length)
 
 function formatCurrency(amount: number): string {
@@ -152,14 +153,7 @@ async function submitCreate() {
   })
   if (success) {
     isCreateModalOpen.value = false
-    createForm.value = {
-      invoiceId: '',
-      amount: 0,
-      paidDate: new Date().toISOString().split('T')[0],
-      method: 'bank_transfer',
-      referenceNumber: '',
-      notes: '',
-    }
+    createForm.value = emptyPaymentForm()
   }
 }
 

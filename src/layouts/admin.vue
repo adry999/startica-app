@@ -13,17 +13,9 @@ useLazyAsyncData('admin-kindergartens', async () => {
   if (first) tenantStore.autoSelectFirst(first.id)
 })
 
-const tenantOptions = computed(() => {
-  // Single-KG mode: only return available kindergartens, no 'ALL' option
-  return kindergartensStore.items.map(kg => ({ label: kg.name, value: kg.id }))
-})
-
-const selectedKgLabel = computed(() => {
-  const id = tenantStore.selectedKindergartenId
-  if (!id) return '—'
-  return kindergartensStore.items.find(k => k.id === id)?.name ?? '—'
-})
-
+// Single-KG mode: the tenant switcher is hidden, so the header renders no
+// kindergarten selector. admin-kindergartens above still auto-selects the
+// first kindergarten into the tenant store, which the pages read.
 const navItems = computed(() => [
   { label: t('nav.overview'),      to: '/',               icon: 'i-heroicons-squares-2x2',      enabled: true },
   { label: t('nav.staff'),         to: '/staff',          icon: 'i-heroicons-user-group',        enabled: can('read', 'staff') },

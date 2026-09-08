@@ -1,4 +1,4 @@
-/* @ts-ignore — Billing is deferred (Should Have, not V1). */
+import { storeToRefs } from 'pinia'
 import { useBillingStore } from '../stores/billing.store'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
@@ -32,12 +32,16 @@ export function useBilling() {
     return billingStore.markAsPaid(id, userId)
   }
 
+  // storeToRefs keeps state reactive when destructured; reading
+  // `billingStore.items` directly would hand out a detached snapshot.
+  const { items, summary, loading, error, pendingCount } = storeToRefs(billingStore)
+
   return {
-    items: billingStore.items,
-    summary: billingStore.summary,
-    loading: billingStore.loading,
-    error: billingStore.error,
-    pendingCount: billingStore.pendingCount,
+    items,
+    summary,
+    loading,
+    error,
+    pendingCount,
     fetchAll,
     fetchSummary,
     create,

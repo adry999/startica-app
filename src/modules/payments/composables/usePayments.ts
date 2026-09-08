@@ -1,4 +1,5 @@
-/* @ts-ignore — Payments module. */
+import { storeToRefs } from 'pinia'
+import type { PaymentInput } from '~/shared/schemas/payment.schema'
 import { usePaymentsStore } from '../stores/payments.store'
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
@@ -10,7 +11,7 @@ export function usePayments() {
     return paymentsStore.fetchByInvoice(kindergartenId, invoiceId)
   }
 
-  async function create(input: { kindergartenId: string; invoiceId: string; amount: number; paidDate: string; method: string; referenceNumber?: string | null; notes?: string | null }) {
+  async function create(input: PaymentInput) {
     const userId = authStore.user?.id
     if (!userId) return false
     return paymentsStore.create(input, userId)
@@ -22,11 +23,15 @@ export function usePayments() {
     return paymentsStore.confirm(id, userId)
   }
 
+  // storeToRefs keeps state reactive when destructured; reading
+  // `paymentsStore.items` directly would hand out a detached snapshot.
+  const { items, loading, error, totalConfirmed } = storeToRefs(paymentsStore)
+
   return {
-    items: paymentsStore.items,
-    loading: paymentsStore.loading,
-    error: paymentsStore.error,
-    totalConfirmed: paymentsStore.totalConfirmed,
+    items,
+    loading,
+    error,
+    totalConfirmed,
     fetchByInvoice,
     create,
     confirm,

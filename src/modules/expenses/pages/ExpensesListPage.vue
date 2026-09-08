@@ -83,7 +83,37 @@
 
           <div class="flex gap-2 justify-end">
             <BaseButton color="gray" @click="isCreateModalOpen = false">{{ t('common.cancel') }}</BaseButton>
-            <BaseButton @click="submitCreate" :loading="loading">{{ t('common.create') }}</BaseButton>
+            <BaseButton :loading="loading" @click="submitCreate">{{ t('common.create') }}</BaseButton>
+          </div>
+        </div>
+      </UModal>
+
+      <!-- Reject Expense Modal -->
+      <UModal v-model="isRejectModalOpen">
+        <div class="rounded-xl border border-border bg-white p-6 space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900">{{ t('expenses.rejectTitle') }}</h3>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">{{ t('expenses.rejectionReason') }}</label>
+            <textarea
+              v-model="rejectionReason"
+              rows="3"
+              maxlength="500"
+              class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+            ></textarea>
+            <p class="mt-1 text-xs text-slate-400">{{ t('expenses.rejectionReasonHint') }}</p>
+          </div>
+
+          <div class="flex gap-2 justify-end">
+            <BaseButton color="gray" @click="rejectingExpenseId = null">{{ t('common.cancel') }}</BaseButton>
+            <BaseButton
+              color="red"
+              :loading="loading"
+              :disabled="!rejectionReason.trim()"
+              @click="submitRejection"
+            >
+              {{ t('expenses.reject') }}
+            </BaseButton>
           </div>
         </div>
       </UModal>
@@ -92,8 +122,9 @@
 </template>
 
 <script setup lang="ts">
-/* @ts-ignore — Expenses module. */
 import { ref, computed } from 'vue'
+import { expenseRejectionSchema } from '~/shared/schemas/expense.schema'
+import type { ExpenseCategory } from '../types/expenses.types'
 import { useExpenses } from '../composables/useExpenses'
 import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
 
@@ -103,12 +134,21 @@ const { items, summary, loading, draftCount, fetchAll, fetchSummary, create, app
 
 const isCreateModalOpen = ref(false)
 const rejectingExpenseId = ref<string | null>(null)
-const createForm = ref({
-  category: 'other',
-  amount: 0,
-  expenseDate: new Date().toISOString().split('T')[0],
-  description: '',
+const rejectionReason = ref('')
+const isRejectModalOpen = computed({
+  get: () => rejectingExpenseId.value !== null,
+  set: (open: boolean) => { if (!open) rejectingExpenseId.value = null },
 })
+function emptyExpenseForm() {
+  return {
+    category: 'other' as ExpenseCategory,
+    amount: 0,
+    expenseDate: new Date().toISOString().split('T')[0] as string,
+    description: '',
+  }
+}
+
+const createForm = ref(emptyExpenseForm())
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
@@ -143,12 +183,7 @@ async function submitCreate() {
   })
   if (success) {
     isCreateModalOpen.value = false
-    createForm.value = {
-      category: 'other',
-      amount: 0,
-      expenseDate: new Date().toISOString().split('T')[0],
-      description: '',
-    }
+    createForm.value = emptyExpenseForm()
   }
 }
 
@@ -156,7 +191,21 @@ async function approveExpense(id: string) {
   await approve(id)
 }
 
-async function rejectExpense(id: string) {
+function rejectExpense(id: string) {
+  rejectionReason.value = ''
   rejectingExpenseId.value = id
+}
+
+async function submitRejection() {
+  const id = rejectingExpenseId.value
+  const parsed = expenseRejectionSchema.safeParse({ rejectionReason: rejectionReason.value })
+  if (!id || !parsed.success) return
+
+  const success = await reject(id, parsed.data.rejectionReason)
+  if (success) {
+    rejectingExpenseId.value = null
+    rejectionReason.value = ''
+    if (selectedKgId.value) await fetchSummary(selectedKgId.value)
+  }
 }
 </script>

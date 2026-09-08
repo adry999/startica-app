@@ -2,12 +2,10 @@
 import { ref, computed } from 'vue'
 import { useBilling } from '../composables/useBilling'
 import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
 const { t } = useI18n()
 const toast = useToast()
 const tenantStore = useTenantStore()
-const authStore = useAuthStore()
 const { items, summary, loading, fetchAll, fetchSummary, markAsPaid } = useBilling()
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
@@ -19,10 +17,9 @@ useLazyAsyncData('billing', async () => {
   await fetchSummary(selectedKgId.value)
 }, { watch: [selectedKgId] })
 
-// @ts-ignore
 const filteredItems = computed(() => {
-  if (statusFilter.value === 'all') return (items as any).value
-  return (items as any).value.filter((i: any) => i.status === statusFilter.value)
+  if (statusFilter.value === 'all') return items.value
+  return items.value.filter(i => i.status === statusFilter.value)
 })
 
 const statusOptions = [
@@ -32,17 +29,6 @@ const statusOptions = [
   { label: t('billing.status.paid'), value: 'paid' },
   { label: t('billing.status.overdue'), value: 'overdue' },
 ]
-
-function statusColor(status: string): string {
-  switch (status) {
-    case 'draft': return 'gray'
-    case 'issued': return 'blue'
-    case 'paid': return 'green'
-    case 'overdue': return 'red'
-    case 'cancelled': return 'gray'
-    default: return 'gray'
-  }
-}
 
 async function onMarkPaid(invoiceId: string) {
   const ok = await markAsPaid(invoiceId)

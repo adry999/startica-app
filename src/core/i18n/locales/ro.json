@@ -551,7 +551,10 @@
       "approved": "Aprobat",
       "pending": "În așteptare",
       "drafts": "Ciorne"
-    }
+    },
+    "rejectTitle": "Respinge cheltuiala",
+    "rejectionReason": "Motivul respingerii",
+    "rejectionReasonHint": "Explică pe scurt de ce este respinsă cheltuiala (max. 500 caractere)."
   },
   "payroll": {
     "title": "Salarizare",

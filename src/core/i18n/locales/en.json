@@ -551,7 +551,10 @@
       "approved": "Approved",
       "pending": "Pending",
       "drafts": "Drafts"
-    }
+    },
+    "rejectTitle": "Reject expense",
+    "rejectionReason": "Rejection reason",
+    "rejectionReasonHint": "Briefly explain why this expense is rejected (max 500 characters)."
   },
   "payroll": {
     "title": "Payroll",

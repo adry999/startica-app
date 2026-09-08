@@ -98,7 +98,7 @@ export async function updateInvoice(
   },
   userId: string,
 ): Promise<Result<Invoice>> {
-  const payload: any = {
+  const payload: Database['public']['Tables']['invoices']['Update'] = {
     updated_by: userId,
   }
   if (input.amount !== undefined) payload.amount = input.amount

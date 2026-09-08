@@ -1,6 +1,6 @@
-/* @ts-ignore — Payments module. */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import type { PaymentInput } from '~/shared/schemas/payment.schema'
 import type { Payment } from '../types/payments.types'
 import * as service from '../services/payments.service'
 import { useSupabaseClient } from '~/core/supabase/client'
@@ -27,7 +27,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     }
   }
 
-  async function create(input: { kindergartenId: string; invoiceId: string; amount: number; paidDate: string; method: string; referenceNumber?: string | null; notes?: string | null }, userId: string) {
+  async function create(input: PaymentInput, userId: string) {
     loading.value = true
     error.value = null
     try {

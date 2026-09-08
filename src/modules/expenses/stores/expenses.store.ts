@@ -1,6 +1,6 @@
-/* @ts-ignore — Expenses module. */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import type { ExpenseInput } from '~/shared/schemas/expense.schema'
 import type { Expense, ExpenseStatus, ExpenseSummary } from '../types/expenses.types'
 import * as service from '../services/expenses.service'
 import { useSupabaseClient } from '~/core/supabase/client'
@@ -44,11 +44,11 @@ export const useExpensesStore = defineStore('expenses', () => {
     }
   }
 
-  async function create(input: { kindergartenId: string; category: string; amount: number; expenseDate: string; description?: string | null }, userId: string) {
+  async function create(input: ExpenseInput, userId: string) {
     loading.value = true
     error.value = null
     try {
-      const result = await service.createExpense(client, input as any, userId)
+      const result = await service.createExpense(client, input, userId)
       if (result.success) {
         items.value.push(result.data)
         await fetchSummary(input.kindergartenId)
