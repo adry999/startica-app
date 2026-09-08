@@ -1,7 +1,7 @@
 import { useAuthStore } from '~/modules/auth/stores/auth.store'
 
 export type PermissionAction = 'create' | 'read' | 'update' | 'delete' | 'assign-role'
-export type PermissionResource = 'kindergarten' | 'staff' | 'children' | 'groups' | 'settings'
+export type PermissionResource = 'kindergarten' | 'staff' | 'children' | 'groups' | 'settings' | 'attendance'
 
 export function usePermissions() {
   const authStore = useAuthStore()
@@ -34,6 +34,12 @@ export function usePermissions() {
 
     if (resource === 'settings') {
       return true // all authenticated users
+    }
+
+    if (resource === 'attendance') {
+      // Educators can mark attendance for their groups
+      if (action === 'read') return true
+      return role === 'super_admin' || role === 'admin' || role === 'educator'
     }
 
     return false
