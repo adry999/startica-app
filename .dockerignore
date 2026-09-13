@@ -4,6 +4,7 @@
 .nuxt
 .output
 node_modules
+.npm-cache
 test-results
 playwright-report
 .env

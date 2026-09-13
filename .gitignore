@@ -4,6 +4,7 @@
 .data
 dist
 node_modules
+.npm-cache/
 
 # Env
 .env

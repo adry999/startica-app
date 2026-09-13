@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -33,3 +33,12 @@ jobs:
 
       - name: Unit tests
         run: npm run test
+
+      - name: Database regression tests (no containers)
+        run: npm run test:db
+
+      - name: Verify database API types
+        run: npm run db:types:sync -- --check
+
+      - name: Production build
+        run: npm run build

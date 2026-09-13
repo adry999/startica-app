@@ -130,7 +130,7 @@ SELECT is(
 -- ── Test 6 (positive): admin CAN read a child from their own kindergarten ────
 -- Uses the known KG-A child from seed (Andrei Vasilescu, cccccccc-0001-...).
 SELECT is(
-  (SELECT count(*) FROM public.children WHERE id = 'cccccccc-0001-0000-0000-000000000000'),
+  (SELECT count(*) FROM public.children WHERE id = 'cccccccc-0001-4ccc-8ccc-cccccccccccc'),
   1::bigint,
   'admin can read children from their own kindergarten'
 );

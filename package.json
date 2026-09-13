@@ -10,6 +10,8 @@
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck",
     "test": "vitest run",
+    "test:db": "node scripts/test-db.mjs",
+    "db:types:sync": "node scripts/sync-db-types.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "lint": "eslint .",
@@ -32,6 +34,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite-pgtap": "^0.0.9",
     "@nuxt/eslint": "^1.16.0",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.0.0",
