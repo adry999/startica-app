@@ -93,6 +93,9 @@ export async function createChild(
       id_type:       input.idType ?? null,
       group_id:      input.groupId ?? null,
       kindergarten_id: input.kindergartenId,
+      contract_number: input.contractNumber ?? null,
+      contract_signed_at: input.contractSignedAt ?? null,
+      enrollment_start_date: input.enrollmentStartDate ?? null,
       consent:       {},
     })
     .select('*, groups(name)')
