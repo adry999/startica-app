@@ -190,8 +190,7 @@ describe('markInvoicePaid', () => {
     expect(store.isSettling(invoiceA.id)).toBe(false)
   })
 
-  it('still reports success when the summary refresh fails after settling', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  it('still reports success and flags the totals as outdated when the summary refresh fails', async () => {
     const paidInvoice: Invoice = { ...invoiceA, status: 'paid' }
     const getSummary = vi.fn<BillingService['getSummary']>().mockResolvedValue({ success: true, data: summaryA })
     const store = createBillingStore(createFakeBillingDependencies({
@@ -205,8 +204,36 @@ describe('markInvoicePaid', () => {
     const result = await store.markInvoicePaid(invoiceA.id)
 
     expect(result).toEqual({ success: true, data: paidInvoice })
-    expect(warn).toHaveBeenCalled()
+    expect(store.isSummaryOutdated).toBe(true)
+    expect(store.summary).toEqual(summaryA)
 
-    warn.mockRestore()
+    await store.loadInvoices(kindergartenA)
+
+    expect(store.isSummaryOutdated).toBe(false)
+  })
+
+  it('keeps the newest summary when an older refresh resolves last', async () => {
+    const invoiceC: Invoice = { ...invoiceA, id: 'invoice-c' }
+    const olderSummary: InvoiceSummary = { ...summaryA, totalPaid: 100 }
+    let resolveOlderSummary: (result: Result<InvoiceSummary, AppError>) => void = () => {}
+    const pendingOlderSummary = new Promise<Result<InvoiceSummary, AppError>>((resolve) => { resolveOlderSummary = resolve })
+    const getSummary = vi.fn<BillingService['getSummary']>()
+      .mockResolvedValueOnce({ success: true, data: summaryA })
+      .mockReturnValueOnce(pendingOlderSummary)
+      .mockResolvedValueOnce({ success: true, data: refreshedSummary })
+    const store = createBillingStore(createFakeBillingDependencies({
+      listInvoices: vi.fn<BillingService['listInvoices']>().mockResolvedValue({ success: true, data: [invoiceA, invoiceC] }),
+      getSummary,
+      markInvoicePaid: vi.fn<BillingService['markInvoicePaid']>(async ({ invoiceId }) =>
+        ({ success: true, data: { ...invoiceA, id: invoiceId, status: 'paid' } })),
+    }))
+    await store.loadInvoices(kindergartenA)
+
+    const settlingA = store.markInvoicePaid(invoiceA.id)
+    await store.markInvoicePaid(invoiceC.id)
+    resolveOlderSummary({ success: true, data: olderSummary })
+    await settlingA
+
+    expect(store.summary).toEqual(refreshedSummary)
   })
 })

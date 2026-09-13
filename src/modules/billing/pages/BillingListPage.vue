@@ -13,7 +13,7 @@ const describeAppError = useAppErrorMessage()
 const { formatCurrency, formatCalendarDate } = useLocaleFormat()
 const tenantStore = useTenantStore()
 const billingStore = useBillingStore()
-const { invoices, summary, status, loadError } = storeToRefs(billingStore)
+const { invoices, summary, isSummaryOutdated, status, loadError } = storeToRefs(billingStore)
 
 const selectedKindergartenId = computed(() => tenantStore.selectedKindergartenId)
 
@@ -77,6 +77,12 @@ async function onMarkPaid(invoiceId: string) {
     </div>
 
     <template v-else>
+      <UAlert v-if="isSummaryOutdated" color="warning" variant="soft" :description="t('billing.summaryOutdated')">
+        <template #actions>
+          <UButton color="warning" variant="soft" size="xs" @click="() => refresh()">{{ t('common.retry') }}</UButton>
+        </template>
+      </UAlert>
+
       <div v-if="summary" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <BaseStatCard :label="t('billing.stats.totalIssued')" :value="formatCurrency(summary.totalIssued)" icon="i-heroicons-document-text" icon-class="bg-blue-50 text-blue-600" />
         <BaseStatCard :label="t('billing.stats.totalPaid')" :value="formatCurrency(summary.totalPaid)" icon="i-heroicons-check-circle" icon-class="bg-green-50 text-green-600" />

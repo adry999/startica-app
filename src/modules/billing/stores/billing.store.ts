@@ -10,9 +10,11 @@ import type { Invoice, InvoiceSummary } from '../types/billing.types'
 export const useBillingStore = defineStore('billing', () => {
   const { billingService, readCurrentActorId } = injectBillingDependencies()
   const invoiceRequests = createLatestRequestGuard()
+  const summaryRequests = createLatestRequestGuard()
 
   const invoices = ref<Invoice[]>([])
   const summary = ref<InvoiceSummary | null>(null)
+  const isSummaryOutdated = ref(false)
   const loadedKindergartenId = ref<string | null>(null)
   const loadPhase = ref<'loading' | 'loaded' | 'failed'>('loading')
   const loadError = ref<AppError | null>(null)
@@ -31,6 +33,7 @@ export const useBillingStore = defineStore('billing', () => {
 
   async function loadInvoices(kindergartenId: string): Promise<boolean> {
     const request = invoiceRequests.begin()
+    summaryRequests.supersede()
     if (loadedKindergartenId.value !== kindergartenId) {
       invoices.value = []
       summary.value = null
@@ -49,19 +52,22 @@ export const useBillingStore = defineStore('billing', () => {
 
     invoices.value = invoicesResult.data
     summary.value = summaryResult.data
+    isSummaryOutdated.value = false
     loadPhase.value = 'loaded'
     return true
   }
 
   async function refreshSummary(kindergartenId: string) {
+    const request = summaryRequests.begin()
     const summaryResult = await billingService.getSummary(kindergartenId)
-    if (loadedKindergartenId.value !== kindergartenId) return
-    if (summaryResult.success) {
-      summary.value = summaryResult.data
+    if (!request.isLatest() || loadedKindergartenId.value !== kindergartenId) return
+    // The invoice is already paid; a failed refresh flags the totals instead of failing the payment.
+    if (!summaryResult.success) {
+      isSummaryOutdated.value = true
       return
     }
-    // The invoice is already paid; a stale summary must not report the payment as failed.
-    console.warn('[billing] summary refresh failed after settling an invoice', { kindergartenId, error: summaryResult.error })
+    summary.value = summaryResult.data
+    isSummaryOutdated.value = false
   }
 
   async function markInvoicePaid(invoiceId: string): Promise<Result<Invoice, AppError>> {
@@ -91,6 +97,7 @@ export const useBillingStore = defineStore('billing', () => {
   return {
     invoices,
     summary,
+    isSummaryOutdated,
     loadedKindergartenId,
     loadPhase,
     loadError,

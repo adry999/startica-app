@@ -533,6 +533,7 @@
     "statusLabel": "Status",
     "markPaid": "Mark as paid",
     "markPaidSuccess": "Invoice marked as paid.",
+    "summaryOutdated": "Totals may be out of date. Retry to update them.",
     "noInvoices": "No invoices found.",
     "stats": {
       "totalIssued": "Total Issued",

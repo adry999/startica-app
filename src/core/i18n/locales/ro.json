@@ -533,6 +533,7 @@
     "statusLabel": "Stare",
     "markPaid": "Marchează ca plătită",
     "markPaidSuccess": "Factura a fost marcată ca plătită.",
+    "summaryOutdated": "Totalurile pot fi neactualizate. Reîncearcă pentru a le actualiza.",
     "noInvoices": "Nicio factură găsită.",
     "stats": {
       "totalIssued": "Total emis",
