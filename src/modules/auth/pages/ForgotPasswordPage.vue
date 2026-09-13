@@ -39,7 +39,6 @@ async function onSubmit(event: FormSubmitEvent<RequestPasswordResetInput>) {
         <NuxtLink to="/login" class="text-teal-600 hover:text-teal-700">
           {{ t('auth.backToLogin') }}
         </NuxtLink>
-        <LanguageSwitcher />
       </div>
     </template>
   </UCard>

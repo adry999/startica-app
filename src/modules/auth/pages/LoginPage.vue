@@ -44,7 +44,6 @@ async function onSubmit(event: FormSubmitEvent<LoginInput>) {
         <NuxtLink to="/forgot-password" class="text-teal-600 hover:text-teal-700">
           {{ t('auth.forgotPassword') }}
         </NuxtLink>
-        <LanguageSwitcher />
       </div>
     </template>
   </UCard>
