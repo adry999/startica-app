@@ -11,6 +11,8 @@
     "adminPortal": "Admin Portal",
     "back": "Back",
     "create": "Create",
+    "copy": "Copy",
+    "copied": "Copied.",
     "pagination": {
       "perPage": "per page",
       "all": "All"
@@ -206,7 +208,31 @@
       "all": "All",
       "educators": "Educators",
       "admins": "Admins"
-    }
+    },
+    "moduleAccessTitle": "Module access",
+    "moduleAccessEmpty": "This member isn't assigned to any kindergarten.",
+    "modulePool": "Pool",
+    "modulePayrollOwn": "Payroll (own salary)",
+    "modulePayrollAll": "Payroll (all salaries)",
+    "moduleSaveSuccess": "Module access saved.",
+    "moduleSaveError": "Failed to save module access.",
+    "modeLabel": "Account creation mode",
+    "modeDirect": "Create account (set password now)",
+    "modeInvite": "Send email invitation",
+    "passwordLabel": "Password",
+    "passwordHint": "Leave blank to auto-generate a password.",
+    "groupLabel": "Group",
+    "groupPlaceholder": "No group",
+    "generatedPasswordLabel": "Generated password — shown once",
+    "generatedPasswordHint": "Copy it now and hand it to the educator personally. It won't be shown again.",
+    "tabProfile": "Profile",
+    "tabModules": "Module access",
+    "tabAccount": "Account",
+    "phoneLabel": "Phone",
+    "internalNoteLabel": "Internal note (admins only)",
+    "deactivateTitleInline": "Deactivate account",
+    "reactivateTitleInline": "Reactivate account",
+    "removeTitleInline": "Remove from kindergarten"
   },
   "children": {
     "pageTitle": "Children",

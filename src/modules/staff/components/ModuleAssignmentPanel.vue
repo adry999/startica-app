@@ -98,20 +98,15 @@ async function save() {
     </p>
 
     <template v-else>
-      <section v-for="kg in kindergartens" :key="kg.id" class="space-y-2">
+      <section v-for="kg in kindergartens" :key="kg.id" class="space-y-3 rounded-lg border border-border p-4">
         <h3 class="text-sm font-semibold text-slate-700">{{ kg.name }}</h3>
-        <label
+        <UCheckbox
           v-for="opt in moduleOptions"
           :key="opt.key"
-          class="flex items-center gap-2 text-sm text-slate-600"
-        >
-          <input
-            type="checkbox"
-            :checked="isChecked(kg.id, opt.key)"
-            @change="(e) => toggle(kg.id, opt.key, (e.target as HTMLInputElement).checked)"
-          >
-          {{ opt.label }}
-        </label>
+          :model-value="isChecked(kg.id, opt.key)"
+          :label="opt.label"
+          @update:model-value="(v) => toggle(kg.id, opt.key, !!v)"
+        />
       </section>
 
       <div class="flex justify-end">

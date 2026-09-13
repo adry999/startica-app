@@ -4,10 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // globals so the server route file can load without the Nuxt build pipeline.
 const { mockReadBody, mockUserClient, mockAdminClient } = vi.hoisted(() => {
   const mockReadBody = vi.fn()
-  const mockUserClient = { auth: { getUser: vi.fn() } }
+  const mockUserClient = { auth: { getUser: vi.fn() }, from: vi.fn() }
   const mockAdminClient = {
     from: vi.fn(),
-    auth: { admin: { inviteUserByEmail: vi.fn() } },
+    auth: { admin: { inviteUserByEmail: vi.fn(), createUser: vi.fn() } },
   }
 
   const g = globalThis as Record<string, unknown>
@@ -31,11 +31,14 @@ type RouteHandler = (event: Record<string, unknown>) => Promise<unknown>
 
 // ── helpers ────────────────────────────────────────────────────────────────
 
+// mode: 'invite' — this file's pre-existing tests exercise the set-password-link
+// email flow. Direct-mode (default) account creation has its own tests below.
 const VALID_BODY = {
   email: 'new@example.com',
   fullName: 'Educator Nou',
   role: 'educator',
   kindergartenId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  mode: 'invite' as const,
 }
 
 const CALLER_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
@@ -49,6 +52,25 @@ function makeQuery(result: { data: unknown; error: unknown }) {
     maybeSingle: vi.fn().mockResolvedValue(result),
     insert: vi.fn().mockResolvedValue(result),
     upsert: vi.fn().mockResolvedValue(result),
+  }
+}
+
+// updateGroup: .update(...).eq(...).select(...).single()
+function makeUpdateQuery(result: { data: unknown; error: unknown }) {
+  return {
+    update: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(result),
+  }
+}
+
+// grantModule's insert branch: .insert(...).select(...).single()
+function makeInsertSelectQuery(result: { data: unknown; error: unknown }) {
+  return {
+    insert: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue(result),
   }
 }
 
@@ -280,5 +302,201 @@ describe('POST /api/staff/invite', () => {
       'new@example.com',
       expect.any(Object),
     )
+  })
+
+  // ── mode: 'direct' (default) ────────────────────────────────────────────
+
+  it('creates the user directly with a server-generated password and returns it once', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, mode: 'direct' })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = '22222222-2222-4222-8222-222222222222'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null })) // role check
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // no existing user
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // insert profile
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // user audit log
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // upsert membership
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))                    // audit log
+
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+
+    expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
+    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ email: VALID_BODY.email, email_confirm: true }),
+    )
+    expect(result).toMatchObject({ success: true, generatedPassword: expect.any(String) })
+  })
+
+  it('creates the user directly with the admin-provided password instead of generating one', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, mode: 'direct', password: 'MyChosenPassw0rd!' })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = '33333333-3333-4333-8333-333333333333'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+
+    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(
+      expect.objectContaining({ password: 'MyChosenPassw0rd!' }),
+    )
+    expect(result).toEqual({ success: true, generatedPassword: 'MyChosenPassw0rd!' })
+  })
+
+  it('returns 500 when createUser fails', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, mode: 'direct' })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'admin_api_error' },
+    })
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 500 })
+  })
+
+  // ── group + module assignment ───────────────────────────────────────────
+
+  it('assigns the group educator when groupId is provided for an educator', async () => {
+    mockReadBody.mockResolvedValue({
+      ...VALID_BODY,
+      mode: 'direct',
+      groupId: '44444444-4444-4444-8444-444444444444',
+    })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = '55555555-5555-4555-8555-555555555555'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { id: '44444444-4444-4444-8444-444444444444' }, error: null })) // live tenant group
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+
+    mockUserClient.from.mockReturnValueOnce(
+      makeUpdateQuery({ data: { id: '44444444-4444-4444-8444-444444444444' }, error: null }),
+    )
+
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+    expect(result).toMatchObject({ success: true })
+    expect(mockUserClient.from).toHaveBeenCalledWith('groups')
+  })
+
+  it('rejects an admin assigning an educator to a group in another kindergarten before creating an account', async () => {
+    mockReadBody.mockResolvedValue({
+      ...VALID_BODY,
+      mode: 'direct',
+      groupId: '77777777-7777-4777-8777-777777777777',
+    })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { user_id: CALLER_ID }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null })) // group query is tenant-scoped
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 404 })
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled()
+    expect(mockAdminClient.auth.admin.inviteUserByEmail).not.toHaveBeenCalled()
+  })
+
+  it('rejects a missing or soft-deleted group before creating an account', async () => {
+    mockReadBody.mockResolvedValue({
+      ...VALID_BODY,
+      mode: 'direct',
+      groupId: '88888888-8888-4888-8888-888888888888',
+    })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({ statusCode: 404 })
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled()
+  })
+
+  it('returns an error when the validated group assignment fails', async () => {
+    const groupId = '99999999-9999-4999-8999-999999999999'
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, mode: 'direct', groupId })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: { id: groupId }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+
+    mockUserClient.from.mockReturnValueOnce(
+      makeUpdateQuery({ data: null, error: { message: 'rls_denied' } }),
+    )
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: { id: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' } },
+      error: null,
+    })
+
+    await expect(((handler as unknown) as RouteHandler)({})).rejects.toMatchObject({
+      statusCode: 500,
+      message: 'group_assignment_failed',
+    })
+  })
+
+  it('grants the requested module keys after creating the user', async () => {
+    mockReadBody.mockResolvedValue({ ...VALID_BODY, mode: 'direct', moduleKeys: ['pool'] })
+    mockUserClient.auth.getUser.mockResolvedValue({ data: { user: { id: CALLER_ID } } })
+
+    const NEW_USER_ID = '66666666-6666-4666-8666-666666666666'
+
+    mockAdminClient.from
+      .mockReturnValueOnce(makeQuery({ data: { role: 'super_admin', status: 'active' }, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      // grantModule: lookup existing grant (maybeSingle → none), then insert().select().single()
+      .mockReturnValueOnce(makeQuery({ data: null, error: null }))
+      .mockReturnValueOnce(makeInsertSelectQuery({ data: { id: 'grant-1' }, error: null }))
+
+    mockAdminClient.auth.admin.createUser.mockResolvedValue({
+      data: { user: { id: NEW_USER_ID } },
+      error: null,
+    })
+
+    const result = await ((handler as unknown) as RouteHandler)({})
+    expect(result).toMatchObject({ success: true })
   })
 })

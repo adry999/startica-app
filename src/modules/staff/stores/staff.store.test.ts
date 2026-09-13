@@ -24,6 +24,8 @@ const sampleRow = {
   created_by: 'user-1',
   updated_by: 'user-1',
   deleted_at: null,
+  phone: null,
+  internal_note: null,
 }
 
 const sampleMember = {
@@ -33,6 +35,8 @@ const sampleMember = {
   role: 'admin' as const,
   status: 'active' as const,
   avatarUrl: null,
+  phone: null,
+  internalNote: null,
 }
 
 describe('useStaffStore', () => {
@@ -75,14 +79,14 @@ describe('useStaffStore', () => {
     vi.mocked(staffService.listStaff).mockResolvedValue({ success: true, data: [sampleRow] })
 
     const store = useStaffStore()
-    const ok = await store.invite({
+    const result = await store.invite({
       email: 'new@example.com',
       fullName: 'Nou Educator',
       role: 'educator',
       kindergartenId: 'kg-1',
     })
 
-    expect(ok).toBe(true)
+    expect(result).toEqual({ ok: true, generatedPassword: undefined })
     expect($fetch).toHaveBeenCalledWith('/api/staff/invite', {
       method: 'POST',
       body: { email: 'new@example.com', fullName: 'Nou Educator', role: 'educator', kindergartenId: 'kg-1' },

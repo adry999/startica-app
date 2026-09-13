@@ -8,12 +8,14 @@ import {
   type UpdateStaffInput,
 } from '~/shared/schemas/staff.schema'
 import type { StaffMember } from '../types/staff.types'
+import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 
 const { t } = useI18n()
 const toast = useToast()
 const { can } = usePermissions()
 const tenantStore = useTenantStore()
 const { items, loading, fetchAll, invite, updateProfile, setStatus, remove } = useStaff()
+const { items: groupItems, fetchAll: fetchGroups } = useGroups()
 
 const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
@@ -51,13 +53,45 @@ const filterTabs = computed(() =>
 const inviteModalOpen = ref(false)
 const inviteState = reactive<Partial<InviteStaffInput>>({
   email: undefined, fullName: undefined, role: 'educator', kindergartenId: undefined,
+  mode: 'direct', password: undefined, groupId: undefined, moduleKeys: [],
 })
+const generatedPassword = ref<string | null>(null)
+
+const inviteModeOptions = computed(() => [
+  { label: t('staff.modeDirect'), value: 'direct' as const },
+  { label: t('staff.modeInvite'), value: 'invite' as const },
+])
+
+const activeGroups = computed(() => groupItems.value.filter(g => g.status === 'active'))
+
+const moduleOptions: Array<{ key: ModuleKey; label: string }> = [
+  { key: 'pool',        label: t('staff.modulePool') },
+  { key: 'payroll_own', label: t('staff.modulePayrollOwn') },
+  { key: 'payroll_all', label: t('staff.modulePayrollAll') },
+]
+
+function isInviteModuleChecked(key: ModuleKey): boolean {
+  return (inviteState.moduleKeys ?? []).includes(key)
+}
+
+function toggleInviteModule(key: ModuleKey, checked: boolean) {
+  const set = new Set(inviteState.moduleKeys ?? [])
+  if (checked) set.add(key)
+  else set.delete(key)
+  inviteState.moduleKeys = [...set]
+}
 
 function openInvite() {
   inviteState.email       = undefined
   inviteState.fullName    = undefined
   inviteState.role        = 'educator'
   inviteState.kindergartenId = selectedKgId.value ?? undefined
+  inviteState.mode        = 'direct'
+  inviteState.password    = undefined
+  inviteState.groupId     = undefined
+  inviteState.moduleKeys  = []
+  generatedPassword.value = null
+  if (selectedKgId.value) fetchGroups(selectedKgId.value)
   inviteModalOpen.value   = true
 }
 
@@ -85,27 +119,48 @@ const roleOptions = computed(() => {
 async function onInviteSubmit(event: FormSubmitEvent<InviteStaffInput>) {
   const kgId = inviteState.kindergartenId ?? selectedKgId.value
   if (!kgId) return
-  const ok = await invite({ ...event.data, kindergartenId: kgId })
-  if (ok) {
+  const result = await invite({ ...event.data, kindergartenId: kgId })
+  if (!result.ok) return
+
+  if (result.generatedPassword) {
+    // Stay open so the admin can copy the one-time generated password before closing.
+    generatedPassword.value = result.generatedPassword
+  } else {
     inviteModalOpen.value = false
-    toast.add({ title: t('staff.inviteSuccess'), color: 'success' })
   }
+  toast.add({ title: t('staff.inviteSuccess'), color: 'success' })
+}
+
+async function copyGeneratedPassword() {
+  if (!generatedPassword.value) return
+  await navigator.clipboard.writeText(generatedPassword.value)
+  toast.add({ title: t('common.copied'), color: 'success' })
 }
 
 const editModalOpen = ref(false)
 const editTarget    = ref<StaffMember | null>(null)
 const editState     = reactive<Partial<UpdateStaffInput>>({})
+const editTab       = ref<'profile' | 'modules' | 'account'>('profile')
+
+const editTabItems = computed(() => [
+  { label: t('staff.tabProfile'), value: 'profile' as const },
+  { label: t('staff.tabModules'), value: 'modules' as const },
+  { label: t('staff.tabAccount'), value: 'account' as const },
+])
 
 function openEdit(member: StaffMember) {
-  editTarget.value    = member
-  editState.fullName  = member.fullName
-  editState.role      = member.role === 'super_admin' ? undefined : member.role
-  editModalOpen.value = true
+  editTarget.value       = member
+  editState.fullName     = member.fullName
+  editState.role         = member.role === 'super_admin' ? undefined : member.role
+  editState.phone        = member.phone ?? ''
+  editState.internalNote = member.internalNote ?? ''
+  editTab.value           = 'profile'
+  editModalOpen.value     = true
 }
 
 async function onEditSubmit(event: FormSubmitEvent<UpdateStaffInput>) {
   if (!editTarget.value) return
-  const data: UpdateStaffInput = { fullName: event.data.fullName }
+  const data: UpdateStaffInput = { fullName: event.data.fullName, phone: event.data.phone, internalNote: event.data.internalNote }
   if (can('assign-role', 'staff') && event.data.role) data.role = event.data.role
   const ok = await updateProfile(editTarget.value.id, data)
   if (ok) {
@@ -155,6 +210,7 @@ async function onRemoveConfirm() {
   const ok = await remove(removeTarget.value.id, selectedKgId.value)
   if (ok) {
     removeModalOpen.value = false
+    editModalOpen.value   = false
     toast.add({ title: t('staff.removeSuccess'), color: 'success' })
   }
 }
@@ -197,20 +253,9 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
     id: 'actions',
     header: t('staff.table.actions'),
     cell: ({ row }) =>
-      h('div', { class: 'flex gap-1' }, [
-        canUpdateStaff.value
-          ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
-          : null,
-        canUpdateStaff.value
-          ? h(UButton,
-              { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openStatusConfirm(row.original) },
-              () => row.original.status === 'active' ? t('staff.deactivate') : t('staff.reactivate'),
-            )
-          : null,
-        canDeleteStaff.value
-          ? h(UButton, { size: 'xs', color: 'error', variant: 'ghost', onClick: () => openRemoveConfirm(row.original) }, () => t('staff.remove'))
-          : null,
-      ]),
+      canUpdateStaff.value
+        ? h(UButton, { size: 'xs', color: 'neutral', variant: 'ghost', onClick: () => openEdit(row.original) }, () => t('common.edit'))
+        : null,
   },
 ])
 </script>
@@ -261,7 +306,27 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
         <h2 class="text-base font-semibold text-slate-800">{{ t('staff.inviteTitle') }}</h2>
       </template>
       <template #body>
-        <UForm :schema="inviteStaffSchema" :state="inviteState" class="space-y-4" @submit="onInviteSubmit">
+        <div v-if="generatedPassword" class="space-y-4">
+          <UAlert color="success" variant="soft" :title="t('staff.inviteSuccess')" />
+          <div class="rounded-lg border border-border bg-slate-50 p-4">
+            <p class="mb-2 text-xs font-medium text-slate-500">{{ t('staff.generatedPasswordLabel') }}</p>
+            <div class="flex items-center justify-between gap-3">
+              <code class="text-sm font-semibold text-slate-800">{{ generatedPassword }}</code>
+              <UButton size="xs" color="neutral" variant="soft" @click="copyGeneratedPassword">
+                {{ t('common.copy') }}
+              </UButton>
+            </div>
+            <p class="mt-2 text-xs text-slate-400">{{ t('staff.generatedPasswordHint') }}</p>
+          </div>
+          <div class="flex justify-end">
+            <UButton color="primary" @click="inviteModalOpen = false">{{ t('common.confirm') }}</UButton>
+          </div>
+        </div>
+
+        <UForm v-else :schema="inviteStaffSchema" :state="inviteState" class="space-y-4" @submit="onInviteSubmit">
+          <UFormField :label="t('staff.modeLabel')" name="mode">
+            <USelect v-model="inviteState.mode" :items="inviteModeOptions" class="w-full" />
+          </UFormField>
           <UFormField :label="t('staff.email')" name="email">
             <UInput v-model="inviteState.email" type="email" class="w-full" />
           </UFormField>
@@ -271,9 +336,38 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
           <UFormField :label="t('staff.roleLabel')" name="role">
             <USelect v-model="inviteState.role" :items="roleOptions" class="w-full" data-testid="role-select" />
           </UFormField>
-          <UButton type="submit" color="primary" block loading-auto :loading="loading">
-            {{ t('staff.invite') }}
-          </UButton>
+          <UFormField
+            v-if="inviteState.mode === 'direct'"
+            :label="t('staff.passwordLabel')"
+            :description="t('staff.passwordHint')"
+            name="password"
+          >
+            <UInput v-model="inviteState.password" type="text" class="w-full" />
+          </UFormField>
+          <UFormField v-if="inviteState.role === 'educator'" :label="t('staff.groupLabel')" name="groupId">
+            <USelect
+              v-model="inviteState.groupId"
+              :items="activeGroups.map(g => ({ label: g.name, value: g.id }))"
+              :placeholder="t('staff.groupPlaceholder')"
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="space-y-3 rounded-lg border border-border p-4">
+            <p class="text-sm font-medium text-slate-700">{{ t('staff.moduleAccessTitle') }}</p>
+            <UCheckbox
+              v-for="opt in moduleOptions"
+              :key="opt.key"
+              :model-value="isInviteModuleChecked(opt.key)"
+              :label="opt.label"
+              @update:model-value="(v) => toggleInviteModule(opt.key, !!v)"
+            />
+          </div>
+
+          <div class="flex justify-end gap-3">
+            <UButton color="neutral" variant="ghost" @click="inviteModalOpen = false">{{ t('common.cancel') }}</UButton>
+            <UButton type="submit" color="primary" loading-auto :loading="loading">{{ t('staff.invite') }}</UButton>
+          </div>
         </UForm>
       </template>
     </UModal>
@@ -283,7 +377,15 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
         <h2 class="text-base font-semibold text-slate-800">{{ t('staff.editTitle') }}</h2>
       </template>
       <template #body>
-        <UForm :schema="updateStaffSchema" :state="editState" class="space-y-4" @submit="onEditSubmit">
+        <BaseFilterTabs v-model="editTab" :items="editTabItems" class="mb-4" />
+
+        <UForm
+          v-if="editTab === 'profile'"
+          :schema="updateStaffSchema"
+          :state="editState"
+          class="space-y-4"
+          @submit="onEditSubmit"
+        >
           <UFormField :label="t('staff.name')" name="fullName">
             <UInput v-model="editState.fullName" class="w-full" />
           </UFormField>
@@ -294,8 +396,56 @@ const columns = computed<TableColumn<StaffMember>[]>(() => [
               class="w-full"
             />
           </UFormField>
-          <UButton type="submit" color="primary" loading-auto :loading="loading">{{ t('common.save') }}</UButton>
+          <UFormField :label="t('staff.phoneLabel')" name="phone">
+            <UInput v-model="editState.phone" type="tel" class="w-full" />
+          </UFormField>
+          <UFormField :label="t('staff.internalNoteLabel')" name="internalNote">
+            <UTextarea v-model="editState.internalNote" class="w-full" :rows="3" />
+          </UFormField>
+
+          <div class="flex justify-end gap-3">
+            <UButton color="neutral" variant="ghost" @click="editModalOpen = false">{{ t('common.cancel') }}</UButton>
+            <UButton type="submit" color="primary" loading-auto :loading="loading">{{ t('common.save') }}</UButton>
+          </div>
         </UForm>
+
+        <ModuleAssignmentPanel v-else-if="editTab === 'modules' && editTarget" :member="editTarget" />
+
+        <div v-else-if="editTarget" class="space-y-3">
+          <div class="rounded-lg border border-border p-4">
+            <p class="text-sm font-medium text-slate-700">
+              {{ editTarget.status === 'active' ? t('staff.deactivateTitleInline') : t('staff.reactivateTitleInline') }}
+            </p>
+            <p class="mt-1 text-sm text-slate-500">
+              {{ editTarget.status === 'active' ? t('staff.confirmDeactivateBody') : t('staff.confirmReactivateBody') }}
+            </p>
+            <UButton
+              v-if="canUpdateStaff"
+              class="mt-3"
+              size="sm"
+              color="neutral"
+              variant="soft"
+              @click="openStatusConfirm(editTarget)"
+            >
+              {{ editTarget.status === 'active' ? t('staff.deactivate') : t('staff.reactivate') }}
+            </UButton>
+          </div>
+
+          <div class="rounded-lg border border-error/30 bg-error/5 p-4">
+            <p class="text-sm font-medium text-error">{{ t('staff.removeTitleInline') }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ t('staff.confirmRemoveBody') }}</p>
+            <UButton
+              v-if="canDeleteStaff"
+              class="mt-3"
+              size="sm"
+              color="error"
+              variant="soft"
+              @click="openRemoveConfirm(editTarget)"
+            >
+              {{ t('staff.remove') }}
+            </UButton>
+          </div>
+        </div>
       </template>
     </UModal>
 

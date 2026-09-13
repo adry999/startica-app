@@ -16,6 +16,8 @@ function toStaffMember(row: UserRow): StaffMember {
     role: row.role as StaffMember['role'],
     status: row.status as StaffMember['status'],
     avatarUrl: row.avatar_url ?? null,
+    phone: row.phone ?? null,
+    internalNote: row.internal_note ?? null,
   }
 }
 
@@ -35,17 +37,20 @@ export const useStaffStore = defineStore('staff', {
       )
     },
 
-    async invite(input: InviteStaffInput): Promise<boolean> {
+    async invite(input: InviteStaffInput): Promise<{ ok: boolean; generatedPassword?: string }> {
       this.loading = true
       this.error = null
 
       try {
-        await $fetch('/api/staff/invite', { method: 'POST', body: input })
+        const result = await $fetch<{ success: boolean; generatedPassword?: string }>(
+          '/api/staff/invite',
+          { method: 'POST', body: input },
+        )
         await this.fetchAll(input.kindergartenId)
-        return true
+        return { ok: true, generatedPassword: result.generatedPassword }
       } catch (err: unknown) {
         this.error = err instanceof Error ? err.message : 'invite_failed'
-        return false
+        return { ok: false }
       } finally {
         this.loading = false
       }

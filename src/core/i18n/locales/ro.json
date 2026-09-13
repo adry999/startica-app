@@ -11,6 +11,8 @@
     "adminPortal": "Portal Admin",
     "back": "Înapoi",
     "create": "Creează",
+    "copy": "Copiază",
+    "copied": "Copiat.",
     "pagination": {
       "perPage": "pe pagină",
       "all": "Toate"
@@ -206,7 +208,31 @@
       "all": "Toți",
       "educators": "Educatori",
       "admins": "Administratori"
-    }
+    },
+    "moduleAccessTitle": "Acces module",
+    "moduleAccessEmpty": "Membrul nu este asignat la nicio grădiniță.",
+    "modulePool": "Piscină",
+    "modulePayrollOwn": "Salarizare (propriul salariu)",
+    "modulePayrollAll": "Salarizare (toate salariile)",
+    "moduleSaveSuccess": "Accesul la module a fost salvat.",
+    "moduleSaveError": "Salvarea accesului la module a eșuat.",
+    "modeLabel": "Mod creare cont",
+    "modeDirect": "Creează cont (parolă acum)",
+    "modeInvite": "Trimite invitație pe email",
+    "passwordLabel": "Parolă",
+    "passwordHint": "Lasă gol pentru a genera automat o parolă.",
+    "groupLabel": "Grupă",
+    "groupPlaceholder": "Fără grupă",
+    "generatedPasswordLabel": "Parolă generată — vizibilă o singură dată",
+    "generatedPasswordHint": "Copiaz-o acum și transmite-o personal educatorului. Nu va mai fi afișată.",
+    "tabProfile": "Profil",
+    "tabModules": "Acces module",
+    "tabAccount": "Cont",
+    "phoneLabel": "Telefon",
+    "internalNoteLabel": "Notă internă (vizibilă doar adminilor)",
+    "deactivateTitleInline": "Dezactivează contul",
+    "reactivateTitleInline": "Reactivează contul",
+    "removeTitleInline": "Elimină din grădiniță"
   },
   "children": {
     "pageTitle": "Copii",
