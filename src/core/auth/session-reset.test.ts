@@ -18,10 +18,15 @@ describe('resetSessionStores', () => {
     const useAuthStore = defineStore('auth', {
       state: () => ({ userId: null as string | null }),
     })
+    const useActorStore = defineStore('actor', {
+      state: () => ({ actorId: null as string | null }),
+    })
 
     useTenantStore().selectedKindergartenId = 'tenant-a'
     useBusinessStore().items = ['child-a']
     useAuthStore().userId = 'user-a'
+    const actorStore = useActorStore()
+    actorStore.actorId = 'user-a'
 
     resetSessionStores(pinia)
 
@@ -30,5 +35,7 @@ describe('resetSessionStores', () => {
     expect(useTenantStore().selectedKindergartenId).toBeNull()
     expect(useBusinessStore().items).toEqual([])
     expect(useAuthStore().userId).toBe('user-a')
+    expect(useActorStore()).toBe(actorStore)
+    expect(actorStore.actorId).toBe('user-a')
   })
 })

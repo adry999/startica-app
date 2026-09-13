@@ -1,16 +1,8 @@
-import type { Database } from '~/core/supabase/types'
+import type { Actor } from '@shared/session/actor.types'
 
-export type UserRole = Database['public']['Enums']['user_role']
-export type UserStatus = Database['public']['Enums']['user_status']
+export type { UserRole, UserStatus } from '@shared/session/actor.types'
 
-export interface AuthUser {
-  id: string
-  email: string
-  fullName: string
-  role: UserRole
-  avatarUrl: string | null
-  status: UserStatus
-}
+export type AuthUser = Actor
 
 export interface LoginCredentials {
   email: string
