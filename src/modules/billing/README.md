@@ -13,7 +13,7 @@ Routed page: `pages/BillingListPage.vue`, imported only by `src/pages/billing.vu
 
 ## Ports
 
-- **Provides:** `BillingService.listPayableInvoices`, bound in `src/plugins/module-dependencies.ts` as the `ListPayableInvoices` port of `payments`.
+- **Provides:** `BillingService.listPayableInvoices`, bound in `src/plugins/module-dependencies.ts` as the `ListPayableInvoices` port of `payments`. It returns live issued, overdue and paid invoices, the same set the `payments_invoice_payable` trigger accepts; `markInvoicePaid` settles only issued and overdue ones.
 - **Requires** (`BillingDependencies`): `billingService`, `readCurrentActorId`.
 
 ## Dependencies

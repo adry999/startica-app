@@ -6,14 +6,17 @@ import type { PaymentInput } from '@shared/schemas/payment.schema'
 import type { Result } from '@shared/types/result'
 import type { ScreenStatus } from '@shared/types/screen-status'
 import { injectPaymentsDependencies } from '../payments.dependencies'
-import type { PayableInvoice, Payment, PaymentStatus } from '../types/payments.types'
+import type { PayableInvoice, Payment, PaymentSummary } from '../types/payments.types'
 
 export const usePaymentsStore = defineStore('payments', () => {
   const { paymentsService, listPayableInvoices, readCurrentActorId } = injectPaymentsDependencies()
   const paymentRequests = createLatestRequestGuard()
+  const summaryRequests = createLatestRequestGuard()
   const payableInvoiceRequests = createLatestRequestGuard()
 
   const payments = ref<Payment[]>([])
+  const summary = ref<PaymentSummary | null>(null)
+  const isSummaryOutdated = ref(false)
   const payableInvoices = ref<PayableInvoice[]>([])
   const payableInvoicesError = ref<AppError | null>(null)
   const loadedKindergartenId = ref<string | null>(null)
@@ -27,21 +30,18 @@ export const usePaymentsStore = defineStore('payments', () => {
     return payments.value.length > 0 ? 'ready' : 'empty'
   })
 
-  const paymentCountByStatus = computed(() => {
-    const counts: Record<PaymentStatus, number> = { pending: 0, confirmed: 0, failed: 0 }
-    for (const payment of payments.value) counts[payment.status] += 1
-    return counts
-  })
-
-  // Summed in cents so repeated two-decimal amounts do not drift.
-  const confirmedTotal = computed(() => payments.value
-    .filter(payment => payment.status === 'confirmed')
-    .reduce((totalCents, payment) => totalCents + Math.round(payment.amount * 100), 0) / 100)
+  function failLoad(error: AppError): false {
+    loadError.value = error
+    loadPhase.value = 'failed'
+    return false
+  }
 
   async function loadPayments(kindergartenId: string): Promise<boolean> {
     const request = paymentRequests.begin()
+    summaryRequests.supersede()
     if (loadedKindergartenId.value !== kindergartenId) {
       payments.value = []
+      summary.value = null
       payableInvoices.value = []
       loadedKindergartenId.value = kindergartenId
     }
@@ -49,20 +49,33 @@ export const usePaymentsStore = defineStore('payments', () => {
     loadError.value = null
 
     // Recording a payment needs the invoice list; reading the ledger does not.
-    const [paymentsResult] = await Promise.all([
+    const [paymentsResult, summaryResult] = await Promise.all([
       paymentsService.listPayments(kindergartenId),
+      paymentsService.getSummary(kindergartenId),
       loadPayableInvoices(kindergartenId),
     ])
     if (!request.isLatest()) return false
+    if (!paymentsResult.success) return failLoad(paymentsResult.error)
+    if (!summaryResult.success) return failLoad(summaryResult.error)
 
-    if (!paymentsResult.success) {
-      loadError.value = paymentsResult.error
-      loadPhase.value = 'failed'
-      return false
-    }
     payments.value = paymentsResult.data
+    summary.value = summaryResult.data
+    isSummaryOutdated.value = false
     loadPhase.value = 'loaded'
     return true
+  }
+
+  async function refreshSummary(kindergartenId: string) {
+    const request = summaryRequests.begin()
+    const summaryResult = await paymentsService.getSummary(kindergartenId)
+    if (!request.isLatest() || loadedKindergartenId.value !== kindergartenId) return
+    // The payment change already succeeded; a failed refresh flags the totals instead of failing it.
+    if (!summaryResult.success) {
+      isSummaryOutdated.value = true
+      return
+    }
+    summary.value = summaryResult.data
+    isSummaryOutdated.value = false
   }
 
   async function loadPayableInvoices(kindergartenId: string): Promise<boolean> {
@@ -73,7 +86,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     if (!request.isLatest() || loadedKindergartenId.value !== kindergartenId) return false
 
     if (!result.success) {
-      // A list kept from an earlier load could offer invoices that are no longer payable.
+      // A list kept from an earlier load could offer invoices that no longer accept payments.
       payableInvoices.value = []
       payableInvoicesError.value = result.error
       return false
@@ -91,6 +104,7 @@ export const usePaymentsStore = defineStore('payments', () => {
       const result = await paymentsService.recordPayment(input, actorId)
       if (result.success && loadedKindergartenId.value === result.data.kindergartenId) {
         payments.value = [result.data, ...payments.value]
+        await refreshSummary(result.data.kindergartenId)
       }
       return result
     }
@@ -110,6 +124,7 @@ export const usePaymentsStore = defineStore('payments', () => {
       const result = await paymentsService.confirmPayment({ paymentId, kindergartenId, actorId })
       if (result.success && loadedKindergartenId.value === kindergartenId) {
         payments.value = payments.value.map(payment => (payment.id === paymentId ? result.data : payment))
+        await refreshSummary(kindergartenId)
       }
       return result
     }
@@ -124,6 +139,8 @@ export const usePaymentsStore = defineStore('payments', () => {
 
   return {
     payments,
+    summary,
+    isSummaryOutdated,
     payableInvoices,
     payableInvoicesError,
     loadedKindergartenId,
@@ -132,8 +149,6 @@ export const usePaymentsStore = defineStore('payments', () => {
     confirmingPaymentIds,
     isRecordingPayment,
     status,
-    paymentCountByStatus,
-    confirmedTotal,
     loadPayments,
     loadPayableInvoices,
     recordPayment,

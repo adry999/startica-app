@@ -8,7 +8,9 @@ type InvoiceWithChild = Tables<'invoices'> & { children: ChildName | null }
 
 const invoiceWithChildColumns = '*, children(first_name, last_name)'
 const payableInvoiceColumns = 'id, amount, due_date, children(first_name, last_name)'
-const payableStatuses: InvoiceStatus[] = ['issued', 'overdue']
+const settleableStatuses: InvoiceStatus[] = ['issued', 'overdue']
+// Matches the payments_invoice_payable trigger: a paid invoice still accepts further payments.
+const paymentAcceptingStatuses: InvoiceStatus[] = ['issued', 'overdue', 'paid']
 
 function formatChildName(child: ChildName | null): string {
   return child ? `${child.first_name} ${child.last_name}` : ''
@@ -68,7 +70,7 @@ export function createBillingService(client: SupabaseClient<Database>): BillingS
         .from('invoices')
         .select(payableInvoiceColumns)
         .eq('kindergarten_id', kindergartenId)
-        .in('status', payableStatuses)
+        .in('status', paymentAcceptingStatuses)
         .is('deleted_at', null)
         .order('due_date', { ascending: true })
 
@@ -90,7 +92,7 @@ export function createBillingService(client: SupabaseClient<Database>): BillingS
         .update({ status: 'paid', paid_at: new Date().toISOString(), updated_by: actorId })
         .eq('id', invoiceId)
         .eq('kindergarten_id', kindergartenId)
-        .in('status', payableStatuses)
+        .in('status', settleableStatuses)
         .is('deleted_at', null)
         .select(invoiceWithChildColumns)
         .maybeSingle()
