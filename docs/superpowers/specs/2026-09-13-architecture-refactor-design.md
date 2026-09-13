@@ -1,7 +1,7 @@
 # Architecture Refactor — Design Spec
 
 **Date:** 2026-09-13
-**Status:** Steps 1–4 (tooling, core primitives, session kernel part 1, billing + payments pilot) committed on branch `refactor/architecture-steps`, not yet merged. Steps 5–11 not started.
+**Status:** Steps 1–4 (tooling, core primitives, session kernel part 1, billing + payments pilot) merged to `main` (#12). Step 5 (global error handling) on branch `refactor/global-error-handling`. Steps 6–11 not started.
 **Conventions record:** `.claude/skills/project-conventions/SKILL.md` (rules + decision log). This spec explains and plans; it does not restate the rules.
 
 ## 1. Summary
