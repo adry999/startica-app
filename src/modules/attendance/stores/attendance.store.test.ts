@@ -9,17 +9,16 @@ const service = vi.hoisted(() => ({
 }))
 
 vi.mock('~/core/supabase/client', () => ({ useSupabaseClient: vi.fn(() => ({})) }))
-vi.mock('~/modules/auth/stores/auth.store', () => ({
-  useAuthStore: vi.fn(() => ({ user: { id: 'user-1' } })),
-}))
 vi.mock('../services/attendance.service', () => service)
 
+import { useActorStore } from '@shared/session/actor.store'
 import { useAttendanceStore } from './attendance.store'
 
 describe('attendance store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.resetAllMocks()
+    useActorStore().setActor({ id: 'user-1', email: 'e@b.com', fullName: 'Educator', role: 'educator', avatarUrl: null, status: 'active' })
   })
 
   it('loads records for a directly selected group', async () => {

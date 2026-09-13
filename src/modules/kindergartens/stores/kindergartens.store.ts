@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as kindergartensService from '../services/kindergartens.service'
 import type { KindergartenRow } from '../services/kindergartens.service'
@@ -63,8 +63,7 @@ export const useKindergartensStore = defineStore('kindergartens', {
     },
 
     async create(details: DetailsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
+      const actorId = useActorStore().actorId
       if (!actorId) return false
 
       const withLoading = useStoreAction(this)
@@ -75,8 +74,7 @@ export const useKindergartensStore = defineStore('kindergartens', {
     },
 
     async updateDetails(id: string, details: DetailsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
+      const actorId = useActorStore().actorId
       if (!actorId) return false
 
       const withLoading = useStoreAction(this)
@@ -87,8 +85,7 @@ export const useKindergartensStore = defineStore('kindergartens', {
     },
 
     async updateSettings(id: string, settings: SettingsInput) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
+      const actorId = useActorStore().actorId
       if (!actorId) return false
 
       const withLoading = useStoreAction(this)
@@ -99,8 +96,7 @@ export const useKindergartensStore = defineStore('kindergartens', {
     },
 
     async setStatus(id: string, status: KindergartenStatus) {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
+      const actorId = useActorStore().actorId
       if (!actorId) return false
 
       const withLoading = useStoreAction(this)

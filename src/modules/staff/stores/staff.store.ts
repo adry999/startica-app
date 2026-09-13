@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
+import type { ModuleKey } from '@shared/session/actor.types'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
 import * as staffService from '../services/staff.service'
 import type { UserRow } from '../services/staff.service'
 import type { StaffMember } from '../types/staff.types'
 import type { InviteStaffInput, UpdateStaffInput } from '~/shared/schemas/staff.schema'
-import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
 
 function toStaffMember(row: UserRow): StaffMember {
   return {
@@ -109,8 +109,7 @@ export const useStaffStore = defineStore('staff', {
     },
 
     async saveModuleGrants(userId: string, kindergartenId: string, desiredKeys: ModuleKey[]): Promise<boolean> {
-      const authStore = useAuthStore()
-      const actorId = authStore.user?.id
+      const actorId = useActorStore().actorId
       if (!actorId) return false
 
       const client = useSupabaseClient()

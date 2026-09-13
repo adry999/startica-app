@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import * as poolService from '../services/pool.service'
 import type { TrainerAvailability, SchedulePattern, PoolSession, SessionParticipant } from '../types/pool.types'
 
@@ -23,14 +23,14 @@ export const usePoolStore = defineStore('pool', {
       this.availability = result.data
     },
     async addAvailability(input: Parameters<typeof poolService.addAvailability>[1]) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.addAvailability(useSupabaseClient(), input, actorId)
       if (!result.success) { this.error = result.error; return false }
       this.availability.push(result.data)
       return true
     },
     async removeAvailability(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.removeAvailability(useSupabaseClient(), id, actorId)
       if (!result.success) { this.error = result.error; return false }
       this.availability = this.availability.filter(a => a.id !== id)
@@ -45,14 +45,14 @@ export const usePoolStore = defineStore('pool', {
       this.patterns = result.data
     },
     async createPattern(input: Parameters<typeof poolService.createPattern>[1]) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.createPattern(useSupabaseClient(), input, actorId)
       if (!result.success) { this.error = result.error; return false }
       this.patterns.push(result.data)
       return true
     },
     async deletePattern(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.deletePattern(useSupabaseClient(), id, actorId)
       if (!result.success) { this.error = result.error; return false }
       this.patterns = this.patterns.filter(p => p.id !== id)
@@ -67,7 +67,7 @@ export const usePoolStore = defineStore('pool', {
       this.sessions = result.data
     },
     async cancelSession(id: string) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.cancelSession(useSupabaseClient(), id, actorId)
       if (!result.success) { this.error = result.error; return false }
       const idx = this.sessions.findIndex(s => s.id === id)
@@ -80,7 +80,7 @@ export const usePoolStore = defineStore('pool', {
       this.participants[sessionId] = result.data
     },
     async addParticipant(sessionId: string, childId: string) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.addParticipant(useSupabaseClient(), sessionId, childId, actorId)
       if (!result.success) { this.error = result.error; return false }
       if (!this.participants[sessionId]) this.participants[sessionId] = []
@@ -90,7 +90,7 @@ export const usePoolStore = defineStore('pool', {
       return true
     },
     async removeParticipant(sessionId: string, participantId: string) {
-      const actorId = useAuthStore().user?.id ?? ''
+      const actorId = useActorStore().actorId ?? ''
       const result = await poolService.removeParticipant(useSupabaseClient(), participantId, actorId)
       if (!result.success) { this.error = result.error; return false }
       this.participants[sessionId] = (this.participants[sessionId] ?? []).filter(p => p.id !== participantId)

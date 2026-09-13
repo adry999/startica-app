@@ -7,14 +7,14 @@ import { uploadKindergartenAvatar } from '~/core/storage/avatar.service'
 
 const { t } = useI18n()
 const toast = useToast()
-const authStore = useAuthStore()
+const actorStore = useActorStore()
 const tenantStore = useTenantStore()
 const client = useSupabaseClient()
 
 type Section = 'profile' | 'password' | 'language' | 'kindergarten'
 const activeSection = ref<Section>('profile')
 
-const fullName = ref(authStore.user?.fullName ?? '')
+const fullName = ref(actorStore.actor?.fullName ?? '')
 const saving = ref(false)
 const sending = ref(false)
 const loadingKg = ref(false)
@@ -37,30 +37,30 @@ const navItems = [
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
 
 const userInitials = computed(() => {
-  const name = authStore.user?.fullName ?? ''
+  const name = actorStore.actor?.fullName ?? ''
   return name.trim().split(/\s+/).slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? '').join('') || '?'
 })
 
 async function saveProfile() {
-  if (!authStore.user) return
+  if (!actorStore.actor) return
   saving.value = true
-  const result = await settingsService.updateOwnProfile(client, authStore.user.id, fullName.value)
+  const result = await settingsService.updateOwnProfile(client, actorStore.actor.id, fullName.value)
   saving.value = false
   if (!result.success) {
     toast.add({ title: t('settings.saveError'), color: 'error' })
     return
   }
-  authStore.user.fullName = fullName.value
+  actorStore.updateProfile({ fullName: fullName.value })
   toast.add({ title: t('settings.saveSuccess'), color: 'success' })
 }
 
 async function handleAvatarUpload(event: Event) {
   const input = event.target as HTMLInputElement
-  if (!input.files?.[0] || !authStore.user) return
+  if (!input.files?.[0] || !actorStore.actor) return
 
   const file = input.files[0]
   saving.value = true
-  const result = await settingsService.updateOwnAvatar(client, authStore.user.id, file)
+  const result = await settingsService.updateOwnAvatar(client, actorStore.actor.id, file)
   saving.value = false
 
   if (!result.success) {
@@ -68,7 +68,7 @@ async function handleAvatarUpload(event: Event) {
     return
   }
 
-  authStore.user.avatarUrl = result.data
+  actorStore.updateProfile({ avatarUrl: result.data })
   toast.add({ title: t('settings.avatarUploadSuccess'), color: 'success' })
 }
 
@@ -94,12 +94,12 @@ async function loadKindergartenSettings() {
 }
 
 async function saveKindergartenSettings() {
-  if (!selectedKgId.value || !authStore.user) return
+  if (!selectedKgId.value || !actorStore.actor) return
   savingKg.value = true
   const result = await settingsService.updateKindergartenSettings(
     client,
     selectedKgId.value,
-    authStore.user.id,
+    actorStore.actor.id,
     {
       timezone: timezone.value,
       defaultLocale: kgLocale.value,
@@ -135,7 +135,7 @@ async function handleKindergartenAvatarUpload(event: Event) {
   await settingsService.updateKindergartenSettings(
     client,
     selectedKgId.value,
-    authStore.user?.id || '',
+    actorStore.actor?.id || '',
     {
       timezone: timezone.value,
       defaultLocale: kgLocale.value,
@@ -148,11 +148,11 @@ async function handleKindergartenAvatarUpload(event: Event) {
 }
 
 async function sendPasswordReset() {
-  if (!authStore.user?.email) return
+  if (!actorStore.actor?.email) return
   sending.value = true
   const result = await settingsService.requestOwnPasswordReset(
     client,
-    authStore.user.email,
+    actorStore.actor.email,
     `${window.location.origin}/reset-password`,
   )
   sending.value = false
@@ -231,9 +231,9 @@ watch(activeSection, (newSection) => {
             <div class="flex items-center gap-4 pb-6 border-b border-border">
               <div class="relative">
                 <img
-                  v-if="authStore.user?.avatarUrl"
-                  :src="authStore.user.avatarUrl"
-                  :alt="authStore.user.fullName"
+                  v-if="actorStore.actor?.avatarUrl"
+                  :src="actorStore.actor.avatarUrl"
+                  :alt="actorStore.actor.fullName"
                   class="inline-flex h-16 w-16 shrink-0 rounded-full object-cover ring-4 ring-teal-50"
                 />
                 <span
@@ -256,8 +256,8 @@ watch(activeSection, (newSection) => {
                 </label>
               </div>
               <div>
-                <p class="font-semibold text-slate-800">{{ authStore.user?.fullName }}</p>
-                <p class="text-sm text-slate-400">{{ authStore.user?.email }}</p>
+                <p class="font-semibold text-slate-800">{{ actorStore.actor?.fullName }}</p>
+                <p class="text-sm text-slate-400">{{ actorStore.actor?.email }}</p>
               </div>
             </div>
 
@@ -269,7 +269,7 @@ watch(activeSection, (newSection) => {
               </div>
               <div>
                 <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.email') }}</label>
-                <UInput :model-value="authStore.user?.email ?? ''" disabled class="w-full" />
+                <UInput :model-value="actorStore.actor?.email ?? ''" disabled class="w-full" />
                 <p class="mt-1.5 flex items-center gap-1 text-xs text-slate-400">
                   <UIcon name="i-heroicons-information-circle" class="h-3.5 w-3.5" />
                   {{ t('settings.emailReadonly') }}
@@ -278,7 +278,7 @@ watch(activeSection, (newSection) => {
               <div>
                 <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.role') }}</label>
                 <UInput
-                  :model-value="authStore.user ? t(`auth.role.${authStore.user.role}`) : ''"
+                  :model-value="actorStore.actor ? t(`auth.role.${actorStore.actor.role}`) : ''"
                   disabled
                   class="w-full"
                 />

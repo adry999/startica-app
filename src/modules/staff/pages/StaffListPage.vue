@@ -8,7 +8,7 @@ import {
   type UpdateStaffInput,
 } from '~/shared/schemas/staff.schema'
 import type { StaffMember } from '../types/staff.types'
-import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
+import type { ModuleKey } from '@shared/session/actor.types'
 
 const { t } = useI18n()
 const toast = useToast()
