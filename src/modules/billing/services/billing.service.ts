@@ -132,31 +132,18 @@ export async function getSummary(
   kindergartenId: string,
 ): Promise<Result<InvoiceSummary>> {
   const { data, error } = await client
-    .from('invoices')
-    .select('amount, status, due_date')
-    .eq('kindergarten_id', kindergartenId)
-    .is('deleted_at', null)
+    .rpc('invoice_summary', { p_kindergarten_id: kindergartenId })
+    .single()
 
-  if (error) return { success: false, error: error.message }
+  if (error || !data) return { success: false, error: error?.message ?? 'summary_failed' }
 
-  const today = new Date().toISOString().split('T')[0]
-  const summary: InvoiceSummary = {
-    totalIssued: 0,
-    totalPaid: 0,
-    totalOverdue: 0,
-    pendingCount: 0,
+  return {
+    success: true,
+    data: {
+      totalIssued: Number(data.total_issued),
+      totalPaid: Number(data.total_paid),
+      totalOverdue: Number(data.total_overdue),
+      pendingCount: Number(data.pending_count),
+    },
   }
-
-  for (const row of data ?? []) {
-    const amount = Number(row.amount)
-    const status = row.status as InvoiceStatus
-    const dueDate = row.due_date as string
-
-    if (status === 'issued') summary.totalIssued += amount
-    if (status === 'paid') summary.totalPaid += amount
-    if (status === 'issued' && dueDate < today) summary.totalOverdue += amount
-    if (status === 'issued' || status === 'draft') summary.pendingCount += 1
-  }
-
-  return { success: true, data: summary }
 }

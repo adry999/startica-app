@@ -133,12 +133,13 @@ describe('confirmPayment', () => {
 })
 
 describe('getTotalPaidForInvoice', () => {
-  it('sums the confirmed payment amounts', async () => {
-    const { client } = createMockClient()
-    const result = await getTotalPaidForInvoice(client, validInput.invoiceId)
+  it('reads the confirmed total from the database aggregate', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: 150.25, error: null })
+    const result = await getTotalPaidForInvoice({ rpc } as never, validInput.invoiceId)
 
     expect(result.success).toBe(true)
     if (!result.success) return
     expect(result.data).toBe(150.25)
+    expect(rpc).toHaveBeenCalledWith('invoice_total_paid', { p_invoice_id: validInput.invoiceId })
   })
 })

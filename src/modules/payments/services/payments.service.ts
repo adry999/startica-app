@@ -95,13 +95,8 @@ export async function getTotalPaidForInvoice(
   invoiceId: string,
 ): Promise<Result<number>> {
   const { data, error } = await client
-    .from('payments')
-    .select('amount')
-    .eq('invoice_id', invoiceId)
-    .eq('status', 'confirmed')
-    .is('deleted_at', null)
+    .rpc('invoice_total_paid', { p_invoice_id: invoiceId })
 
-  if (error) return { success: false, error: error.message }
-  const total = (data ?? []).reduce((sum, row) => sum + Number(row.amount), 0)
-  return { success: true, data: total }
+  if (error || data === null) return { success: false, error: error?.message ?? 'summary_failed' }
+  return { success: true, data: Number(data) }
 }
