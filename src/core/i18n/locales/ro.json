@@ -511,6 +511,15 @@
       "invoice_not_payable": "Factura nu mai poate fi marcată ca plătită. Reîncarcă lista.",
       "payment_not_pending": "Plata nu mai este în așteptare. Reîncarcă lista.",
       "invoice_not_accepting_payments": "Factura nu mai acceptă plăți. Reîncarcă lista."
+    },
+    "page": {
+      "title": "Pagina nu a putut fi afișată.",
+      "description": "A apărut o eroare la afișarea paginii. Încearcă din nou sau deschide altă pagină din meniu.",
+      "notFoundTitle": "Pagina nu a fost găsită",
+      "notFoundDescription": "Adresa deschisă nu există sau a fost mutată.",
+      "unexpectedTitle": "A apărut o eroare",
+      "unexpectedDescription": "Aplicația a întâmpinat o eroare neașteptată. Revino la pagina principală și încearcă din nou.",
+      "backHome": "Înapoi la pagina principală"
     }
   },
   "billing": {

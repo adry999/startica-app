@@ -511,6 +511,15 @@
       "invoice_not_payable": "This invoice can no longer be marked as paid. Reload the list.",
       "payment_not_pending": "This payment is no longer pending. Reload the list.",
       "invoice_not_accepting_payments": "This invoice no longer accepts payments. Reload the list."
+    },
+    "page": {
+      "title": "This page could not be displayed.",
+      "description": "Something went wrong while showing this page. Try again, or open another page from the menu.",
+      "notFoundTitle": "Page not found",
+      "notFoundDescription": "The address you opened does not exist or has moved.",
+      "unexpectedTitle": "Something went wrong",
+      "unexpectedDescription": "The application hit an unexpected error. Go back to the home page and try again.",
+      "backHome": "Back to home"
     }
   },
   "billing": {

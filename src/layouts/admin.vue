@@ -209,7 +209,10 @@ async function onLogout() {
       <!-- Page content -->
       <main class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8" role="main">
         <div class="mx-auto w-full max-w-[1400px]">
-          <slot />
+          <!-- A crashing page keeps the shell; retry or navigation clears the panel. -->
+          <BasePageBoundary>
+            <slot />
+          </BasePageBoundary>
         </div>
       </main>
     </div>
