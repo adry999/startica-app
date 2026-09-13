@@ -1,4 +1,5 @@
-import { defineStore } from 'pinia'
+import { defineStore, getActivePinia, type Pinia } from 'pinia'
+import { resetSessionStores } from '~/core/auth/session-reset'
 import { useSupabaseClient } from '~/core/supabase/client'
 import type { Database } from '~/core/supabase/types'
 import * as authService from '../services/auth.service'
@@ -26,6 +27,8 @@ export const useAuthStore = defineStore('auth', {
     error: null as string | null,
     isPasswordRecovery: false,
     moduleGrants: [] as ModuleGrant[],
+    sessionVersion: 0,
+    isAuthOperation: false,
   }),
 
   getters: {
@@ -36,65 +39,129 @@ export const useAuthStore = defineStore('auth', {
     async login(email: string, password: string) {
       this.loading = true
       this.error = null
+      this.isAuthOperation = true
       const client = useSupabaseClient()
+      const pinia = getActivePinia() ?? undefined
+      let sessionVersion = this.sessionVersion
 
-      const signInResult = await authService.signInWithPassword(client, email, password)
-      if (!signInResult.success) {
+      try {
+        const signInResult = await authService.signInWithPassword(client, email, password)
+        if (sessionVersion !== this.sessionVersion) return false
+        if (!signInResult.success) {
+          this.loading = false
+          this.error = signInResult.error
+          return false
+        }
+
+        // A different user can sign in without a page reload (for example after
+        // an expired session). Remove every tenant-scoped cache before loading
+        // their profile.
+        if (this.user?.id && this.user.id !== signInResult.data.userId) {
+          this.clearSessionState({ preserveAuthOperation: true, pinia })
+          sessionVersion = this.sessionVersion
+        }
+
+        const profileResult = await authService.fetchCurrentUserProfile(client, signInResult.data.userId)
+        if (sessionVersion !== this.sessionVersion) return false
+        if (!profileResult.success) {
+          // Roll back an authenticated session without a usable profile.
+          try {
+            await authService.signOut(client)
+          } catch {
+            // Local state is still cleared when remote sign-out fails.
+          }
+          this.clearSessionState({ preserveAuthOperation: true, pinia })
+          this.error = profileResult.error
+          return false
+        }
+
         this.loading = false
-        this.error = signInResult.error
+        this.user = toAuthUser(profileResult.data)
+        await this.loadModuleGrants(profileResult.data.id, client, sessionVersion)
+        return sessionVersion === this.sessionVersion
+      } catch (error) {
+        if (sessionVersion === this.sessionVersion) {
+          this.clearSessionState({ preserveAuthOperation: true, pinia })
+          this.error = error instanceof Error ? error.message : 'login_failed'
+        }
         return false
-      }
-
-      const profileResult = await authService.fetchCurrentUserProfile(client, signInResult.data.userId)
-      if (!profileResult.success) {
-        // A live Supabase session with no usable profile (e.g. the user was
-        // soft-deleted/deactivated after they last set their password) must
-        // not be left dangling — roll it back so the browser holds no
-        // authenticated session the app itself doesn't recognize.
-        await authService.signOut(client)
+      } finally {
         this.loading = false
-        this.error = profileResult.error
-        return false
+        this.isAuthOperation = false
       }
-
-      this.loading = false
-      this.user = toAuthUser(profileResult.data)
-      await this.loadModuleGrants(profileResult.data.id, client)
-      return true
     },
 
     async logout() {
       const client = useSupabaseClient()
-      await authService.signOut(client)
+      const pinia = getActivePinia() ?? undefined
+      this.isAuthOperation = true
+      try {
+        const result = await authService.signOut(client)
+        return result.success
+      } catch {
+        return false
+      } finally {
+        // Clear local data even if Supabase cannot confirm the remote sign-out.
+        this.clearSessionState({ preserveAuthOperation: true, pinia })
+        this.isAuthOperation = false
+      }
+    },
+
+    clearSessionState({
+      preserveAuthOperation = false,
+      pinia,
+    }: { preserveAuthOperation?: boolean, pinia?: Pinia } = {}) {
+      resetSessionStores(pinia)
+      if (import.meta.client) clearNuxtData()
       this.user = null
       this.moduleGrants = []
+      this.loading = false
+      this.error = null
+      this.isPasswordRecovery = false
+      this.sessionVersion += 1
+      if (!preserveAuthOperation) this.isAuthOperation = false
     },
 
     async fetchCurrentUser() {
       const client = useSupabaseClient()
+      const pinia = getActivePinia() ?? undefined
+      const sessionVersion = this.sessionVersion
       const userId = await authService.getCurrentUserId(client)
 
+      if (sessionVersion !== this.sessionVersion) return
+
       if (!userId) {
-        this.user = null
+        this.clearSessionState({ pinia })
         return
       }
 
       const profileResult = await authService.fetchCurrentUserProfile(client, userId)
+      if (sessionVersion !== this.sessionVersion) return
       if (!profileResult.success) {
+        this.clearSessionState({ pinia })
         this.error = profileResult.error
-        this.user = null
         return
       }
 
+      if (this.user?.id && this.user.id !== profileResult.data.id) {
+        this.clearSessionState({ pinia })
+      }
+
       this.user = toAuthUser(profileResult.data)
-      await this.loadModuleGrants(profileResult.data.id, client)
+      await this.loadModuleGrants(profileResult.data.id, client, this.sessionVersion)
     },
 
     // The client must be captured by the caller BEFORE any await: on SSR,
     // calling useSupabaseClient() after an await point loses the Nuxt
     // instance (useRequestEvent throws "composable called outside ...").
-    async loadModuleGrants(userId: string, client: ReturnType<typeof useSupabaseClient> = useSupabaseClient()) {
+    async loadModuleGrants(
+      userId: string,
+      client: ReturnType<typeof useSupabaseClient> = useSupabaseClient(),
+      sessionVersion?: number,
+    ) {
+      const requestVersion = sessionVersion ?? this.sessionVersion
       const result = await listUserModuleGrants(client, userId)
+      if (requestVersion !== this.sessionVersion) return
       this.moduleGrants = result.success ? result.data : []
     },
 
