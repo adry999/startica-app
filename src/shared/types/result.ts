@@ -1,1 +1,1 @@
-export type Result<T> = { success: true; data: T } | { success: false; error: string }
+export type Result<T, E = string> = { success: true, data: T } | { success: false, error: E }

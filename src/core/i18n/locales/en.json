@@ -13,6 +13,8 @@
     "create": "Create",
     "copy": "Copy",
     "copied": "Copied.",
+    "retry": "Retry",
+    "actions": "Actions",
     "pagination": {
       "perPage": "per page",
       "all": "All"
@@ -495,6 +497,17 @@
       "4": "Thursday",
       "5": "Friday",
       "6": "Saturday"
+    }
+  },
+  "errors": {
+    "network": "Could not reach the server. Check your connection and try again.",
+    "validation": "Some fields are not valid. Check the values you entered.",
+    "refused": {
+      "forbidden": "You don't have permission for this action.",
+      "not_found": "This record no longer exists.",
+      "conflict": "A record with these details already exists.",
+      "rejected": "The operation was rejected. Try again or contact an administrator.",
+      "session_expired": "Your session has expired. Please log in again."
     }
   },
   "billing": {

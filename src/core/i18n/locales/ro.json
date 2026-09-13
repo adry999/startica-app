@@ -13,6 +13,8 @@
     "create": "Creează",
     "copy": "Copiază",
     "copied": "Copiat.",
+    "retry": "Reîncearcă",
+    "actions": "Acțiuni",
     "pagination": {
       "perPage": "pe pagină",
       "all": "Toate"
@@ -495,6 +497,17 @@
       "4": "Joi",
       "5": "Vineri",
       "6": "Sâmbătă"
+    }
+  },
+  "errors": {
+    "network": "Nu s-a putut contacta serverul. Verifică conexiunea și încearcă din nou.",
+    "validation": "Unele câmpuri nu sunt valide. Verifică datele introduse.",
+    "refused": {
+      "forbidden": "Nu ai permisiunea pentru această acțiune.",
+      "not_found": "Înregistrarea nu mai există.",
+      "conflict": "Există deja o înregistrare cu aceste date.",
+      "rejected": "Operațiunea a fost respinsă. Încearcă din nou sau contactează un administrator.",
+      "session_expired": "Sesiunea a expirat. Autentifică-te din nou."
     }
   },
   "billing": {
