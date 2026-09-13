@@ -1,149 +1,104 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '~/core/supabase/types'
-import type { Result } from '~/shared/types/result'
-import type { Invoice, InvoiceStatus, InvoiceSummary } from '../types/billing.types'
+import { appErrorFromPostgrest } from '@core/errors/app-error'
+import type { Database, Tables } from '@core/supabase/types'
+import type { BillingService, Invoice, InvoiceStatus } from '../types/billing.types'
 
-type Client = SupabaseClient<Database>
+type ChildName = Pick<Tables<'children'>, 'first_name' | 'last_name'>
+type InvoiceWithChild = Tables<'invoices'> & { children: ChildName | null }
 
-function toInvoice(row: Record<string, unknown>): Invoice {
+const invoiceWithChildColumns = '*, children(first_name, last_name)'
+const payableInvoiceColumns = 'id, amount, due_date, children(first_name, last_name)'
+const payableStatuses: InvoiceStatus[] = ['issued', 'overdue']
+
+function formatChildName(child: ChildName | null): string {
+  return child ? `${child.first_name} ${child.last_name}` : ''
+}
+
+function toInvoice(row: InvoiceWithChild): Invoice {
   return {
-    id: row.id as string,
-    kindergartenId: row.kindergarten_id as string,
-    childId: row.child_id as string,
-    childName: ((row.children as { first_name: string; last_name: string } | null)?.first_name ?? '') + ' ' + ((row.children as { first_name: string; last_name: string } | null)?.last_name ?? ''),
+    id: row.id,
+    kindergartenId: row.kindergarten_id,
+    childId: row.child_id,
+    childName: formatChildName(row.children),
     amount: Number(row.amount),
-    dueDate: row.due_date as string,
-    paidAt: row.paid_at as string | null,
-    status: row.status as InvoiceStatus,
-    notes: (row.notes as string | null) ?? null,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-    createdBy: (row.created_by as string | null) ?? null,
-    updatedBy: (row.updated_by as string | null) ?? null,
+    dueDate: row.due_date,
+    paidAt: row.paid_at,
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdBy: row.created_by,
+    updatedBy: row.updated_by,
   }
 }
 
-export async function listInvoices(
-  client: Client,
-  kindergartenId: string,
-  status?: InvoiceStatus,
-): Promise<Result<Invoice[]>> {
-  let q = client
-    .from('invoices')
-    .select('*, children(first_name, last_name)')
-    .eq('kindergarten_id', kindergartenId)
-    .is('deleted_at', null)
-    .order('due_date', { ascending: false })
-
-  if (status) q = q.eq('status', status)
-
-  const { data, error } = await q
-  if (error) return { success: false, error: error.message }
-  return { success: true, data: (data ?? []).map(r => toInvoice(r as Record<string, unknown>)) }
-}
-
-export async function getInvoice(
-  client: Client,
-  id: string,
-): Promise<Result<Invoice>> {
-  const { data, error } = await client
-    .from('invoices')
-    .select('*, children(first_name, last_name)')
-    .eq('id', id)
-    .is('deleted_at', null)
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'not_found' }
-  return { success: true, data: toInvoice(data as Record<string, unknown>) }
-}
-
-export async function createInvoice(
-  client: Client,
-  input: {
-    kindergartenId: string
-    childId: string
-    amount: number
-    dueDate: string
-    notes?: string | null
-  },
-  userId: string,
-): Promise<Result<Invoice>> {
-  const { data, error } = await client
-    .from('invoices')
-    .insert({
-      kindergarten_id: input.kindergartenId,
-      child_id: input.childId,
-      amount: input.amount,
-      due_date: input.dueDate,
-      notes: input.notes ?? null,
-      created_by: userId,
-      updated_by: userId,
-    })
-    .select('*, children(first_name, last_name)')
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'create_failed' }
-  return { success: true, data: toInvoice(data as Record<string, unknown>) }
-}
-
-export async function updateInvoice(
-  client: Client,
-  id: string,
-  input: {
-    amount?: number
-    dueDate?: string
-    status?: InvoiceStatus
-    paidAt?: string | null
-    notes?: string | null
-  },
-  userId: string,
-): Promise<Result<Invoice>> {
-  const payload: Database['public']['Tables']['invoices']['Update'] = {
-    updated_by: userId,
-  }
-  if (input.amount !== undefined) payload.amount = input.amount
-  if (input.dueDate !== undefined) payload.due_date = input.dueDate
-  if (input.status !== undefined) payload.status = input.status
-  if (input.paidAt !== undefined) payload.paid_at = input.paidAt
-  if (input.notes !== undefined) payload.notes = input.notes
-
-  const { data, error } = await client
-    .from('invoices')
-    .update(payload)
-    .eq('id', id)
-    .select('*, children(first_name, last_name)')
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'update_failed' }
-  return { success: true, data: toInvoice(data as Record<string, unknown>) }
-}
-
-export async function markAsPaid(
-  client: Client,
-  id: string,
-  userId: string,
-): Promise<Result<Invoice>> {
-  const now = new Date().toISOString()
-  return updateInvoice(client, id, { status: 'paid', paidAt: now }, userId)
-}
-
-export async function getSummary(
-  client: Client,
-  kindergartenId: string,
-): Promise<Result<InvoiceSummary>> {
-  const { data, error } = await client
-    .rpc('invoice_summary', { p_kindergarten_id: kindergartenId })
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'summary_failed' }
-
+export function createBillingService(client: SupabaseClient<Database>): BillingService {
   return {
-    success: true,
-    data: {
-      totalIssued: Number(data.total_issued),
-      totalPaid: Number(data.total_paid),
-      totalOverdue: Number(data.total_overdue),
-      pendingCount: Number(data.pending_count),
+    async listInvoices(kindergartenId) {
+      const response = await client
+        .from('invoices')
+        .select(invoiceWithChildColumns)
+        .eq('kindergarten_id', kindergartenId)
+        .is('deleted_at', null)
+        .order('due_date', { ascending: false })
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: response.data.map(toInvoice) }
+    },
+
+    async getSummary(kindergartenId) {
+      const response = await client
+        .rpc('invoice_summary', { p_kindergarten_id: kindergartenId })
+        .single()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return {
+        success: true,
+        data: {
+          totalIssued: Number(response.data.total_issued),
+          totalPaid: Number(response.data.total_paid),
+          totalOverdue: Number(response.data.total_overdue),
+          pendingCount: Number(response.data.pending_count),
+        },
+      }
+    },
+
+    async listPayableInvoices(kindergartenId) {
+      const response = await client
+        .from('invoices')
+        .select(payableInvoiceColumns)
+        .eq('kindergarten_id', kindergartenId)
+        .in('status', payableStatuses)
+        .is('deleted_at', null)
+        .order('due_date', { ascending: true })
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return {
+        success: true,
+        data: response.data.map(row => ({
+          id: row.id,
+          childName: formatChildName(row.children),
+          amount: Number(row.amount),
+          dueDate: row.due_date,
+        })),
+      }
+    },
+
+    async markInvoicePaid({ invoiceId, kindergartenId, actorId }) {
+      const response = await client
+        .from('invoices')
+        .update({ status: 'paid', paid_at: new Date().toISOString(), updated_by: actorId })
+        .eq('id', invoiceId)
+        .eq('kindergarten_id', kindergartenId)
+        .in('status', payableStatuses)
+        .is('deleted_at', null)
+        .select(invoiceWithChildColumns)
+        .maybeSingle()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      // No row: someone already settled or cancelled the invoice, or RLS hides it.
+      if (!response.data) return { success: false, error: { kind: 'refused', reason: 'invoice_not_payable' } }
+      return { success: true, data: toInvoice(response.data) }
     },
   }
 }

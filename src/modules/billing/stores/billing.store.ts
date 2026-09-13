@@ -1,100 +1,103 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Invoice, InvoiceStatus, InvoiceSummary } from '../types/billing.types'
-import * as service from '../services/billing.service'
-import { useSupabaseClient } from '~/core/supabase/client'
+import { computed, ref } from 'vue'
+import { createLatestRequestGuard } from '@core/async/latest-request'
+import { sessionExpiredError, type AppError } from '@core/errors/app-error'
+import type { Result } from '@shared/types/result'
+import type { ScreenStatus } from '@shared/types/screen-status'
+import { injectBillingDependencies } from '../billing.dependencies'
+import type { Invoice, InvoiceSummary } from '../types/billing.types'
 
 export const useBillingStore = defineStore('billing', () => {
-  const client = useSupabaseClient()
-  const items = ref<Invoice[]>([])
+  const { billingService, readCurrentActorId } = injectBillingDependencies()
+  const invoiceRequests = createLatestRequestGuard()
+
+  const invoices = ref<Invoice[]>([])
   const summary = ref<InvoiceSummary | null>(null)
-  const loading = ref(false)
-  const error = ref<string | null>(null)
+  const loadedKindergartenId = ref<string | null>(null)
+  const loadPhase = ref<'loading' | 'loaded' | 'failed'>('loading')
+  const loadError = ref<AppError | null>(null)
+  const settlingInvoiceIds = ref<string[]>([])
 
-  async function fetchAll(kindergartenId: string, status?: InvoiceStatus) {
-    loading.value = true
-    error.value = null
+  const status = computed<ScreenStatus>(() => {
+    if (loadPhase.value !== 'loaded') return loadPhase.value
+    return invoices.value.length > 0 ? 'ready' : 'empty'
+  })
+
+  function failLoad(error: AppError): false {
+    loadError.value = error
+    loadPhase.value = 'failed'
+    return false
+  }
+
+  async function loadInvoices(kindergartenId: string): Promise<boolean> {
+    const request = invoiceRequests.begin()
+    if (loadedKindergartenId.value !== kindergartenId) {
+      invoices.value = []
+      summary.value = null
+      loadedKindergartenId.value = kindergartenId
+    }
+    loadPhase.value = 'loading'
+    loadError.value = null
+
+    const [invoicesResult, summaryResult] = await Promise.all([
+      billingService.listInvoices(kindergartenId),
+      billingService.getSummary(kindergartenId),
+    ])
+    if (!request.isLatest()) return false
+    if (!invoicesResult.success) return failLoad(invoicesResult.error)
+    if (!summaryResult.success) return failLoad(summaryResult.error)
+
+    invoices.value = invoicesResult.data
+    summary.value = summaryResult.data
+    loadPhase.value = 'loaded'
+    return true
+  }
+
+  async function refreshSummary(kindergartenId: string) {
+    const summaryResult = await billingService.getSummary(kindergartenId)
+    if (loadedKindergartenId.value !== kindergartenId) return
+    if (summaryResult.success) {
+      summary.value = summaryResult.data
+      return
+    }
+    // The invoice is already paid; a stale summary must not report the payment as failed.
+    console.warn('[billing] summary refresh failed after settling an invoice', { kindergartenId, error: summaryResult.error })
+  }
+
+  async function markInvoicePaid(invoiceId: string): Promise<Result<Invoice, AppError>> {
+    const actorId = readCurrentActorId()
+    const kindergartenId = loadedKindergartenId.value
+    if (!actorId) return { success: false, error: sessionExpiredError }
+    if (!kindergartenId) return { success: false, error: { kind: 'refused', reason: 'not_found' } }
+
+    settlingInvoiceIds.value = [...settlingInvoiceIds.value, invoiceId]
     try {
-      const result = await service.listInvoices(client, kindergartenId, status)
-      if (result.success) {
-        items.value = result.data
-        return true
+      const result = await billingService.markInvoicePaid({ invoiceId, kindergartenId, actorId })
+      if (result.success && loadedKindergartenId.value === kindergartenId) {
+        invoices.value = invoices.value.map(invoice => (invoice.id === invoiceId ? result.data : invoice))
+        await refreshSummary(kindergartenId)
       }
-      error.value = result.error
-      return false
-    } finally {
-      loading.value = false
+      return result
+    }
+    finally {
+      settlingInvoiceIds.value = settlingInvoiceIds.value.filter(id => id !== invoiceId)
     }
   }
 
-  async function fetchSummary(kindergartenId: string) {
-    loading.value = true
-    error.value = null
-    try {
-      const result = await service.getSummary(client, kindergartenId)
-      if (result.success) {
-        summary.value = result.data
-        return true
-      }
-      error.value = result.error
-      return false
-    } finally {
-      loading.value = false
-    }
+  function isSettling(invoiceId: string): boolean {
+    return settlingInvoiceIds.value.includes(invoiceId)
   }
 
-  async function create(input: { kindergartenId: string; childId: string; amount: number; dueDate: string; notes?: string | null }, userId: string) {
-    loading.value = true
-    error.value = null
-    try {
-      const result = await service.createInvoice(client, input, userId)
-      if (result.success) {
-        items.value.push(result.data)
-        await fetchSummary(input.kindergartenId)
-        return true
-      }
-      error.value = result.error
-      return false
-    } finally {
-      loading.value = false
-    }
+  return {
+    invoices,
+    summary,
+    loadedKindergartenId,
+    loadPhase,
+    loadError,
+    settlingInvoiceIds,
+    status,
+    loadInvoices,
+    markInvoicePaid,
+    isSettling,
   }
-
-  async function update(id: string, input: { amount?: number; dueDate?: string; status?: InvoiceStatus; paidAt?: string | null; notes?: string | null }, userId: string) {
-    loading.value = true
-    error.value = null
-    try {
-      const result = await service.updateInvoice(client, id, input, userId)
-      if (result.success) {
-        const idx = items.value.findIndex(i => i.id === id)
-        if (idx >= 0) items.value[idx] = result.data
-        return true
-      }
-      error.value = result.error
-      return false
-    } finally {
-      loading.value = false
-    }
-  }
-
-  async function markAsPaid(id: string, userId: string) {
-    loading.value = true
-    error.value = null
-    try {
-      const result = await service.markAsPaid(client, id, userId)
-      if (result.success) {
-        const idx = items.value.findIndex(i => i.id === id)
-        if (idx >= 0) items.value[idx] = result.data
-        return true
-      }
-      error.value = result.error
-      return false
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const pendingCount = computed(() => items.value.filter(i => i.status === 'draft' || i.status === 'issued').length)
-
-  return { items, summary, loading, error, pendingCount, fetchAll, fetchSummary, create, update, markAsPaid }
 })

@@ -4,7 +4,7 @@ import withNuxt from './.nuxt/eslint.config.mjs'
 // Modules migrated behind a public index. Each migration step appends one name;
 // the rules below then forbid any deep import into it.
 /** @type {string[]} */
-const boundaryEnforcedModules = []
+const boundaryEnforcedModules = ['billing', 'payments']
 const enforcedModulesPattern = boundaryEnforcedModules.join('|')
 
 const legacyModuleAlias = {

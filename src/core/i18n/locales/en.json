@@ -507,10 +507,13 @@
       "not_found": "This record no longer exists.",
       "conflict": "A record with these details already exists.",
       "rejected": "The operation was rejected. Try again or contact an administrator.",
-      "session_expired": "Your session has expired. Please log in again."
+      "session_expired": "Your session has expired. Please log in again.",
+      "invoice_not_payable": "This invoice can no longer be marked as paid. Reload the list.",
+      "payment_not_pending": "This payment is no longer pending. Reload the list."
     }
   },
   "billing": {
+    "selectKindergarten": "Select a kindergarten to view invoices.",
     "pageTitle": "Billing",
     "pageSubtitle": "Manage invoices and payments",
     "filterLabel": "Filter:",
@@ -557,8 +560,14 @@
     },
     "confirm": "Confirm",
     "noPayments": "No payments recorded.",
+    "selectKindergarten": "Select a kindergarten to view payments.",
+    "selectInvoice": "Choose the invoice",
+    "noPayableInvoices": "There are no issued or overdue invoices.",
+    "payableInvoicesUnavailable": "The invoice list could not be loaded.",
+    "recordSuccess": "Payment recorded.",
+    "confirmSuccess": "Payment confirmed.",
     "methods": {
-      "bankTransfer": "Bank transfer",
+      "bank_transfer": "Bank transfer",
       "cash": "Cash",
       "check": "Check",
       "online": "Online"
