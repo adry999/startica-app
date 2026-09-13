@@ -14,6 +14,10 @@ interface AttendanceRecord {
   notes: string | null
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'attendance_request_failed'
+}
+
 function toAttendanceRecord(row: AttendanceRow): AttendanceRecord {
   return {
     id: row.id,
@@ -30,6 +34,7 @@ export const useAttendanceStore = defineStore('attendance', {
     records: [] as AttendanceRecord[],
     loading: false,
     error: null as string | null,
+    loadVersion: 0,
   }),
 
   actions: {
@@ -42,11 +47,32 @@ export const useAttendanceStore = defineStore('attendance', {
     },
 
     async fetchByGroup(groupId: string, date: string) {
-      const withLoading = useStoreAction(this)
-      return withLoading(
-        () => attendanceService.listByGroup(useSupabaseClient(), groupId, date),
-        (data) => { this.records = data.map(toAttendanceRecord) },
-      )
+      const loadVersion = ++this.loadVersion
+      this.loading = true
+      this.error = null
+      try {
+        const result = await attendanceService.listByGroup(useSupabaseClient(), groupId, date)
+        // A later group, date, or tenant selection supersedes this response.
+        if (loadVersion !== this.loadVersion) return false
+        if (!result.success) {
+          this.error = result.error
+          return false
+        }
+        this.records = result.data.map(toAttendanceRecord)
+        return true
+      } catch (error) {
+        if (loadVersion === this.loadVersion) this.error = errorMessage(error)
+        return false
+      } finally {
+        if (loadVersion === this.loadVersion) this.loading = false
+      }
+    },
+
+    clear() {
+      ++this.loadVersion
+      this.records = []
+      this.loading = false
+      this.error = null
     },
 
     async markAttendance(
@@ -61,28 +87,28 @@ export const useAttendanceStore = defineStore('attendance', {
       const userId = authStore.user?.id
       if (!userId) return false
 
-      const withLoading = useStoreAction(this)
-      return withLoading(
-        () =>
-          attendanceService.markAttendance(
-            useSupabaseClient(),
-            kindergartenId,
-            childId,
-            date,
-            status,
-            groupId,
-            notes,
-            userId,
-          ),
-        (data) => {
-          const existing = this.records.findIndex(r => r.id === data.id)
-          if (existing !== -1) {
-            this.records[existing] = toAttendanceRecord(data)
-          } else {
-            this.records.push(toAttendanceRecord(data))
-          }
-        },
-      )
+      const loadVersion = this.loadVersion
+      this.loading = true
+      this.error = null
+      try {
+        const result = await attendanceService.markAttendance(
+          useSupabaseClient(), kindergartenId, childId, date, status, groupId, notes, userId,
+        )
+        if (loadVersion !== this.loadVersion) return false
+        if (!result.success) {
+          this.error = result.error
+          return false
+        }
+        const existing = this.records.findIndex(r => r.id === result.data.id)
+        if (existing !== -1) this.records[existing] = toAttendanceRecord(result.data)
+        else this.records.push(toAttendanceRecord(result.data))
+        return true
+      } catch (error) {
+        if (loadVersion === this.loadVersion) this.error = errorMessage(error)
+        return false
+      } finally {
+        if (loadVersion === this.loadVersion) this.loading = false
+      }
     },
 
     async markGroupBulk(
@@ -96,6 +122,7 @@ export const useAttendanceStore = defineStore('attendance', {
       const userId = authStore.user?.id
       if (!userId) return false
 
+      const loadVersion = this.loadVersion
       this.loading = true
       this.error = null
       try {
@@ -108,14 +135,17 @@ export const useAttendanceStore = defineStore('attendance', {
           status,
           userId,
         )
+        if (loadVersion !== this.loadVersion) return false
         if (!result.success) {
           this.error = result.error
           return false
         }
-        await this.fetchByGroup(groupId, date)
-        return true
+        return await this.fetchByGroup(groupId, date)
+      } catch (error) {
+        if (loadVersion === this.loadVersion) this.error = errorMessage(error)
+        return false
       } finally {
-        this.loading = false
+        if (loadVersion === this.loadVersion) this.loading = false
       }
     },
   },

@@ -8,28 +8,49 @@ const toast = useToast()
 const tenantStore = useTenantStore()
 const groupsStore = useGroupsStore()
 const childrenStore = useChildrenStore()
-const { records, loading, error, fetchByGroup, markAttendance } = useAttendance()
+const { records, loading, error, fetchByGroup, markAttendance, markGroupBulk, clear } = useAttendance()
 
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const selectedGroupId = ref<string | null>(null)
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
+const { pending: dataLoading, error: pageDataError } = useLazyAsyncData(
+  'attendance-page-data',
+  async () => {
+    const kindergartenId = selectedKgId.value
+    if (!kindergartenId) return true
 
-watch(selectedGroupId, async () => {
-  if (selectedGroupId.value && selectedKgId.value) {
-    await fetchByGroup(selectedGroupId.value, selectedDate.value)
-  }
-})
+    const [groupsLoaded, childrenLoaded] = await Promise.all([
+      groupsStore.fetchAll(kindergartenId),
+      childrenStore.fetchAll(kindergartenId),
+    ])
+    return groupsLoaded && childrenLoaded
+  },
+  { watch: [selectedKgId] },
+)
+const dataFetchError = computed(() => groupsStore.error ?? childrenStore.error ?? pageDataError.value?.message)
 
-watch(selectedDate, async () => {
-  if (selectedGroupId.value && selectedKgId.value) {
-    await fetchByGroup(selectedGroupId.value, selectedDate.value)
+watch(selectedKgId, () => {
+  // The stores are shared between pages. Clear their old tenant data before
+  // the next request resolves so it cannot be selected or displayed here.
+  selectedGroupId.value = null
+  groupsStore.$reset()
+  childrenStore.$reset()
+  clear()
+}, { flush: 'sync' })
+
+watch([selectedGroupId, selectedDate, selectedKgId], async ([groupId, date, kindergartenId]) => {
+  clear()
+  if (groupId && kindergartenId) {
+    await fetchByGroup(groupId, date)
   }
 })
 
 const groupChildren = computed(() => {
   if (!selectedGroupId.value || !childrenStore.items.length) return []
   const groupChildren = childrenStore.items.filter(
-    c => c.groupId === selectedGroupId.value && c.status === 'enrolled',
+    c => c.kindergartenId === selectedKgId.value
+      && c.groupId === selectedGroupId.value
+      && c.status === 'enrolled',
   )
   return groupChildren.map(child => {
     const record = records.value.find(r => r.childId === child.id)
@@ -78,18 +99,15 @@ async function markAllStatus(status: AttendanceStatus) {
   const childIds = groupChildren.value.map(c => c.id)
   if (!childIds.length) return
 
-  // Mark each child
-  for (const childId of childIds) {
-    await markAttendance(
-      selectedKgId.value,
-      childId,
-      selectedDate.value,
-      status,
-      selectedGroupId.value,
-    )
-  }
+  const ok = await markGroupBulk(
+    selectedKgId.value,
+    selectedGroupId.value,
+    selectedDate.value,
+    childIds,
+    status,
+  )
 
-  toast.add({ title: t('attendance.markSuccess'), color: 'success' })
+  toast.add({ title: t(ok ? 'attendance.markSuccess' : 'attendance.markError'), color: ok ? 'success' : 'error' })
 }
 
 const statusOptions: Array<{ label: string; value: AttendanceStatus; icon: string; color: string }> = [
@@ -116,7 +134,7 @@ const statusButtonClasses: Record<string, string> = {
       <p class="mt-0.5 text-sm text-slate-400">{{ t('attendance.pageSubtitle') }}</p>
     </div>
 
-    <UAlert v-if="error" color="error" variant="soft" :description="error" />
+    <UAlert v-if="dataFetchError ?? error" color="error" variant="soft" :description="dataFetchError ?? error ?? undefined" />
 
     <div class="space-y-4 rounded-xl border border-border bg-white p-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -128,7 +146,7 @@ const statusButtonClasses: Record<string, string> = {
             v-model="selectedDate"
             type="date"
             class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
+          >
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">
@@ -139,7 +157,11 @@ const statusButtonClasses: Record<string, string> = {
             class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">{{ t('common.select') }}</option>
-            <option v-for="group in groupsStore.items" :key="group.id" :value="group.id">
+            <option
+              v-for="group in groupsStore.items.filter(group => group.kindergartenId === selectedKgId && group.status === 'active')"
+              :key="group.id"
+              :value="group.id"
+            >
               {{ group.name }}
             </option>
           </select>
@@ -154,7 +176,7 @@ const statusButtonClasses: Record<string, string> = {
           <button
             v-for="opt in statusOptions"
             :key="opt.value"
-            @click="markAllStatus(opt.value)"
+            :disabled="loading"
             class="rounded px-3 py-1 text-xs font-medium text-white"
             :class="{
               'bg-green-600': opt.value === 'present',
@@ -162,6 +184,7 @@ const statusButtonClasses: Record<string, string> = {
               'bg-yellow-600': opt.value === 'excused',
               'bg-orange-600': opt.value === 'sick',
             }"
+            @click="markAllStatus(opt.value)"
           >
             {{ opt.label }}
           </button>
@@ -189,7 +212,7 @@ const statusButtonClasses: Record<string, string> = {
     </div>
 
     <div v-if="selectedGroupId" class="rounded-xl border border-border bg-white p-6">
-      <div v-if="loading" class="text-center text-sm text-slate-500">
+      <div v-if="dataLoading || loading" class="text-center text-sm text-slate-500">
         {{ t('common.loading') }}
       </div>
       <div v-else-if="!groupChildren.length" class="text-center text-sm text-slate-500">
@@ -211,6 +234,7 @@ const statusButtonClasses: Record<string, string> = {
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
               :aria-label="opt.label"
               :aria-pressed="child.status === opt.value"
+              :disabled="loading"
               @click="handleStatusChange(child.id, opt.value)"
             >
               {{ opt.icon }}

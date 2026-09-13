@@ -28,5 +28,6 @@ export function useAttendance() {
       childIds: string[],
       status: AttendanceStatus,
     ) => store.markGroupBulk(kindergartenId, groupId, date, childIds, status),
+    clear: () => store.clear(),
   }
 }
