@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import vue from '@vitejs/plugin-vue'
 import { fileURLToPath } from 'node:url'
+import { boundaryAliases } from './aliases.config'
 
 export default defineConfig({
   plugins: [vue()],
@@ -10,6 +11,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      ...boundaryAliases,
       '~': fileURLToPath(new URL('./src', import.meta.url)),
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },

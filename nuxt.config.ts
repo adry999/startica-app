@@ -1,7 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { boundaryAliases } from './aliases.config'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-24',
   srcDir: 'src/',
+  alias: boundaryAliases,
+  // src/modules holds feature modules, not Nuxt modules. Without this, Nuxt loads
+  // every src/modules/<name>/index.ts public API as a Nuxt module and fails.
+  dir: { modules: 'nuxt-modules' },
 
   devtools: { enabled: true },
 
