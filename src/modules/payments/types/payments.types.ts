@@ -37,8 +37,16 @@ export interface ConfirmPaymentCommand {
   actorId: string
 }
 
+export interface PaymentSummary {
+  confirmedTotal: number
+  pendingCount: number
+  confirmedCount: number
+  failedCount: number
+}
+
 export interface PaymentsService {
   listPayments(kindergartenId: string): Promise<Result<Payment[], AppError>>
+  getSummary(kindergartenId: string): Promise<Result<PaymentSummary, AppError>>
   recordPayment(input: PaymentInput, actorId: string): Promise<Result<Payment, AppError>>
   confirmPayment(command: ConfirmPaymentCommand): Promise<Result<Payment, AppError>>
   getTotalPaidForInvoice(invoiceId: string): Promise<Result<number, AppError>>

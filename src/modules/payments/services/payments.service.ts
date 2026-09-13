@@ -36,6 +36,23 @@ export function createPaymentsService(client: SupabaseClient<Database>): Payment
       return { success: true, data: response.data.map(toPayment) }
     },
 
+    async getSummary(kindergartenId) {
+      const response = await client
+        .rpc('payment_summary', { p_kindergarten_id: kindergartenId })
+        .single()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return {
+        success: true,
+        data: {
+          confirmedTotal: Number(response.data.confirmed_total),
+          pendingCount: Number(response.data.pending_count),
+          confirmedCount: Number(response.data.confirmed_count),
+          failedCount: Number(response.data.failed_count),
+        },
+      }
+    },
+
     async recordPayment(input, actorId) {
       const parsed = paymentSchema.safeParse(input)
       if (!parsed.success) return { success: false, error: appErrorFromValidation(parsed.error) }
@@ -57,6 +74,10 @@ export function createPaymentsService(client: SupabaseClient<Database>): Payment
         .select()
         .single()
 
+      // The payments_invoice_payable trigger rejects draft, cancelled and deleted invoices.
+      if (response.error?.code === '23514') {
+        return { success: false, error: { kind: 'refused', reason: 'invoice_not_accepting_payments' } }
+      }
       if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
       return { success: true, data: toPayment(response.data) }
     },

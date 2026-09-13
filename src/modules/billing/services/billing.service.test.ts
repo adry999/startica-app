@@ -87,7 +87,7 @@ describe('getSummary', () => {
 })
 
 describe('listPayableInvoices', () => {
-  it('filters to issued and overdue invoices scoped to the kindergarten', async () => {
+  it('filters to issued, overdue and paid invoices scoped to the kindergarten', async () => {
     const payableRow = {
       id: 'invoice-2',
       amount: '100.00',
@@ -105,7 +105,7 @@ describe('listPayableInvoices', () => {
     })
     const invoicesQuery = queries.find(query => query.target === 'invoices')
     expect(argumentsOf(invoicesQuery, 'eq')).toEqual([['kindergarten_id', kindergartenId]])
-    expect(argumentsOf(invoicesQuery, 'in')).toEqual([['status', ['issued', 'overdue']]])
+    expect(argumentsOf(invoicesQuery, 'in')).toEqual([['status', ['issued', 'overdue', 'paid']]])
   })
 })
 

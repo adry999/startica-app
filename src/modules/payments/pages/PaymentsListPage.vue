@@ -14,7 +14,7 @@ const describeAppError = useAppErrorMessage()
 const { formatCurrency, formatCalendarDate } = useLocaleFormat()
 const tenantStore = useTenantStore()
 const paymentsStore = usePaymentsStore()
-const { payments, status, loadError, confirmedTotal, paymentCountByStatus } = storeToRefs(paymentsStore)
+const { payments, summary, isSummaryOutdated, status, loadError } = storeToRefs(paymentsStore)
 
 const selectedKindergartenId = computed(() => tenantStore.selectedKindergartenId)
 
@@ -65,11 +65,17 @@ async function onConfirm(paymentId: string) {
     </UAlert>
 
     <template v-else>
-      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <BaseStatCard :label="t('payments.stats.total')" :value="formatCurrency(confirmedTotal)" icon="i-heroicons-credit-card" icon-class="bg-green-50 text-green-600" />
-        <BaseStatCard :label="t('payments.stats.pending')" :value="paymentCountByStatus.pending" icon="i-heroicons-clock" icon-class="bg-yellow-50 text-yellow-600" />
-        <BaseStatCard :label="t('payments.stats.confirmed')" :value="paymentCountByStatus.confirmed" icon="i-heroicons-check-circle" icon-class="bg-blue-50 text-blue-600" />
-        <BaseStatCard :label="t('payments.stats.failed')" :value="paymentCountByStatus.failed" icon="i-heroicons-exclamation-circle" icon-class="bg-red-50 text-red-600" />
+      <UAlert v-if="isSummaryOutdated" color="warning" variant="soft" :description="t('payments.summaryOutdated')">
+        <template #actions>
+          <UButton color="warning" variant="soft" size="xs" @click="() => refresh()">{{ t('common.retry') }}</UButton>
+        </template>
+      </UAlert>
+
+      <div v-if="summary" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <BaseStatCard :label="t('payments.stats.total')" :value="formatCurrency(summary.confirmedTotal)" icon="i-heroicons-credit-card" icon-class="bg-green-50 text-green-600" />
+        <BaseStatCard :label="t('payments.stats.pending')" :value="summary.pendingCount" icon="i-heroicons-clock" icon-class="bg-yellow-50 text-yellow-600" />
+        <BaseStatCard :label="t('payments.stats.confirmed')" :value="summary.confirmedCount" icon="i-heroicons-check-circle" icon-class="bg-blue-50 text-blue-600" />
+        <BaseStatCard :label="t('payments.stats.failed')" :value="summary.failedCount" icon="i-heroicons-exclamation-circle" icon-class="bg-red-50 text-red-600" />
       </div>
 
       <div class="rounded-xl border border-border bg-white p-6">

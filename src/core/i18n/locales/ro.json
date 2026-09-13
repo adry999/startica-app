@@ -509,7 +509,8 @@
       "rejected": "Operațiunea a fost respinsă. Încearcă din nou sau contactează un administrator.",
       "session_expired": "Sesiunea a expirat. Autentifică-te din nou.",
       "invoice_not_payable": "Factura nu mai poate fi marcată ca plătită. Reîncarcă lista.",
-      "payment_not_pending": "Plata nu mai este în așteptare. Reîncarcă lista."
+      "payment_not_pending": "Plata nu mai este în așteptare. Reîncarcă lista.",
+      "invoice_not_accepting_payments": "Factura nu mai acceptă plăți. Reîncarcă lista."
     },
     "page": {
       "title": "Pagina nu a putut fi afișată.",
@@ -572,10 +573,11 @@
     "noPayments": "Nicio plată înregistrată.",
     "selectKindergarten": "Selectează o grădiniță pentru a vedea plățile.",
     "selectInvoice": "Alege factura",
-    "noPayableInvoices": "Nu există facturi emise sau restante.",
+    "noPayableInvoices": "Nu există facturi care acceptă plăți.",
     "payableInvoicesUnavailable": "Lista de facturi nu a putut fi încărcată.",
     "recordSuccess": "Plata a fost înregistrată.",
     "confirmSuccess": "Plata a fost confirmată.",
+    "summaryOutdated": "Totalurile pot fi neactualizate. Reîncearcă pentru a le actualiza.",
     "methods": {
       "bank_transfer": "Transfer bancar",
       "cash": "Numerar",

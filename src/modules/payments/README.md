@@ -27,7 +27,12 @@ Routed page: `pages/PaymentsListPage.vue`, imported only by `src/pages/payments.
 
 None. Confirming a payment does not settle its invoice — that business rule does not exist yet. When it is decided, publish `payments.confirmed` (decision D5 in `.claude/skills/project-conventions/SKILL.md`).
 
+## Database rules
+
+- The `payments_invoice_payable` trigger accepts a payment only for a live issued, overdue or paid invoice. `recordPayment` maps its `23514` to the refusal `invoice_not_accepting_payments`.
+- KPI cards read the `payment_summary` aggregate, refreshed after every recorded or confirmed payment.
+
 ## Known limits
 
-- `confirmedTotal` and `paymentCountByStatus` are computed from the loaded list, which PostgREST caps at 1000 rows. Move them to an RPC, as `invoice_summary` does for billing, before a kindergarten reaches that volume.
+- `listPayments` is unpaginated; PostgREST returns at most 1000 rows. The summary stays correct.
 - Amounts are formatted as RON for every kindergarten.

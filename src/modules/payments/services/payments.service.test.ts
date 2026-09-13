@@ -127,6 +127,36 @@ describe('recordPayment validation', () => {
     const paymentsQuery = queries.find(query => query.target === 'payments')
     expect(argumentsOf(paymentsQuery, 'insert')).toEqual([[expect.objectContaining({ amount: 250.5 })]])
   })
+
+  it('returns refused invoice_not_accepting_payments when the database rejects the invoice status', async () => {
+    const { client } = createSupabaseClientFake(() => refusalResponse('23514', 400))
+    const service = createPaymentsService(client)
+
+    const result = await service.recordPayment(validInput, actorId)
+
+    expect(result).toEqual({ success: false, error: { kind: 'refused', reason: 'invoice_not_accepting_payments' } })
+  })
+})
+
+describe('getSummary', () => {
+  it('reads the payment_summary aggregate scoped to the kindergarten and coerces its numbers', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse({
+      confirmed_total: '2012.00',
+      pending_count: '3',
+      confirmed_count: '1002',
+      failed_count: '1',
+    }))
+    const service = createPaymentsService(client)
+
+    const result = await service.getSummary(kindergartenId)
+
+    expect(result).toEqual({
+      success: true,
+      data: { confirmedTotal: 2012, pendingCount: 3, confirmedCount: 1002, failedCount: 1 },
+    })
+    const summaryQuery = queries.find(query => query.target === 'rpc:payment_summary')
+    expect(argumentsOf(summaryQuery, 'rpc')).toEqual([[{ p_kindergarten_id: kindergartenId }]])
+  })
 })
 
 describe('confirmPayment', () => {
