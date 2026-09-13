@@ -19,6 +19,7 @@ SELECT throws_ok(
   $$INSERT INTO public.children (kindergarten_id, group_id, first_name, last_name, birth_date, status, created_by)
     VALUES ('eeeeeeee-1000-4000-8000-000000000001', 'eeeeeeee-3000-4000-8000-000000000003', 'Wrong', 'Group', date '2021-01-01', 'enrolled', '11111111-1111-1111-1111-111111111111')$$,
   '23514',
+  'related record must belong to the same kindergarten',
   'cross-tenant group assignment is rejected'
 );
 
@@ -26,6 +27,7 @@ SELECT throws_ok(
   $$INSERT INTO public.parents (kindergarten_id, child_id, full_name, created_by)
     VALUES ('eeeeeeee-2000-4000-8000-000000000002', 'eeeeeeee-4000-4000-8000-000000000004', 'Wrong Parent', '11111111-1111-1111-1111-111111111111')$$,
   '23514',
+  'related record must belong to the same kindergarten',
   'cross-tenant parent assignment is rejected'
 );
 
@@ -33,6 +35,7 @@ SELECT throws_ok(
   $$INSERT INTO public.guardians (kindergarten_id, child_id, first_name, last_name, created_by)
     VALUES ('eeeeeeee-2000-4000-8000-000000000002', 'eeeeeeee-4000-4000-8000-000000000004', 'Wrong', 'Guardian', '11111111-1111-1111-1111-111111111111')$$,
   '23514',
+  'related record must belong to the same kindergarten',
   'cross-tenant guardian assignment is rejected'
 );
 

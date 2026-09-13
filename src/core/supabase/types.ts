@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -88,10 +88,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "attendance_child_id_fkey"
-            columns: ["child_id"]
+            columns: ["child_id","kindergarten_id"]
             isOneToOne: false
             referencedRelation: "children"
-            referencedColumns: ["id"]
+            referencedColumns: ["id","kindergarten_id"]
           },
           {
             foreignKeyName: "attendance_created_by_fkey"
@@ -102,10 +102,10 @@ export type Database = {
           },
           {
             foreignKeyName: "attendance_group_id_fkey"
-            columns: ["group_id"]
+            columns: ["group_id","kindergarten_id"]
             isOneToOne: false
             referencedRelation: "groups"
-            referencedColumns: ["id"]
+            referencedColumns: ["id","kindergarten_id"]
           },
           {
             foreignKeyName: "attendance_kindergarten_id_fkey"
@@ -565,10 +565,10 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "invoices_child_id_fkey"
-            columns: ["child_id"]
+            columns: ["child_id","kindergarten_id"]
             isOneToOne: false
             referencedRelation: "children"
-            referencedColumns: ["id"]
+            referencedColumns: ["id","kindergarten_id"]
           },
           {
             foreignKeyName: "invoices_created_by_fkey"
@@ -789,10 +789,10 @@ export type Database = {
           },
           {
             foreignKeyName: "payments_invoice_id_fkey"
-            columns: ["invoice_id"]
+            columns: ["invoice_id","kindergarten_id"]
             isOneToOne: false
             referencedRelation: "invoices"
-            referencedColumns: ["id"]
+            referencedColumns: ["id","kindergarten_id"]
           },
           {
             foreignKeyName: "payments_kindergarten_id_fkey"
@@ -1273,6 +1273,8 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          internal_note: string | null
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["user_status"]
           updated_at: string
@@ -1286,6 +1288,8 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          internal_note?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
@@ -1299,6 +1303,8 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          internal_note?: string | null
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
@@ -1339,6 +1345,19 @@ export type Database = {
           total_pending: number
           total_spent: number
         }[]
+      }
+      invoice_summary: {
+        Args: { p_kindergarten_id: string }
+        Returns: {
+          total_issued: number
+          total_paid: number
+          total_overdue: number
+          pending_count: number
+        }[]
+      }
+      invoice_total_paid: {
+        Args: { p_invoice_id: string }
+        Returns: number
       }
       is_super_admin: { Args: never; Returns: boolean }
       user_kindergarten_ids: { Args: never; Returns: string[] }
