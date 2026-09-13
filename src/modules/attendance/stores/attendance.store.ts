@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useSupabaseClient } from '~/core/supabase/client'
 import { useStoreAction } from '~/shared/composables/useStoreAction'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import * as attendanceService from '../services/attendance.service'
 import type { AttendanceRow, AttendanceStatus } from '../services/attendance.service'
 
@@ -83,8 +83,7 @@ export const useAttendanceStore = defineStore('attendance', {
       groupId: string | null = null,
       notes: string | null = null,
     ) {
-      const authStore = useAuthStore()
-      const userId = authStore.user?.id
+      const userId = useActorStore().actorId
       if (!userId) return false
 
       const loadVersion = this.loadVersion
@@ -118,8 +117,7 @@ export const useAttendanceStore = defineStore('attendance', {
       childIds: string[],
       status: AttendanceStatus,
     ) {
-      const authStore = useAuthStore()
-      const userId = authStore.user?.id
+      const userId = useActorStore().actorId
       if (!userId) return false
 
       const loadVersion = this.loadVersion

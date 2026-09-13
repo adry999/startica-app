@@ -4,11 +4,11 @@ import { computed } from 'vue'
 const { t } = useI18n()
 const { canManagePoolTrainer } = usePermissions()
 const tenantStore = useTenantStore()
-const authStore = useAuthStore()
+const actorStore = useActorStore()
 const { items: groups, fetchAll: fetchGroups } = useGroups()
 
 const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
-const trainerUserId = computed(() => authStore.user?.id ?? '')
+const trainerUserId = computed(() => actorStore.actorId ?? '')
 const canEdit = computed((): boolean => selectedKgId.value ? canManagePoolTrainer(selectedKgId.value, trainerUserId.value) : false)
 
 useLazyAsyncData('pool-settings-groups', async () => { if (selectedKgId.value) await fetchGroups(selectedKgId.value); return true }, { watch: [selectedKgId] })

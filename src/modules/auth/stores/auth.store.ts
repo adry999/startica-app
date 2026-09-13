@@ -2,6 +2,7 @@ import { defineStore, getActivePinia, type Pinia } from 'pinia'
 import { resetSessionStores } from '~/core/auth/session-reset'
 import { useSupabaseClient } from '~/core/supabase/client'
 import type { Database } from '~/core/supabase/types'
+import { useActorStore } from '@shared/session/actor.store'
 import * as authService from '../services/auth.service'
 import { listUserModuleGrants } from '../services/moduleAccess.service'
 import type { AuthUser } from '../types/auth.types'
@@ -22,17 +23,19 @@ function toAuthUser(row: UserRow): AuthUser {
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null as AuthUser | null,
     loading: false,
     error: null as string | null,
     isPasswordRecovery: false,
-    moduleGrants: [] as ModuleGrant[],
     sessionVersion: 0,
     isAuthOperation: false,
   }),
 
+  // Identity and grants live in the shared actor store; these read-only views keep
+  // the auth module's own pages, middleware and plugins unchanged.
   getters: {
-    isAuthenticated: (state) => state.user !== null,
+    user: (): AuthUser | null => useActorStore().actor,
+    moduleGrants: (): ModuleGrant[] => useActorStore().moduleGrants,
+    isAuthenticated: (): boolean => useActorStore().isSignedIn,
   },
 
   actions: {
@@ -42,6 +45,7 @@ export const useAuthStore = defineStore('auth', {
       this.isAuthOperation = true
       const client = useSupabaseClient()
       const pinia = getActivePinia() ?? undefined
+      const actorStore = useActorStore()
       let sessionVersion = this.sessionVersion
 
       try {
@@ -56,7 +60,7 @@ export const useAuthStore = defineStore('auth', {
         // A different user can sign in without a page reload (for example after
         // an expired session). Remove every tenant-scoped cache before loading
         // their profile.
-        if (this.user?.id && this.user.id !== signInResult.data.userId) {
+        if (actorStore.actorId && actorStore.actorId !== signInResult.data.userId) {
           this.clearSessionState({ preserveAuthOperation: true, pinia })
           sessionVersion = this.sessionVersion
         }
@@ -76,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
         }
 
         this.loading = false
-        this.user = toAuthUser(profileResult.data)
+        actorStore.setActor(toAuthUser(profileResult.data))
         await this.loadModuleGrants(profileResult.data.id, client, sessionVersion)
         return sessionVersion === this.sessionVersion
       } catch (error) {
@@ -113,8 +117,7 @@ export const useAuthStore = defineStore('auth', {
     }: { preserveAuthOperation?: boolean, pinia?: Pinia } = {}) {
       resetSessionStores(pinia)
       if (import.meta.client) clearNuxtData()
-      this.user = null
-      this.moduleGrants = []
+      useActorStore(pinia).clear()
       this.loading = false
       this.error = null
       this.isPasswordRecovery = false
@@ -125,6 +128,7 @@ export const useAuthStore = defineStore('auth', {
     async fetchCurrentUser() {
       const client = useSupabaseClient()
       const pinia = getActivePinia() ?? undefined
+      const actorStore = useActorStore()
       const sessionVersion = this.sessionVersion
       const userId = await authService.getCurrentUserId(client)
 
@@ -143,11 +147,11 @@ export const useAuthStore = defineStore('auth', {
         return
       }
 
-      if (this.user?.id && this.user.id !== profileResult.data.id) {
+      if (actorStore.actorId && actorStore.actorId !== profileResult.data.id) {
         this.clearSessionState({ pinia })
       }
 
-      this.user = toAuthUser(profileResult.data)
+      actorStore.setActor(toAuthUser(profileResult.data))
       await this.loadModuleGrants(profileResult.data.id, client, this.sessionVersion)
     },
 
@@ -159,10 +163,11 @@ export const useAuthStore = defineStore('auth', {
       client: ReturnType<typeof useSupabaseClient> = useSupabaseClient(),
       sessionVersion?: number,
     ) {
+      const actorStore = useActorStore()
       const requestVersion = sessionVersion ?? this.sessionVersion
       const result = await listUserModuleGrants(client, userId)
       if (requestVersion !== this.sessionVersion) return
-      this.moduleGrants = result.success ? result.data : []
+      actorStore.setModuleGrants(result.success ? result.data : [])
     },
 
     setPasswordRecovery(value: boolean) {

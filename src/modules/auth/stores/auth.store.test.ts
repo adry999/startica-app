@@ -12,6 +12,7 @@ vi.mock('../services/moduleAccess.service', () => ({
 }))
 
 import { useAuthStore } from './auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import { useTenantStore } from '@shared/session/tenant.store'
 import * as authService from '../services/auth.service'
 import { listUserModuleGrants } from '../services/moduleAccess.service'
@@ -60,7 +61,7 @@ describe('useAuthStore', () => {
     vi.mocked(authService.signOut).mockResolvedValue({ success: true, data: null })
 
     const store = useAuthStore()
-    store.user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' }
+    useActorStore().setActor({ id: 'user-1', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' })
 
     await store.logout()
 
@@ -77,7 +78,7 @@ describe('useAuthStore', () => {
     const tenantStore = useTenantStore()
     const businessStore = useBusinessStore()
     businessStore.items = ['child-a']
-    store.user = { id: 'user-a', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' }
+    useActorStore().setActor({ id: 'user-a', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' })
     tenantStore.selectKindergarten('tenant-a')
 
     const result = await store.logout()
@@ -91,8 +92,8 @@ describe('useAuthStore', () => {
   it('clears local data and returns false when sign-out throws', async () => {
     vi.mocked(authService.signOut).mockRejectedValue(new Error('network_error'))
     const store = useAuthStore()
-    store.user = { id: 'user-a', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' }
-    store.moduleGrants = [{ kindergartenId: 'tenant-a', moduleKey: 'pool' }]
+    useActorStore().setActor({ id: 'user-a', email: 'a@b.com', fullName: 'A B', role: 'admin', avatarUrl: null, status: 'active' })
+    useActorStore().setModuleGrants([{ kindergartenId: 'tenant-a', moduleKey: 'pool' }])
 
     await expect(store.logout()).resolves.toBe(false)
     expect(store.user).toBeNull()
@@ -146,7 +147,7 @@ describe('useAuthStore', () => {
     const store = useAuthStore()
     const tenantStore = useTenantStore()
     useBusinessStore().items = ['child-a']
-    store.user = { id: 'user-a', email: 'a@b.com', fullName: 'A A', role: 'admin', avatarUrl: null, status: 'active' }
+    useActorStore().setActor({ id: 'user-a', email: 'a@b.com', fullName: 'A A', role: 'admin', avatarUrl: null, status: 'active' })
     tenantStore.selectKindergarten('tenant-a')
 
     await store.fetchCurrentUser()

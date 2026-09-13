@@ -8,7 +8,7 @@ vi.mock('~/core/supabase/client', () => ({
 vi.mock('../services/staff.service')
 
 import { useStaffStore } from './staff.store'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import * as staffService from '../services/staff.service'
 import type { UserModuleRow } from '../services/staff.service'
 
@@ -44,14 +44,14 @@ describe('useStaffStore', () => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
     vi.stubGlobal('$fetch', vi.fn().mockResolvedValue({ success: true }))
-    useAuthStore().user = {
+    useActorStore().setActor({
       id: 'user-1',
       email: 'admin@startica.dev',
       fullName: 'Super Admin',
       role: 'super_admin',
       avatarUrl: null,
       status: 'active',
-    }
+    })
   })
 
   it('fetchAll loads and maps the list', async () => {
@@ -199,8 +199,7 @@ describe('staff.store module grants', () => {
   })
 
   it('saveModuleGrants grants missing keys and revokes removed keys', async () => {
-    const authStore = useAuthStore()
-    authStore.user = { id: 'actor-1', email: 'a@b.com', fullName: 'A', role: 'admin', avatarUrl: null, status: 'active' }
+    useActorStore().setActor({ id: 'actor-1', email: 'a@b.com', fullName: 'A', role: 'admin', avatarUrl: null, status: 'active' })
 
     vi.spyOn(staffService, 'listUserModules').mockResolvedValue({
       success: true,

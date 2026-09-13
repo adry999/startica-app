@@ -8,7 +8,7 @@ vi.mock('~/core/supabase/client', () => ({
 vi.mock('../services/kindergartens.service')
 
 import { useKindergartensStore } from './kindergartens.store'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
 import * as kindergartensService from '../services/kindergartens.service'
 
 const sampleRow = {
@@ -31,7 +31,7 @@ describe('useKindergartensStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
-    useAuthStore().user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role: 'super_admin', avatarUrl: null, status: 'active' }
+    useActorStore().setActor({ id: 'user-1', email: 'a@b.com', fullName: 'A B', role: 'super_admin', avatarUrl: null, status: 'active' })
   })
 
   it('fetchAll loads and maps the list', async () => {

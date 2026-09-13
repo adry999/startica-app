@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
+import type { ModuleKey } from '@shared/session/actor.types'
 import type { StaffMember } from '../types/staff.types'
 
 const props = defineProps<{ member: StaffMember }>()

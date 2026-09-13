@@ -30,6 +30,7 @@ Update this table in the commit that lands a step.
 | `shared/session/tenant.store.ts` | done (step 3) |
 | Boundary lint (`boundaryEnforcedModules` in `eslint.config.mjs`) | enforced: `billing`, `payments` (step 4) |
 | Global error handling (`src/error.vue`, `NuxtErrorBoundary` in the admin layout, `plugins/error-reporting.ts`) | done (step 5) |
+| `shared/session/actor.store.ts` + `shared/permissions` (pure policy, `usePermissions`); no module outside `auth` reads `useAuthStore` | done (step 6) |
 | All other modules | legacy layout — see Legacy notes |
 
 A module counts as migrated only when its name is in `boundaryEnforcedModules` on `main`.
@@ -42,7 +43,7 @@ A module counts as migrated only when its name is in `boundaryEnforcedModules` o
 - `src/modules/<module>` imports `@shared/*`, `@core/*` and its own files (relative). Never `@modules/<other>` or `~/modules/<other>`.
 - `src/shared` and `src/core` never import a module.
 - `core/` = infrastructure without domain words: Supabase client, errors, async guards, session reset, email, i18n.
-- `shared/` = used by ≥ 2 modules: `ui/` (Base*, no business logic), `schemas/` (Zod), `session/` (selected kindergarten, current actor), `types/`, `composables/`, `contracts/` (port types with ≥ 2 consumers).
+- `shared/` = used by ≥ 2 modules: `ui/` (Base*, no business logic), `schemas/` (Zod), `session/` (selected kindergarten, current actor), `permissions/` (pure policy + `usePermissions`), `types/`, `composables/`, `contracts/` (port types with ≥ 2 consumers).
 
 ### 2. Module shape
 
@@ -69,7 +70,9 @@ modules/<module>/
 
 - The consumer declares the port type in its own `types/` (`ListPayableInvoices` in payments). The provider satisfies it structurally, without importing the consumer.
 - `src/plugins/module-dependencies.ts` creates services per request and calls `nuxtApp.vueApp.provide(<module>DependenciesKey, …)`. Stores read them once at setup with `inject<Module>Dependencies()`.
-- Current user inside a module: the `readCurrentActorId` port. Never `useAuthStore` inside a module.
+- Current user inside a migrated module: the `readCurrentActorId` port, bound to `useActorStore().actorId` in `module-dependencies.ts`. A legacy module reads `useActorStore` from `@shared/session/actor.store`. Never `useAuthStore` outside `modules/auth`.
+- Only `modules/auth` writes the actor store (`setActor`, `setModuleGrants`, `clear`); others may call `updateProfile` after saving their own profile. `resetSessionStores` preserves the `auth` and `actor` stores; auth clears the actor explicitly.
+- Authorization: `usePermissions()` from `shared/permissions`, backed by the pure `isActionAllowed` / `resolvePayrollScope` / `canActorManagePoolTrainer` in `permission-policy.ts`. New rules go in the policy with a test, never as role checks in a page.
 - Selected kindergarten: `useTenantStore` from `@shared/session/tenant.store`.
 - No domain event bus yet (D5). Add `shared/contracts/domain-events.ts` + `core/events/` in the same change that introduces the first module reacting to another module's change.
 
@@ -120,7 +123,8 @@ modules/<module>/
 
 ## Legacy notes (unmigrated modules)
 
-- Stores still call `useSupabaseClient()` and `useStoreAction`, and modules still reach `useAuthStore`/other stores through auto-import. Do not copy these into new code.
+- Stores still call `useSupabaseClient()` and `useStoreAction`, and modules still reach other modules' stores through auto-import. Do not copy these into new code.
+- `src/core/middleware/auth.ts` and `plugins/auth-state.client.ts` still call `useAuthStore` through auto-import; they belong to the composition root and move there in the close-out step.
 - New code inside a legacy module follows rules 4–9 wherever that needs no file move.
 
 ## Decision log

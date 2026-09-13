@@ -1,6 +1,1 @@
-export type ModuleKey = 'pool' | 'payroll_own' | 'payroll_all'
-
-export interface ModuleGrant {
-  kindergartenId: string
-  moduleKey: ModuleKey
-}
+export type { ModuleGrant, ModuleKey } from '@shared/session/actor.types'

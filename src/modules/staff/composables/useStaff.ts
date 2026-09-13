@@ -1,7 +1,7 @@
 import { computed } from 'vue'
 import { useStaffStore } from '../stores/staff.store'
 import type { InviteStaffInput, UpdateStaffInput } from '~/shared/schemas/staff.schema'
-import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
+import type { ModuleKey } from '@shared/session/actor.types'
 
 export function useStaff() {
   const store = useStaffStore()

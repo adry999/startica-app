@@ -1,5 +1,5 @@
 import { useSupabaseClient } from '@core/supabase/client'
-import { useAuthStore } from '@modules/auth'
+import { useActorStore } from '@shared/session/actor.store'
 import { billingDependenciesKey, createBillingService } from '@modules/billing'
 import { createPaymentsService, paymentsDependenciesKey } from '@modules/payments'
 
@@ -9,8 +9,8 @@ export default defineNuxtPlugin({
   name: 'module-dependencies',
   setup(nuxtApp) {
     const client = useSupabaseClient()
-    const authStore = useAuthStore()
-    const readCurrentActorId = () => authStore.user?.id ?? null
+    const actorStore = useActorStore()
+    const readCurrentActorId = () => actorStore.actorId
     const billingService = createBillingService(client)
 
     nuxtApp.vueApp.provide(billingDependenciesKey, { billingService, readCurrentActorId })

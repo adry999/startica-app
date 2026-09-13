@@ -1,18 +1,17 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
-import { useAuthStore } from '~/modules/auth/stores/auth.store'
+import { useActorStore } from '@shared/session/actor.store'
+import type { ModuleGrant } from '@shared/session/actor.types'
 import { usePermissions } from './usePermissions'
-import type { ModuleGrant } from '~/modules/auth/types/moduleAccess.types'
 
 function setUserRole(role: 'super_admin' | 'admin' | 'educator') {
-  const authStore = useAuthStore()
-  authStore.user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' }
+  useActorStore().setActor({ id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' })
 }
 
 function setUser(role: 'super_admin' | 'admin' | 'educator', grants: ModuleGrant[] = []) {
-  const authStore = useAuthStore()
-  authStore.user = { id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' }
-  authStore.moduleGrants = grants
+  const actorStore = useActorStore()
+  actorStore.setActor({ id: 'user-1', email: 'a@b.com', fullName: 'A B', role, avatarUrl: null, status: 'active' })
+  actorStore.setModuleGrants(grants)
 }
 
 describe('usePermissions', () => {

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '~/core/supabase/types'
 import type { Result } from '~/shared/types/result'
-import type { ModuleKey } from '~/modules/auth/types/moduleAccess.types'
+import type { ModuleKey } from '@shared/session/actor.types'
 import { STAFF_EXCLUDED_ROLES } from '~/shared/utils/staffFilters'
 
 type Client = SupabaseClient<Database>
