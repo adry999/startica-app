@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { reportError } from '@core/errors/report-error'
 
 const { t } = useI18n()
 const { user, logout } = useAuth()
@@ -79,11 +78,6 @@ async function onTopbarSearch() {
 async function onLogout() {
   await logout()
   await navigateTo('/login')
-}
-
-// The boundary stops propagation, so vue:error never sees these crashes.
-function reportPageError(error: unknown) {
-  reportError(error, { source: 'page', detail: route.path })
 }
 </script>
 
@@ -215,13 +209,10 @@ function reportPageError(error: unknown) {
       <!-- Page content -->
       <main class="flex-1 overflow-auto p-4 sm:p-6 lg:p-8" role="main">
         <div class="mx-auto w-full max-w-[1400px]">
-          <!-- A crashing page keeps the shell; navigating away clears the boundary. -->
-          <NuxtErrorBoundary @error="reportPageError">
+          <!-- A crashing page keeps the shell; retry or navigation clears the panel. -->
+          <BasePageBoundary>
             <slot />
-            <template #error="{ clearError }">
-              <BasePageError @retry="clearError" />
-            </template>
-          </NuxtErrorBoundary>
+          </BasePageBoundary>
         </div>
       </main>
     </div>

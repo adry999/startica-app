@@ -1,4 +1,4 @@
-export type ErrorSource = 'app' | 'vue' | 'page'
+export type ErrorSource = 'app' | 'vue'
 
 export interface ErrorReport {
   source: ErrorSource

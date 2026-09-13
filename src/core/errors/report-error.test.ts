@@ -10,9 +10,9 @@ describe('reportError', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     const error = new Error('render failed')
 
-    reportError(error, { source: 'page', detail: '/children' })
+    reportError(error, { source: 'vue', detail: 'render function' })
 
-    expect(consoleError).toHaveBeenCalledWith('[startica:page]', '/children', error)
+    expect(consoleError).toHaveBeenCalledWith('[startica:vue]', 'render function', error)
   })
 
   it('logs an empty detail when none is given', () => {

@@ -94,8 +94,8 @@ modules/<module>/
 - Load with `useLazyAsyncData(key, () => store.load(kindergartenId), { watch: [kindergartenId] })`; the callback returns a non-undefined value.
 - Render exactly one of: no kindergarten selected · loading · failed (`UAlert` + retry) · empty · ready.
 - Error text only through `useAppErrorMessage()` → `errors.network`, `errors.validation`, `errors.refused.<reason>`. Never render a Supabase `error.message`.
-- A client-side render crash inside the admin layout shows `BasePageError` from its `NuxtErrorBoundary`; navigation or retry clears it. Fatal and SSR errors render `src/error.vue` (404 vs unexpected, never the raw message).
-- Unexpected errors are reported only through `reportError` from `@core/errors/report-error` (`vue:error`, `app:error`, boundary `@error`). Its `detail` never carries user data: log `route.path`, not `route.fullPath`.
+- A client-side render crash inside the admin layout shows `BasePageError` through `BasePageBoundary`. Nuxt 3's `NuxtErrorBoundary` never resets itself, so `BasePageBoundary` clears it on retry and on every `route.path` change. Fatal and SSR errors render `src/error.vue` (404 vs unexpected, never the raw message).
+- Unexpected errors are reported only through `reportError` from `@core/errors/report-error`, called by `plugins/error-reporting.ts` for `vue:error` and `app:error`. `NuxtErrorBoundary` already forwards what it catches to `vue:error`: do not add an `@error` reporter. `detail` never carries user data such as `route.fullPath`.
 - Nuxt UI v3: `UModal v-model:open` with `#content`; `UButton`, `UBadge`. `BaseButton` and `BaseBadge` do not exist.
 - Money and dates format through `useLocaleFormat()` (active i18n locale). Postgres `date` columns use `formatCalendarDate` (formatted in UTC); a default "today" is built from local date parts, never `toISOString()`.
 - A page over ~250 lines gets split into components and a form composable.
