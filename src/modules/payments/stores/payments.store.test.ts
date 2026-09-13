@@ -132,6 +132,21 @@ describe('loadPayments', () => {
     expect(store.payableInvoices).toEqual([])
   })
 
+  it('drops previously loaded payable invoices when reloading them fails', async () => {
+    const payableFailure: AppError = { kind: 'network' }
+    const listPayableInvoices = vi.fn<ListPayableInvoices>()
+      .mockResolvedValueOnce({ success: true, data: [payableInvoiceA] })
+      .mockResolvedValueOnce({ success: false, error: payableFailure })
+    const store = createPaymentsStore(createFakePaymentsDependencies({ listPayableInvoices }))
+    await store.loadPayments(kindergartenA)
+    expect(store.payableInvoices).toEqual([payableInvoiceA])
+
+    await store.loadPayments(kindergartenA)
+
+    expect(store.payableInvoices).toEqual([])
+    expect(store.payableInvoicesError).toEqual(payableFailure)
+  })
+
   it('ignores a slow kindergarten-A response that resolves after kindergarten B has loaded', async () => {
     let resolvePaymentsA: (result: Result<Payment[], AppError>) => void = () => {}
     const pendingPaymentsA = new Promise<Result<Payment[], AppError>>((resolve) => { resolvePaymentsA = resolve })
@@ -146,6 +161,40 @@ describe('loadPayments', () => {
 
     expect(store.loadedKindergartenId).toBe(kindergartenB)
     expect(store.payments).toEqual([paymentB])
+  })
+})
+
+describe('loadPayableInvoices', () => {
+  it('clears the error and fills the list when a retry succeeds', async () => {
+    const listPayableInvoices = vi.fn<ListPayableInvoices>()
+      .mockResolvedValueOnce({ success: false, error: { kind: 'network' } })
+      .mockResolvedValueOnce({ success: true, data: [payableInvoiceA] })
+    const store = createPaymentsStore(createFakePaymentsDependencies({ listPayableInvoices }))
+    await store.loadPayments(kindergartenA)
+
+    await expect(store.loadPayableInvoices(kindergartenA)).resolves.toBe(true)
+
+    expect(store.payableInvoicesError).toBeNull()
+    expect(store.payableInvoices).toEqual([payableInvoiceA])
+  })
+
+  it('ignores a retry for a kindergarten that is no longer loaded', async () => {
+    const payableInvoiceB: PayableInvoice = { ...payableInvoiceA, id: 'invoice-b' }
+    let resolveRetryA: (result: Result<PayableInvoice[], AppError>) => void = () => {}
+    const pendingRetryA = new Promise<Result<PayableInvoice[], AppError>>((resolve) => { resolveRetryA = resolve })
+    const listPayableInvoices = vi.fn<ListPayableInvoices>()
+      .mockResolvedValueOnce({ success: true, data: [payableInvoiceA] })
+      .mockReturnValueOnce(pendingRetryA)
+      .mockResolvedValueOnce({ success: true, data: [payableInvoiceB] })
+    const store = createPaymentsStore(createFakePaymentsDependencies({ listPayableInvoices }))
+    await store.loadPayments(kindergartenA)
+
+    const retryingA = store.loadPayableInvoices(kindergartenA)
+    await store.loadPayments(kindergartenB)
+    resolveRetryA({ success: true, data: [payableInvoiceA] })
+
+    await expect(retryingA).resolves.toBe(false)
+    expect(store.payableInvoices).toEqual([payableInvoiceB])
   })
 })
 

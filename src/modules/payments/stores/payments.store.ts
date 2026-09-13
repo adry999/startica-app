@@ -11,6 +11,7 @@ import type { PayableInvoice, Payment, PaymentStatus } from '../types/payments.t
 export const usePaymentsStore = defineStore('payments', () => {
   const { paymentsService, listPayableInvoices, readCurrentActorId } = injectPaymentsDependencies()
   const paymentRequests = createLatestRequestGuard()
+  const payableInvoiceRequests = createLatestRequestGuard()
 
   const payments = ref<Payment[]>([])
   const payableInvoices = ref<PayableInvoice[]>([])
@@ -46,17 +47,13 @@ export const usePaymentsStore = defineStore('payments', () => {
     }
     loadPhase.value = 'loading'
     loadError.value = null
-    payableInvoicesError.value = null
-
-    const [paymentsResult, payableInvoicesResult] = await Promise.all([
-      paymentsService.listPayments(kindergartenId),
-      listPayableInvoices(kindergartenId),
-    ])
-    if (!request.isLatest()) return false
 
     // Recording a payment needs the invoice list; reading the ledger does not.
-    if (payableInvoicesResult.success) payableInvoices.value = payableInvoicesResult.data
-    else payableInvoicesError.value = payableInvoicesResult.error
+    const [paymentsResult] = await Promise.all([
+      paymentsService.listPayments(kindergartenId),
+      loadPayableInvoices(kindergartenId),
+    ])
+    if (!request.isLatest()) return false
 
     if (!paymentsResult.success) {
       loadError.value = paymentsResult.error
@@ -65,6 +62,23 @@ export const usePaymentsStore = defineStore('payments', () => {
     }
     payments.value = paymentsResult.data
     loadPhase.value = 'loaded'
+    return true
+  }
+
+  async function loadPayableInvoices(kindergartenId: string): Promise<boolean> {
+    const request = payableInvoiceRequests.begin()
+    payableInvoicesError.value = null
+
+    const result = await listPayableInvoices(kindergartenId)
+    if (!request.isLatest() || loadedKindergartenId.value !== kindergartenId) return false
+
+    if (!result.success) {
+      // A list kept from an earlier load could offer invoices that are no longer payable.
+      payableInvoices.value = []
+      payableInvoicesError.value = result.error
+      return false
+    }
+    payableInvoices.value = result.data
     return true
   }
 
@@ -121,6 +135,7 @@ export const usePaymentsStore = defineStore('payments', () => {
     paymentCountByStatus,
     confirmedTotal,
     loadPayments,
+    loadPayableInvoices,
     recordPayment,
     confirmPayment,
     isConfirming,

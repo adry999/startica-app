@@ -42,7 +42,7 @@ const isOpen = computed({
   set: (open: boolean) => emit('update:open', open),
 })
 
-watch(() => props.open, (open) => {
+watch(() => [props.open, props.kindergartenId] as const, ([open]) => {
   if (open) Object.assign(paymentForm, emptyPaymentForm())
 })
 
@@ -56,7 +56,12 @@ const methodOptions = computed(() => paymentMethods.map(method => ({
   value: method,
 })))
 
-const canSubmit = computed(() => invoiceOptions.value.length > 0 && !isRecordingPayment.value)
+const canSubmit = computed(() => !isRecordingPayment.value
+  && invoiceOptions.value.some(option => option.value === paymentForm.invoiceId))
+
+function retryPayableInvoices() {
+  paymentsStore.loadPayableInvoices(props.kindergartenId)
+}
 
 function close() {
   isOpen.value = false
@@ -79,7 +84,11 @@ async function submitPayment() {
       <div class="space-y-4 rounded-xl border border-border bg-white p-6">
         <h3 class="text-lg font-semibold text-gray-900">{{ t('payments.create') }}</h3>
 
-        <UAlert v-if="payableInvoicesError" color="error" variant="soft" :description="t('payments.payableInvoicesUnavailable')" />
+        <UAlert v-if="payableInvoicesError" color="error" variant="soft" :description="t('payments.payableInvoicesUnavailable')">
+          <template #actions>
+            <UButton color="error" variant="soft" size="xs" @click="retryPayableInvoices">{{ t('common.retry') }}</UButton>
+          </template>
+        </UAlert>
         <UAlert v-else-if="invoiceOptions.length === 0" color="neutral" variant="soft" :description="t('payments.noPayableInvoices')" />
 
         <div class="space-y-3">
