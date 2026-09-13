@@ -11,6 +11,7 @@ import type {
   Payment,
   PaymentsDependencies,
   PaymentsService,
+  PaymentSummary,
 } from '../types/payments.types'
 import { usePaymentsStore } from './payments.store'
 
@@ -35,6 +36,9 @@ const paymentA: Payment = {
 
 const paymentB: Payment = { ...paymentA, id: 'payment-b', kindergartenId: kindergartenB }
 
+const summaryA: PaymentSummary = { confirmedTotal: 0, pendingCount: 1, confirmedCount: 0, failedCount: 0 }
+const refreshedSummary: PaymentSummary = { confirmedTotal: 250.5, pendingCount: 0, confirmedCount: 1, failedCount: 0 }
+
 const payableInvoiceA: PayableInvoice = { id: 'invoice-a', childName: 'Maria Ionescu', amount: 250.5, dueDate: '2026-09-01' }
 
 const validPaymentInput: PaymentInput = {
@@ -47,6 +51,7 @@ const validPaymentInput: PaymentInput = {
 
 interface PaymentsServiceOverrides {
   listPayments?: PaymentsService['listPayments']
+  getSummary?: PaymentsService['getSummary']
   recordPayment?: PaymentsService['recordPayment']
   confirmPayment?: PaymentsService['confirmPayment']
   getTotalPaidForInvoice?: PaymentsService['getTotalPaidForInvoice']
@@ -59,6 +64,8 @@ function createFakePaymentsDependencies(overrides: PaymentsServiceOverrides = {}
     paymentsService: {
       listPayments: overrides.listPayments
         ?? vi.fn<PaymentsService['listPayments']>().mockResolvedValue({ success: true, data: [] }),
+      getSummary: overrides.getSummary
+        ?? vi.fn<PaymentsService['getSummary']>().mockResolvedValue({ success: true, data: summaryA }),
       recordPayment: overrides.recordPayment
         ?? vi.fn<PaymentsService['recordPayment']>().mockResolvedValue({ success: true, data: paymentA }),
       confirmPayment: overrides.confirmPayment
@@ -115,9 +122,31 @@ describe('status', () => {
     expect(store.status).toBe('failed')
     expect(store.loadError).toEqual(listFailure)
   })
+
+  it('is failed with loadError set when the summary request fails', async () => {
+    const summaryFailure: AppError = { kind: 'refused', reason: 'forbidden' }
+    const store = createPaymentsStore(createFakePaymentsDependencies({
+      listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({ success: true, data: [paymentA] }),
+      getSummary: vi.fn<PaymentsService['getSummary']>().mockResolvedValue({ success: false, error: summaryFailure }),
+    }))
+
+    await store.loadPayments(kindergartenA)
+
+    expect(store.status).toBe('failed')
+    expect(store.loadError).toEqual(summaryFailure)
+  })
 })
 
 describe('loadPayments', () => {
+  it('loads the database-side summary with the payments', async () => {
+    const store = createPaymentsStore(createFakePaymentsDependencies())
+
+    await store.loadPayments(kindergartenA)
+
+    expect(store.summary).toEqual(summaryA)
+    expect(store.isSummaryOutdated).toBe(false)
+  })
+
   it('still loads payments when the payable invoices request fails', async () => {
     const payableFailure: AppError = { kind: 'refused', reason: 'forbidden' }
     const store = createPaymentsStore(createFakePaymentsDependencies({
@@ -212,18 +241,22 @@ describe('recordPayment', () => {
     expect(recordPayment).not.toHaveBeenCalled()
   })
 
-  it('prepends a newly recorded payment to the list', async () => {
+  it('prepends a newly recorded payment and refreshes the summary', async () => {
     const newPayment: Payment = { ...paymentA, id: 'payment-new' }
+    const getSummary = vi.fn<PaymentsService['getSummary']>().mockResolvedValue({ success: true, data: summaryA })
     const store = createPaymentsStore(createFakePaymentsDependencies({
       listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({ success: true, data: [paymentA] }),
+      getSummary,
       recordPayment: vi.fn<PaymentsService['recordPayment']>().mockResolvedValue({ success: true, data: newPayment }),
     }))
     await store.loadPayments(kindergartenA)
+    getSummary.mockResolvedValueOnce({ success: true, data: refreshedSummary })
 
     const result = await store.recordPayment(validPaymentInput)
 
     expect(result).toEqual({ success: true, data: newPayment })
     expect(store.payments).toEqual([newPayment, paymentA])
+    expect(store.summary).toEqual(refreshedSummary)
   })
 })
 
@@ -248,43 +281,51 @@ describe('confirmPayment', () => {
     })
     expect(store.payments).toEqual([confirmedPayment])
   })
-})
 
-describe('confirmedTotal', () => {
-  it('sums confirmed payments in cents, ignoring pending ones, so repeated decimals do not drift', async () => {
+  it('still reports success and flags the totals as outdated when the summary refresh fails', async () => {
+    const confirmedPayment: Payment = { ...paymentA, status: 'confirmed' }
+    const getSummary = vi.fn<PaymentsService['getSummary']>().mockResolvedValue({ success: true, data: summaryA })
     const store = createPaymentsStore(createFakePaymentsDependencies({
-      listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({
-        success: true,
-        data: [
-          { ...paymentA, id: 'payment-1', amount: 0.1, status: 'confirmed' },
-          { ...paymentA, id: 'payment-2', amount: 0.2, status: 'confirmed' },
-          { ...paymentA, id: 'payment-3', amount: 5, status: 'pending' },
-        ],
-      }),
+      listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({ success: true, data: [paymentA] }),
+      getSummary,
+      confirmPayment: vi.fn<PaymentsService['confirmPayment']>().mockResolvedValue({ success: true, data: confirmedPayment }),
     }))
+    await store.loadPayments(kindergartenA)
+    getSummary.mockResolvedValueOnce({ success: false, error: { kind: 'network' } })
+
+    const result = await store.confirmPayment(paymentA.id)
+
+    expect(result).toEqual({ success: true, data: confirmedPayment })
+    expect(store.isSummaryOutdated).toBe(true)
+    expect(store.summary).toEqual(summaryA)
 
     await store.loadPayments(kindergartenA)
 
-    expect(store.confirmedTotal).toBe(0.3)
+    expect(store.isSummaryOutdated).toBe(false)
   })
-})
 
-describe('paymentCountByStatus', () => {
-  it('counts loaded payments per status', async () => {
+  it('keeps the newest summary when an older refresh resolves last', async () => {
+    const paymentC: Payment = { ...paymentA, id: 'payment-c' }
+    const olderSummary: PaymentSummary = { ...summaryA, confirmedCount: 1 }
+    let resolveOlderSummary: (result: Result<PaymentSummary, AppError>) => void = () => {}
+    const pendingOlderSummary = new Promise<Result<PaymentSummary, AppError>>((resolve) => { resolveOlderSummary = resolve })
+    const getSummary = vi.fn<PaymentsService['getSummary']>()
+      .mockResolvedValueOnce({ success: true, data: summaryA })
+      .mockReturnValueOnce(pendingOlderSummary)
+      .mockResolvedValueOnce({ success: true, data: refreshedSummary })
     const store = createPaymentsStore(createFakePaymentsDependencies({
-      listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({
-        success: true,
-        data: [
-          { ...paymentA, id: 'payment-1', status: 'pending' },
-          { ...paymentA, id: 'payment-2', status: 'confirmed' },
-          { ...paymentA, id: 'payment-3', status: 'confirmed' },
-          { ...paymentA, id: 'payment-4', status: 'failed' },
-        ],
-      }),
+      listPayments: vi.fn<PaymentsService['listPayments']>().mockResolvedValue({ success: true, data: [paymentA, paymentC] }),
+      getSummary,
+      confirmPayment: vi.fn<PaymentsService['confirmPayment']>(async ({ paymentId }) =>
+        ({ success: true, data: { ...paymentA, id: paymentId, status: 'confirmed' } })),
     }))
-
     await store.loadPayments(kindergartenA)
 
-    expect(store.paymentCountByStatus).toEqual({ pending: 1, confirmed: 2, failed: 1 })
+    const confirmingA = store.confirmPayment(paymentA.id)
+    await store.confirmPayment(paymentC.id)
+    resolveOlderSummary({ success: true, data: olderSummary })
+    await confirmingA
+
+    expect(store.summary).toEqual(refreshedSummary)
   })
 })
