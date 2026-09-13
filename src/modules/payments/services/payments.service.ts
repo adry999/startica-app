@@ -1,102 +1,88 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '~/core/supabase/types'
-import type { Result } from '~/shared/types/result'
-import { paymentSchema, type PaymentInput } from '~/shared/schemas/payment.schema'
-import type { Payment, PaymentStatus } from '../types/payments.types'
+import { appErrorFromPostgrest, appErrorFromValidation } from '@core/errors/app-error'
+import type { Database, Tables } from '@core/supabase/types'
+import { paymentSchema } from '@shared/schemas/payment.schema'
+import type { Payment, PaymentsService } from '../types/payments.types'
 
-type Client = SupabaseClient<Database>
-
-function toPayment(row: Record<string, unknown>): Payment {
+function toPayment(row: Tables<'payments'>): Payment {
   return {
-    id: row.id as string,
-    kindergartenId: row.kindergarten_id as string,
-    invoiceId: row.invoice_id as string,
+    id: row.id,
+    kindergartenId: row.kindergarten_id,
+    invoiceId: row.invoice_id,
     amount: Number(row.amount),
-    paidDate: row.paid_date as string,
-    method: row.method as string,
-    referenceNumber: (row.reference_number as string | null) ?? null,
-    status: row.status as PaymentStatus,
-    notes: (row.notes as string | null) ?? null,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-    createdBy: (row.created_by as string | null) ?? null,
-    updatedBy: (row.updated_by as string | null) ?? null,
+    paidDate: row.paid_date,
+    method: row.method,
+    referenceNumber: row.reference_number,
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdBy: row.created_by,
+    updatedBy: row.updated_by,
   }
 }
 
-export async function listPayments(
-  client: Client,
-  kindergartenId: string,
-  invoiceId?: string,
-): Promise<Result<Payment[]>> {
-  let q = client
-    .from('payments')
-    .select('*')
-    .eq('kindergarten_id', kindergartenId)
-    .is('deleted_at', null)
-    .order('paid_date', { ascending: false })
+export function createPaymentsService(client: SupabaseClient<Database>): PaymentsService {
+  return {
+    async listPayments(kindergartenId) {
+      const response = await client
+        .from('payments')
+        .select('*')
+        .eq('kindergarten_id', kindergartenId)
+        .is('deleted_at', null)
+        .order('paid_date', { ascending: false })
 
-  if (invoiceId) q = q.eq('invoice_id', invoiceId)
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: response.data.map(toPayment) }
+    },
 
-  const { data, error } = await q
-  if (error) return { success: false, error: error.message }
-  return { success: true, data: (data ?? []).map(r => toPayment(r as Record<string, unknown>)) }
-}
+    async recordPayment(input, actorId) {
+      const parsed = paymentSchema.safeParse(input)
+      if (!parsed.success) return { success: false, error: appErrorFromValidation(parsed.error) }
+      const payment = parsed.data
 
-export async function createPayment(
-  client: Client,
-  input: PaymentInput,
-  userId: string,
-): Promise<Result<Payment>> {
-  const parsed = paymentSchema.safeParse(input)
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'validation_failed' }
+      const response = await client
+        .from('payments')
+        .insert({
+          kindergarten_id: payment.kindergartenId,
+          invoice_id: payment.invoiceId,
+          amount: payment.amount,
+          paid_date: payment.paidDate,
+          method: payment.method,
+          reference_number: payment.referenceNumber ?? null,
+          notes: payment.notes ?? null,
+          created_by: actorId,
+          updated_by: actorId,
+        })
+        .select()
+        .single()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: toPayment(response.data) }
+    },
+
+    async confirmPayment({ paymentId, kindergartenId, actorId }) {
+      const response = await client
+        .from('payments')
+        .update({ status: 'confirmed', updated_by: actorId })
+        .eq('id', paymentId)
+        .eq('kindergarten_id', kindergartenId)
+        .eq('status', 'pending')
+        .is('deleted_at', null)
+        .select()
+        .maybeSingle()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      // No row: the payment was confirmed concurrently, has failed, or RLS hides it.
+      if (!response.data) return { success: false, error: { kind: 'refused', reason: 'payment_not_pending' } }
+      return { success: true, data: toPayment(response.data) }
+    },
+
+    async getTotalPaidForInvoice(invoiceId) {
+      const response = await client.rpc('invoice_total_paid', { p_invoice_id: invoiceId })
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: Number(response.data) }
+    },
   }
-  const v = parsed.data
-
-  const { data, error } = await client
-    .from('payments')
-    .insert({
-      kindergarten_id: v.kindergartenId,
-      invoice_id: v.invoiceId,
-      amount: v.amount,
-      paid_date: v.paidDate,
-      method: v.method,
-      reference_number: v.referenceNumber ?? null,
-      notes: v.notes ?? null,
-      created_by: userId,
-      updated_by: userId,
-    })
-    .select()
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'create_failed' }
-  return { success: true, data: toPayment(data as Record<string, unknown>) }
-}
-
-export async function confirmPayment(
-  client: Client,
-  id: string,
-  userId: string,
-): Promise<Result<Payment>> {
-  const { data, error } = await client
-    .from('payments')
-    .update({ status: 'confirmed', updated_by: userId })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'update_failed' }
-  return { success: true, data: toPayment(data as Record<string, unknown>) }
-}
-
-export async function getTotalPaidForInvoice(
-  client: Client,
-  invoiceId: string,
-): Promise<Result<number>> {
-  const { data, error } = await client
-    .rpc('invoice_total_paid', { p_invoice_id: invoiceId })
-
-  if (error || data === null) return { success: false, error: error?.message ?? 'summary_failed' }
-  return { success: true, data: Number(data) }
 }

@@ -1,7 +1,13 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { boundaryAliases } from './aliases.config'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-06-24',
   srcDir: 'src/',
+  alias: boundaryAliases,
+  // src/modules holds feature modules, not Nuxt modules. Without this, Nuxt loads
+  // every src/modules/<name>/index.ts public API as a Nuxt module and fails.
+  dir: { modules: 'nuxt-modules' },
 
   devtools: { enabled: true },
 
@@ -34,8 +40,6 @@ export default defineNuxtConfig({
       '~/modules/groups/components',
       '~/modules/staff/components',
       '~/modules/settings/components',
-      '~/modules/billing/components',
-      '~/modules/payments/components',
       '~/modules/expenses/components',
       '~/modules/pool/components',
     ],
@@ -44,6 +48,7 @@ export default defineNuxtConfig({
   imports: {
     dirs: [
       'shared/composables',
+      'shared/session',
       'shared/utils',
       'modules/auth/composables',
       'modules/auth/stores',
@@ -59,10 +64,6 @@ export default defineNuxtConfig({
       'modules/staff/stores',
       'modules/settings/composables',
       'modules/settings/stores',
-      'modules/billing/composables',
-      'modules/billing/stores',
-      'modules/payments/composables',
-      'modules/payments/stores',
       'modules/expenses/composables',
       'modules/expenses/stores',
       'modules/pool/composables',

@@ -1,7 +1,7 @@
 # Architecture Refactor — Design Spec
 
 **Date:** 2026-09-13
-**Status:** Proposed. Pilot (billing + payments) implemented, not committed, in worktree `.worktrees/arch-prototype` on branch `refactor/architecture-prototype`.
+**Status:** Steps 1–4 (tooling, core primitives, session kernel part 1, billing + payments pilot) committed on branch `refactor/architecture-steps`, not yet merged. Steps 5–11 not started.
 **Conventions record:** `.claude/skills/project-conventions/SKILL.md` (rules + decision log). This spec explains and plans; it does not restate the rules.
 
 ## 1. Summary
@@ -805,7 +805,7 @@ Order rationale:
 
 ## 7. Pilot verification
 
-Run in `.worktrees/arch-prototype` (a worktree of `main` at `aff008f`, plus a copy of the uncommitted work on `main`):
+Mechanism checks and the first full run happened in a throwaway prototype worktree (`main` at `aff008f` plus a copy of the then-uncommitted work). The steps were then rebuilt one commit at a time on `refactor/architecture-steps` from `main` at `4b3eb02`; per-commit gates are in the second table.
 
 | Check | Result |
 |---|---|
@@ -821,6 +821,15 @@ Run in `.worktrees/arch-prototype` (a worktree of `main` at `aff008f`, plus a co
 | `nuxi typecheck` | 0 errors |
 | `npm run build` (includes type checking) | ✓ |
 | SSR smoke of `/billing` and `/payments` with a logged-in admin; e2e | **not run** — needs a real `.env` and credentials; part of step 4's verification |
+
+Per-commit gates on `refactor/architecture-steps` (each run on exactly that commit's tree):
+
+| Commit | Step | ESLint | `nuxi typecheck` | Vitest |
+|---|---|---|---|---|
+| `b1bed20` | 1 — aliases, `dir.modules`, boundary lint (empty enforced list) | 0 errors / 19 warnings | ✓ | 30 files / 222 tests ✓ |
+| `19d74d5` | 2 — core primitives, `errors.*` + `common.*` i18n keys | 0 errors / 19 warnings | ✓ | 32 files / 230 tests ✓ |
+| `4d06682` | 3 — `tenant.store` → `shared/session` | 0 errors / 19 warnings | ✓ | 32 files / 230 tests ✓ |
+| `fa03336` | 4 — billing + payments pilot, enforced lint | 0 errors / 11 warnings | ✓ | 34 files / 260 tests ✓ |
 
 ## 8. Open questions
 

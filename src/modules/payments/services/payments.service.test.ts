@@ -1,10 +1,22 @@
-import { describe, it, expect, vi } from 'vitest'
-import { listPayments, createPayment, confirmPayment, getTotalPaidForInvoice } from './payments.service'
+import { describe, expect, it } from 'vitest'
+import {
+  argumentsOf,
+  createSupabaseClientFake,
+  networkFailureResponse,
+  refusalResponse,
+  successResponse,
+} from '@test-support/supabase-client-fake'
+import type { PaymentInput } from '@shared/schemas/payment.schema'
+import { createPaymentsService } from './payments.service'
 
-const sampleRow = {
-  id: 'pay-1',
-  kindergarten_id: '3f1a9c2e-5b7d-4e8a-9c1f-2a4b6d8e0f13',
-  invoice_id: '7c4e1b9a-2d6f-4a3b-8e5c-1f9d0b7a3c62',
+const kindergartenId = '3f1a9c2e-5b7d-4e8a-9c1f-2a4b6d8e0f13'
+const invoiceId = '7c4e1b9a-2d6f-4a3b-8e5c-1f9d0b7a3c62'
+const actorId = 'user-1'
+
+const paymentRow = {
+  id: 'payment-1',
+  kindergarten_id: kindergartenId,
+  invoice_id: invoiceId,
   amount: '250.50',
   paid_date: '2026-09-01',
   method: 'bank_transfer',
@@ -13,88 +25,76 @@ const sampleRow = {
   notes: null,
   created_at: '2026-09-01T00:00:00Z',
   updated_at: '2026-09-01T00:00:00Z',
-  created_by: 'user-1',
-  updated_by: 'user-1',
-  deleted_at: null,
+  created_by: actorId,
+  updated_by: actorId,
 }
 
-const validInput = {
-  kindergartenId: '3f1a9c2e-5b7d-4e8a-9c1f-2a4b6d8e0f13',
-  invoiceId: '7c4e1b9a-2d6f-4a3b-8e5c-1f9d0b7a3c62',
+const validInput: PaymentInput = {
+  kindergartenId,
+  invoiceId,
   amount: 250.5,
   paidDate: '2026-09-01',
-  method: 'bank_transfer' as const,
-}
-
-function createMockClient(overrides: Record<string, unknown> = {}) {
-  const insertSingle = vi.fn().mockResolvedValue({ data: sampleRow, error: null })
-  const insert = vi.fn().mockReturnValue({
-    select: vi.fn().mockReturnValue({ single: insertSingle }),
-  })
-  const client = {
-    from: vi.fn().mockReturnValue({
-      insert,
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          is: vi.fn().mockReturnValue({
-            order: vi.fn().mockResolvedValue({ data: [sampleRow], error: null }),
-          }),
-          eq: vi.fn().mockReturnValue({
-            is: vi.fn().mockResolvedValue({
-              data: [{ amount: '100.00' }, { amount: '50.25' }],
-              error: null,
-            }),
-          }),
-        }),
-      }),
-      update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
-              data: { ...sampleRow, status: 'confirmed' },
-              error: null,
-            }),
-          }),
-        }),
-      }),
-      ...overrides,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any
-  return { client, insert }
+  method: 'bank_transfer',
 }
 
 describe('listPayments', () => {
-  it('maps rows and coerces the numeric amount to a number', async () => {
-    const { client } = createMockClient()
-    const result = await listPayments(client, validInput.kindergartenId)
+  it('scopes the query by kindergarten and excludes soft-deleted rows', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse([paymentRow]))
+    const service = createPaymentsService(client)
 
-    expect(result.success).toBe(true)
-    if (!result.success) return
-    expect(result.data).toHaveLength(1)
-    expect(result.data[0]!.amount).toBe(250.5)
-    expect(result.data[0]!.invoiceId).toBe(validInput.invoiceId)
+    await service.listPayments(kindergartenId)
+
+    const paymentsQuery = queries.find(query => query.target === 'payments')
+    expect(argumentsOf(paymentsQuery, 'eq')).toEqual([['kindergarten_id', kindergartenId]])
+    expect(argumentsOf(paymentsQuery, 'is')).toEqual([['deleted_at', null]])
+  })
+
+  it('maps snake_case rows and coerces the numeric amount to a number', async () => {
+    const { client } = createSupabaseClientFake(() => successResponse([paymentRow]))
+    const service = createPaymentsService(client)
+
+    const result = await service.listPayments(kindergartenId)
+
+    expect(result).toEqual({
+      success: true,
+      data: [{
+        id: 'payment-1',
+        kindergartenId,
+        invoiceId,
+        amount: 250.5,
+        paidDate: '2026-09-01',
+        method: 'bank_transfer',
+        referenceNumber: 'REF-9',
+        status: 'pending',
+        notes: null,
+        createdAt: '2026-09-01T00:00:00Z',
+        updatedAt: '2026-09-01T00:00:00Z',
+        createdBy: actorId,
+        updatedBy: actorId,
+      }],
+    })
   })
 })
 
-describe('createPayment validation', () => {
-  it('inserts snake_case columns when the input is valid', async () => {
-    const { client, insert } = createMockClient()
-    const result = await createPayment(client, validInput, 'user-1')
+describe('recordPayment validation', () => {
+  it('inserts snake_case columns with the actor as created_by and updated_by', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse(paymentRow))
+    const service = createPaymentsService(client)
 
-    expect(result.success).toBe(true)
-    expect(insert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        kindergarten_id: validInput.kindergartenId,
-        invoice_id: validInput.invoiceId,
-        amount: 250.5,
-        paid_date: '2026-09-01',
-        method: 'bank_transfer',
-        created_by: 'user-1',
-        updated_by: 'user-1',
-      }),
-    )
+    await service.recordPayment(validInput, actorId)
+
+    const paymentsQuery = queries.find(query => query.target === 'payments')
+    expect(argumentsOf(paymentsQuery, 'insert')).toEqual([[{
+      kindergarten_id: kindergartenId,
+      invoice_id: invoiceId,
+      amount: 250.5,
+      paid_date: '2026-09-01',
+      method: 'bank_transfer',
+      reference_number: null,
+      notes: null,
+      created_by: actorId,
+      updated_by: actorId,
+    }]])
   })
 
   it.each([
@@ -104,42 +104,87 @@ describe('createPayment validation', () => {
     ['an unknown payment method', { method: 'crypto' }],
     ['a malformed date', { paidDate: '01-09-2026' }],
     ['a non-uuid invoice id', { invoiceId: 'not-a-uuid' }],
-  ])('rejects %s without touching the database', async (_label, patch) => {
-    const { client, insert } = createMockClient()
-    const result = await createPayment(client, { ...validInput, ...patch } as never, 'user-1')
+  ])('rejects %s without issuing any query', async (_label, patch) => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse(paymentRow))
+    const service = createPaymentsService(client)
 
-    expect(result.success).toBe(false)
-    expect(insert).not.toHaveBeenCalled()
+    const result = await service.recordPayment({ ...validInput, ...patch } as unknown as PaymentInput, actorId)
+
+    expect(result).toEqual({ success: false, error: expect.objectContaining({ kind: 'validation' }) })
+    expect(queries).toHaveLength(0)
   })
 
-  it('accepts a numeric string amount from a number input', async () => {
-    const { client, insert } = createMockClient()
-    const result = await createPayment(client, { ...validInput, amount: '250.50' } as never, 'user-1')
+  it('accepts a numeric string amount', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse(paymentRow))
+    const service = createPaymentsService(client)
+
+    const result = await service.recordPayment(
+      { ...validInput, amount: '250.50' } as unknown as PaymentInput,
+      actorId,
+    )
 
     expect(result.success).toBe(true)
-    expect(insert).toHaveBeenCalledWith(expect.objectContaining({ amount: 250.5 }))
+    const paymentsQuery = queries.find(query => query.target === 'payments')
+    expect(argumentsOf(paymentsQuery, 'insert')).toEqual([[expect.objectContaining({ amount: 250.5 })]])
   })
 })
 
 describe('confirmPayment', () => {
-  it('returns the row with confirmed status', async () => {
-    const { client } = createMockClient()
-    const result = await confirmPayment(client, 'pay-1', 'user-1')
+  const command = { paymentId: 'payment-1', kindergartenId, actorId }
 
-    expect(result.success).toBe(true)
-    if (!result.success) return
-    expect(result.data.status).toBe('confirmed')
+  it('filters by id, kindergarten, and the pending status', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse({ ...paymentRow, status: 'confirmed' }))
+    const service = createPaymentsService(client)
+
+    await service.confirmPayment(command)
+
+    const paymentsQuery = queries.find(query => query.target === 'payments')
+    expect(argumentsOf(paymentsQuery, 'eq')).toEqual([
+      ['id', command.paymentId],
+      ['kindergarten_id', kindergartenId],
+      ['status', 'pending'],
+    ])
+  })
+
+  it('returns refused payment_not_pending when no row matches', async () => {
+    const { client } = createSupabaseClientFake(() => successResponse(null))
+    const service = createPaymentsService(client)
+
+    const result = await service.confirmPayment(command)
+
+    expect(result).toEqual({ success: false, error: { kind: 'refused', reason: 'payment_not_pending' } })
   })
 })
 
 describe('getTotalPaidForInvoice', () => {
-  it('reads the confirmed total from the database aggregate', async () => {
-    const rpc = vi.fn().mockResolvedValue({ data: 150.25, error: null })
-    const result = await getTotalPaidForInvoice({ rpc } as never, validInput.invoiceId)
+  it('reads the confirmed total from the invoice_total_paid aggregate', async () => {
+    const { client, queries } = createSupabaseClientFake(() => successResponse(150.25))
+    const service = createPaymentsService(client)
 
-    expect(result.success).toBe(true)
-    if (!result.success) return
-    expect(result.data).toBe(150.25)
-    expect(rpc).toHaveBeenCalledWith('invoice_total_paid', { p_invoice_id: validInput.invoiceId })
+    const result = await service.getTotalPaidForInvoice(invoiceId)
+
+    expect(result).toEqual({ success: true, data: 150.25 })
+    const totalQuery = queries.find(query => query.target === 'rpc:invoice_total_paid')
+    expect(argumentsOf(totalQuery, 'rpc')).toEqual([[{ p_invoice_id: invoiceId }]])
+  })
+})
+
+describe('postgrest error translation', () => {
+  it('maps a status-0 network failure to a network error', async () => {
+    const { client } = createSupabaseClientFake(() => networkFailureResponse)
+    const service = createPaymentsService(client)
+
+    const result = await service.listPayments(kindergartenId)
+
+    expect(result).toEqual({ success: false, error: { kind: 'network' } })
+  })
+
+  it('maps an RLS rejection (42501) to a forbidden refusal', async () => {
+    const { client } = createSupabaseClientFake(() => refusalResponse('42501', 403))
+    const service = createPaymentsService(client)
+
+    const result = await service.listPayments(kindergartenId)
+
+    expect(result).toEqual({ success: false, error: { kind: 'refused', reason: 'forbidden' } })
   })
 })

@@ -13,6 +13,8 @@
     "create": "Creează",
     "copy": "Copiază",
     "copied": "Copiat.",
+    "retry": "Reîncearcă",
+    "actions": "Acțiuni",
     "pagination": {
       "perPage": "pe pagină",
       "all": "Toate"
@@ -497,7 +499,21 @@
       "6": "Sâmbătă"
     }
   },
+  "errors": {
+    "network": "Nu s-a putut contacta serverul. Verifică conexiunea și încearcă din nou.",
+    "validation": "Unele câmpuri nu sunt valide. Verifică datele introduse.",
+    "refused": {
+      "forbidden": "Nu ai permisiunea pentru această acțiune.",
+      "not_found": "Înregistrarea nu mai există.",
+      "conflict": "Există deja o înregistrare cu aceste date.",
+      "rejected": "Operațiunea a fost respinsă. Încearcă din nou sau contactează un administrator.",
+      "session_expired": "Sesiunea a expirat. Autentifică-te din nou.",
+      "invoice_not_payable": "Factura nu mai poate fi marcată ca plătită. Reîncarcă lista.",
+      "payment_not_pending": "Plata nu mai este în așteptare. Reîncarcă lista."
+    }
+  },
   "billing": {
+    "selectKindergarten": "Selectează o grădiniță pentru a vedea facturile.",
     "pageTitle": "Facturare",
     "pageSubtitle": "Gestionează facturi și plăți",
     "filterLabel": "Filtru:",
@@ -517,6 +533,7 @@
     "statusLabel": "Stare",
     "markPaid": "Marchează ca plătită",
     "markPaidSuccess": "Factura a fost marcată ca plătită.",
+    "summaryOutdated": "Totalurile pot fi neactualizate. Reîncearcă pentru a le actualiza.",
     "noInvoices": "Nicio factură găsită.",
     "stats": {
       "totalIssued": "Total emis",
@@ -544,8 +561,14 @@
     },
     "confirm": "Confirmă",
     "noPayments": "Nicio plată înregistrată.",
+    "selectKindergarten": "Selectează o grădiniță pentru a vedea plățile.",
+    "selectInvoice": "Alege factura",
+    "noPayableInvoices": "Nu există facturi emise sau restante.",
+    "payableInvoicesUnavailable": "Lista de facturi nu a putut fi încărcată.",
+    "recordSuccess": "Plata a fost înregistrată.",
+    "confirmSuccess": "Plata a fost confirmată.",
     "methods": {
-      "bankTransfer": "Transfer bancar",
+      "bank_transfer": "Transfer bancar",
       "cash": "Numerar",
       "check": "Cec",
       "online": "Online"

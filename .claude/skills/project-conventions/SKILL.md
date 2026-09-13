@@ -25,9 +25,10 @@ Update this table in the commit that lands a step.
 
 | Area | State |
 |---|---|
-| Aliases `@core` `@shared` `@modules` `@test-support` | pilot on branch `refactor/architecture-prototype` |
-| Boundary lint (`boundaryEnforcedModules` in `eslint.config.mjs`) | pilot: `billing`, `payments` |
-| `shared/session/tenant.store.ts` | pilot |
+| Aliases `@core` `@shared` `@modules` `@test-support` | done (step 1) |
+| Core primitives (`AppError`, latest-request guard, `ScreenStatus`, `useAppErrorMessage`, `useLocaleFormat`) | done (step 2) |
+| `shared/session/tenant.store.ts` | done (step 3) |
+| Boundary lint (`boundaryEnforcedModules` in `eslint.config.mjs`) | enforced: `billing`, `payments` (step 4) |
 | All other modules | legacy layout — see Legacy notes |
 
 A module counts as migrated only when its name is in `boundaryEnforcedModules` on `main`.

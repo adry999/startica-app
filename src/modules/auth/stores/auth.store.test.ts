@@ -12,7 +12,7 @@ vi.mock('../services/moduleAccess.service', () => ({
 }))
 
 import { useAuthStore } from './auth.store'
-import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
+import { useTenantStore } from '@shared/session/tenant.store'
 import * as authService from '../services/auth.service'
 import { listUserModuleGrants } from '../services/moduleAccess.service'
 
