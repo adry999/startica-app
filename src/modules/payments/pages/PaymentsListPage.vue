@@ -96,7 +96,7 @@
 import { ref, computed } from 'vue'
 import type { PaymentMethod } from '~/shared/schemas/payment.schema'
 import { usePayments } from '../composables/usePayments'
-import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
+import { useTenantStore } from '@shared/session/tenant.store'
 
 const { t } = useI18n()
 const tenantStore = useTenantStore()

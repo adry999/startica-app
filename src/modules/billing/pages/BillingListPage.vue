@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useBilling } from '../composables/useBilling'
-import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
+import { useTenantStore } from '@shared/session/tenant.store'
 
 const { t } = useI18n()
 const toast = useToast()

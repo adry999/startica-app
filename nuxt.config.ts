@@ -50,6 +50,7 @@ export default defineNuxtConfig({
   imports: {
     dirs: [
       'shared/composables',
+      'shared/session',
       'shared/utils',
       'modules/auth/composables',
       'modules/auth/stores',

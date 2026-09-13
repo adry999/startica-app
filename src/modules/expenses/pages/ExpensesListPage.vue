@@ -127,7 +127,7 @@ import { ref, computed } from 'vue'
 import { expenseRejectionSchema } from '~/shared/schemas/expense.schema'
 import type { ExpenseCategory } from '../types/expenses.types'
 import { useExpenses } from '../composables/useExpenses'
-import { useTenantStore } from '~/modules/kindergartens/stores/tenant.store'
+import { useTenantStore } from '@shared/session/tenant.store'
 
 const { t } = useI18n()
 const tenantStore = useTenantStore()
