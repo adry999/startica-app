@@ -1360,6 +1360,15 @@ export type Database = {
         Returns: number
       }
       is_super_admin: { Args: never; Returns: boolean }
+      payment_summary: {
+        Args: { p_kindergarten_id: string }
+        Returns: {
+          confirmed_total: number
+          pending_count: number
+          confirmed_count: number
+          failed_count: number
+        }[]
+      }
       user_kindergarten_ids: { Args: never; Returns: string[] }
     }
     Enums: {

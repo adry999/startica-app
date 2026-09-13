@@ -29,7 +29,7 @@ try {
       coalesce(proargmodes, array['i']::"char"[]) as modes,
       coalesce(proallargtypes, proargtypes::oid[])::regtype[]::text as types,
       prorettype::regtype::text as result_type
-    from pg_proc where proname in ('invoice_summary','invoice_total_paid') order by proname
+    from pg_proc where proname in ('invoice_summary','invoice_total_paid','payment_summary') order by proname
   `)
   const typeMap = { uuid: 'string', numeric: 'number', bigint: 'number' }
   for (const fn of functions) {
@@ -45,7 +45,7 @@ try {
     const previous = new RegExp(`^      ${fn.proname}: \\{[\\s\\S]*?^      \\}\\r?\\n`, 'm')
     source = previous.test(source)
       ? source.replace(previous, block)
-      : source.replace('      is_super_admin:', `${block}      is_super_admin:`)
+      : source.replace('      user_kindergarten_ids:', `${block}      user_kindergarten_ids:`)
   }
   if (process.argv.includes('--check')) {
     if (source.replaceAll('\r\n', '\n') !== (await readFile(file, 'utf8')).replaceAll('\r\n', '\n')) {
