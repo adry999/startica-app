@@ -85,8 +85,13 @@ const {
   canSave: canSaveKindergartenSettings,
 } = kindergartenSettings
 
-watch([activeSection, selectedKindergartenId], ([section]) => {
-  if (section === 'kindergarten') kindergartenSettings.load()
+watch([activeSection, selectedKindergartenId], async ([section, kindergartenId]) => {
+  if (section !== 'kindergarten' || !kindergartenId) return
+  const loaded = await kindergartenSettings.load()
+  // A superseded load also returns false; report only when nothing newer is loading or loaded.
+  if (!loaded && !loadingKindergartenSettings.value && !canSaveKindergartenSettings.value) {
+    toast.add({ title: t('settings.loadError'), color: 'error' })
+  }
 })
 
 async function saveProfile() {
