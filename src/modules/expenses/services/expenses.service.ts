@@ -48,20 +48,30 @@ export function createExpensesService(client: SupabaseClient<Database>): Expense
       return { success: true, data: response.data.map(toExpense) }
     },
 
-    // Aggregated in Postgres: summing the list in the browser under-reports past PostgREST's 1000-row cap.
+    // Aggregated in Postgres: summing or counting the list in the browser under-reports past PostgREST's 1000-row cap.
     async getSummary(kindergartenId) {
-      const response = await client
-        .rpc('expense_summary', { p_kindergarten_id: kindergartenId })
-        .single()
+      const [summaryResponse, draftCountResponse] = await Promise.all([
+        client
+          .rpc('expense_summary', { p_kindergarten_id: kindergartenId })
+          .single(),
+        client
+          .from('expenses')
+          .select('id', { count: 'exact', head: true })
+          .eq('kindergarten_id', kindergartenId)
+          .eq('status', 'draft')
+          .is('deleted_at', null),
+      ])
 
-      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      if (summaryResponse.error) return { success: false, error: appErrorFromPostgrest(summaryResponse) }
+      if (draftCountResponse.error) return { success: false, error: appErrorFromPostgrest(draftCountResponse) }
       return {
         success: true,
         data: {
-          totalSpent: Number(response.data.total_spent),
-          totalApproved: Number(response.data.total_approved),
-          totalPending: Number(response.data.total_pending),
-          byCategory: toCategoryTotals(response.data.by_category),
+          totalSpent: Number(summaryResponse.data.total_spent),
+          totalApproved: Number(summaryResponse.data.total_approved),
+          totalPending: Number(summaryResponse.data.total_pending),
+          byCategory: toCategoryTotals(summaryResponse.data.by_category),
+          draftCount: draftCountResponse.count ?? 0,
         },
       }
     },

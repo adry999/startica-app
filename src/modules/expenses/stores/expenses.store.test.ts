@@ -29,8 +29,8 @@ const draftA: Expense = {
 
 const expenseB: Expense = { ...draftA, id: 'expense-b', kindergartenId: kindergartenB }
 
-const summaryA: ExpenseSummary = { totalSpent: 120, totalApproved: 0, totalPending: 120, byCategory: { supplies: 120 } }
-const refreshedSummary: ExpenseSummary = { totalSpent: 120, totalApproved: 120, totalPending: 0, byCategory: { supplies: 120 } }
+const summaryA: ExpenseSummary = { totalSpent: 120, totalApproved: 0, totalPending: 120, byCategory: { supplies: 120 }, draftCount: 1 }
+const refreshedSummary: ExpenseSummary = { totalSpent: 120, totalApproved: 120, totalPending: 0, byCategory: { supplies: 120 }, draftCount: 0 }
 
 const validInput: ExpenseInput = {
   kindergartenId: kindergartenA,
@@ -263,5 +263,57 @@ describe('rejectExpense', () => {
 
     expect(result).toEqual({ success: false, error: refusal })
     expect(store.expenses).toEqual([draftA])
+  })
+})
+
+describe('mutations racing a kindergarten switch', () => {
+  it('does not apply a recordExpense result that resolves after switching to kindergarten B', async () => {
+    let resolveRecord: (result: Result<Expense, AppError>) => void = () => {}
+    const pendingRecord = new Promise<Result<Expense, AppError>>((resolve) => { resolveRecord = resolve })
+    const listExpenses = vi.fn<ExpensesService['listExpenses']>(async kindergartenId =>
+      (kindergartenId === kindergartenA ? { success: true, data: [draftA] } : { success: true, data: [expenseB] }))
+    const getSummary = vi.fn<ExpensesService['getSummary']>().mockResolvedValue({ success: true, data: summaryA })
+    const store = createExpensesStore(createFakeExpensesDependencies({
+      listExpenses,
+      getSummary,
+      recordExpense: vi.fn<ExpensesService['recordExpense']>(() => pendingRecord),
+    }))
+    await store.loadExpenses(kindergartenA)
+
+    const recording = store.recordExpense(validInput)
+    await store.loadExpenses(kindergartenB)
+
+    resolveRecord({ success: true, data: { ...draftA, id: 'expense-new' } })
+    await recording
+
+    expect(store.expenses).toEqual([expenseB])
+    expect(store.summary).toEqual(summaryA)
+    // Once for kindergarten A's load, once for kindergarten B's: the late record never refreshed it.
+    expect(getSummary).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not apply an approveExpense result that resolves after switching to kindergarten B', async () => {
+    let resolveApproval: (result: Result<Expense, AppError>) => void = () => {}
+    const pendingApproval = new Promise<Result<Expense, AppError>>((resolve) => { resolveApproval = resolve })
+    const listExpenses = vi.fn<ExpensesService['listExpenses']>(async kindergartenId =>
+      (kindergartenId === kindergartenA ? { success: true, data: [draftA] } : { success: true, data: [expenseB] }))
+    const getSummary = vi.fn<ExpensesService['getSummary']>().mockResolvedValue({ success: true, data: summaryA })
+    const store = createExpensesStore(createFakeExpensesDependencies({
+      listExpenses,
+      getSummary,
+      approveExpense: vi.fn<ExpensesService['approveExpense']>(() => pendingApproval),
+    }))
+    await store.loadExpenses(kindergartenA)
+
+    const approving = store.approveExpense(draftA.id)
+    await store.loadExpenses(kindergartenB)
+
+    resolveApproval({ success: true, data: { ...draftA, status: 'approved' } })
+    await approving
+
+    expect(store.expenses).toEqual([expenseB])
+    expect(store.summary).toEqual(summaryA)
+    // Once for kindergarten A's load, once for kindergarten B's: the late approval never refreshed it.
+    expect(getSummary).toHaveBeenCalledTimes(2)
   })
 })

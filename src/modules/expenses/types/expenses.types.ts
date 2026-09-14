@@ -27,6 +27,7 @@ export interface ExpenseSummary {
   totalApproved: number
   totalPending: number
   byCategory: Partial<Record<ExpenseCategory, number>>
+  draftCount: number
 }
 
 export interface ExpenseDecision {

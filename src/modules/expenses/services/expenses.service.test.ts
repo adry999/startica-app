@@ -75,35 +75,66 @@ describe('listExpenses', () => {
   })
 })
 
+function respondToSummaryAndDraftCount(summaryData: unknown, draftCount: number) {
+  return (query: { target: string }) =>
+    (query.target === 'expenses' ? successResponse(null, draftCount) : successResponse(summaryData))
+}
+
 describe('getSummary', () => {
-  it('reads the expense_summary aggregate for the kindergarten and coerces its numbers', async () => {
-    const { client, queries } = createSupabaseClientFake(() => successResponse({
+  it('reads the expense_summary aggregate and the draft head count for the kindergarten, coercing the aggregate numbers', async () => {
+    const { client, queries } = createSupabaseClientFake(respondToSummaryAndDraftCount({
       total_spent: '175.50',
       total_approved: '125.50',
       total_pending: '50.00',
       by_category: { supplies: '150.00', food: '25.50', unknown_category: '99' },
-    }))
+    }, 3))
     const service = createExpensesService(client)
 
     const result = await service.getSummary(kindergartenId)
 
     expect(result).toEqual({
       success: true,
-      data: { totalSpent: 175.5, totalApproved: 125.5, totalPending: 50, byCategory: { supplies: 150, food: 25.5 } },
+      data: {
+        totalSpent: 175.5,
+        totalApproved: 125.5,
+        totalPending: 50,
+        byCategory: { supplies: 150, food: 25.5 },
+        draftCount: 3,
+      },
     })
     const summaryQuery = queries.find(query => query.target === 'rpc:expense_summary')
     expect(argumentsOf(summaryQuery, 'rpc')).toEqual([[{ p_kindergarten_id: kindergartenId }]])
+
+    const draftCountQuery = queries.find(query => query.target === 'expenses')
+    expect(argumentsOf(draftCountQuery, 'select')).toEqual([['id', { count: 'exact', head: true }]])
+    expect(argumentsOf(draftCountQuery, 'eq')).toEqual([['kindergarten_id', kindergartenId], ['status', 'draft']])
+    expect(argumentsOf(draftCountQuery, 'is')).toEqual([['deleted_at', null]])
   })
 
   it('returns no category totals when the aggregate has none', async () => {
-    const { client } = createSupabaseClientFake(() => successResponse({
+    const { client } = createSupabaseClientFake(respondToSummaryAndDraftCount({
       total_spent: 0, total_approved: 0, total_pending: 0, by_category: null,
-    }))
+    }, 0))
     const service = createExpensesService(client)
 
     const result = await service.getSummary(kindergartenId)
 
-    expect(result).toEqual({ success: true, data: { totalSpent: 0, totalApproved: 0, totalPending: 0, byCategory: {} } })
+    expect(result).toEqual({
+      success: true,
+      data: { totalSpent: 0, totalApproved: 0, totalPending: 0, byCategory: {}, draftCount: 0 },
+    })
+  })
+
+  it('returns the same failure as an RPC error when the draft count query fails', async () => {
+    const { client } = createSupabaseClientFake((query) => {
+      if (query.target === 'expenses') return refusalResponse('42501', 403)
+      return successResponse({ total_spent: 0, total_approved: 0, total_pending: 0, by_category: null })
+    })
+    const service = createExpensesService(client)
+
+    const result = await service.getSummary(kindergartenId)
+
+    expect(result).toEqual({ success: false, error: { kind: 'refused', reason: 'forbidden' } })
   })
 })
 

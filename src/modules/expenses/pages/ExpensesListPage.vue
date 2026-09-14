@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAppErrorMessage } from '@shared/composables/useAppErrorMessage'
 import { useLocaleFormat } from '@shared/composables/useLocaleFormat'
@@ -28,6 +28,12 @@ const failureMessage = computed(() => loadError.value ? describeAppError(loadErr
 
 const isRecordModalOpen = ref(false)
 const rejectingExpenseId = ref<string | null>(null)
+
+// A kindergarten switch must not leave a stale modal open over the new tenant's data.
+watch(selectedKindergartenId, () => {
+  isRecordModalOpen.value = false
+  rejectingExpenseId.value = null
+})
 
 const badgeColorByStatus: Record<ExpenseStatus, 'neutral' | 'success' | 'error'> = {
   draft: 'neutral',

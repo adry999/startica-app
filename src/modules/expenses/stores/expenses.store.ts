@@ -27,8 +27,7 @@ export const useExpensesStore = defineStore('expenses', () => {
     return expenses.value.length > 0 ? 'ready' : 'empty'
   })
 
-  // Counted from the loaded list, capped at 1000 rows: expense_summary has no draft count.
-  const draftCount = computed(() => expenses.value.filter(expense => expense.status === 'draft').length)
+  const draftCount = computed(() => summary.value?.draftCount ?? 0)
 
   function failLoad(error: AppError): false {
     loadError.value = error

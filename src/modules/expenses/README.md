@@ -31,5 +31,5 @@ None published or consumed.
 
 ## Known limits
 
-- `listExpenses` is unpaginated; PostgREST returns at most 1000 rows. The money totals stay correct, but the drafts card counts the loaded list: `expense_summary` has no draft count.
+- `listExpenses` is unpaginated; PostgREST returns at most 1000 rows. Money totals and the drafts card both come from the database (`expense_summary` and an exact head count), so neither is capped by the loaded list.
 - Amounts are formatted as RON for every kindergarten.
