@@ -1,7 +1,7 @@
 # Architecture Refactor — Design Spec
 
 **Date:** 2026-09-13
-**Status:** Steps 1–4 (tooling, core primitives, session kernel part 1, billing + payments pilot) merged to `main` (#12); step 5 (global error handling) merged (#15). Step 6 (session kernel part 2: actor store, shared permissions) on branch `refactor/session-actor`. Steps 7–11 not started.
+**Status:** Steps 1–6 merged to `main` (#12, #15, #16). Step 7 in progress: `expenses` migrated (branch `refactor/expenses-module`); remaining modules not started. Steps 8–11 not started.
 **Conventions record:** `.claude/skills/project-conventions/SKILL.md` (rules + decision log). This spec explains and plans; it does not restate the rules.
 
 ## 1. Summary

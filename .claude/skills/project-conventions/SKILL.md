@@ -28,7 +28,7 @@ Update this table in the commit that lands a step.
 | Aliases `@core` `@shared` `@modules` `@test-support` | done (step 1) |
 | Core primitives (`AppError`, latest-request guard, `ScreenStatus`, `useAppErrorMessage`, `useLocaleFormat`) | done (step 2) |
 | `shared/session/tenant.store.ts` | done (step 3) |
-| Boundary lint (`boundaryEnforcedModules` in `eslint.config.mjs`) | enforced: `billing`, `payments` (step 4) |
+| Boundary lint (`boundaryEnforcedModules` in `eslint.config.mjs`) | enforced: `billing`, `payments` (step 4), `expenses` (step 7) |
 | Global error handling (`src/error.vue`, `NuxtErrorBoundary` in the admin layout, `plugins/error-reporting.ts`) | done (step 5) |
 | `shared/session/actor.store.ts` + `shared/permissions` (pure policy, `usePermissions`); no module outside `auth` reads `useAuthStore` | done (step 6) |
 | All other modules | legacy layout — see Legacy notes |
