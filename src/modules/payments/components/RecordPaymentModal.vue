@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useAppErrorMessage } from '@shared/composables/useAppErrorMessage'
 import { useLocaleFormat } from '@shared/composables/useLocaleFormat'
 import { paymentMethods, type PaymentInput } from '@shared/schemas/payment.schema'
+import { todayAsCalendarDate } from '@shared/utils/calendarDate'
 import { usePaymentsStore } from '../stores/payments.store'
 
 const props = defineProps<{ open: boolean, kindergartenId: string }>()
@@ -15,13 +16,6 @@ const describeAppError = useAppErrorMessage()
 const { formatCurrency, formatCalendarDate } = useLocaleFormat()
 const paymentsStore = usePaymentsStore()
 const { payableInvoices, payableInvoicesError, isRecordingPayment } = storeToRefs(paymentsStore)
-
-function todayAsCalendarDate(): string {
-  const now = new Date()
-  return [now.getFullYear(), now.getMonth() + 1, now.getDate()]
-    .map(part => String(part).padStart(2, '0'))
-    .join('-')
-}
 
 function emptyPaymentForm(): PaymentInput {
   return {
