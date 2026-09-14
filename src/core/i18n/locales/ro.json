@@ -512,7 +512,8 @@
       "session_expired": "Sesiunea a expirat. Autentifică-te din nou.",
       "invoice_not_payable": "Factura nu mai poate fi marcată ca plătită. Reîncarcă lista.",
       "payment_not_pending": "Plata nu mai este în așteptare. Reîncarcă lista.",
-      "invoice_not_accepting_payments": "Factura nu mai acceptă plăți. Reîncarcă lista."
+      "invoice_not_accepting_payments": "Factura nu mai acceptă plăți. Reîncarcă lista.",
+      "expense_not_draft": "Cheltuiala nu mai este ciornă. Reîncarcă lista."
     },
     "page": {
       "title": "Pagina nu a putut fi afișată.",
@@ -630,7 +631,12 @@
     },
     "rejectTitle": "Respinge cheltuiala",
     "rejectionReason": "Motivul respingerii",
-    "rejectionReasonHint": "Explică pe scurt de ce este respinsă cheltuiala (max. 500 caractere)."
+    "rejectionReasonHint": "Explică pe scurt de ce este respinsă cheltuiala (max. 500 caractere).",
+    "selectKindergarten": "Selectează o grădiniță pentru a vedea cheltuielile.",
+    "recordSuccess": "Cheltuiala a fost înregistrată.",
+    "approveSuccess": "Cheltuiala a fost aprobată.",
+    "rejectSuccess": "Cheltuiala a fost respinsă.",
+    "summaryOutdated": "Totalurile pot fi neactualizate. Reîncearcă pentru a le actualiza."
   },
   "payroll": {
     "title": "Salarizare",
