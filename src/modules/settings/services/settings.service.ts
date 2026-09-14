@@ -116,3 +116,22 @@ export async function updateKindergartenSettings(
   if (error || !data) return { success: false, error: error?.message ?? 'update_failed' }
   return { success: true, data }
 }
+
+export async function updateKindergartenLogo(
+  client: Client,
+  kindergartenId: string,
+  userId: string,
+  logoUrl: string,
+): Promise<Result<void>> {
+  const { data, error } = await client
+    .from('kindergartens')
+    .update({ logo_url: logoUrl, updated_by: userId })
+    .eq('id', kindergartenId)
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { success: false, error: error.message }
+  // No row: RLS lets the caller read this kindergarten but not change it.
+  if (!data) return { success: false, error: 'forbidden' }
+  return { success: true, data: undefined }
+}
