@@ -1,44 +1,92 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { uploadKindergartenAvatar } from '~/core/storage/avatar.service'
 import { useSupabaseClient } from '~/core/supabase/client'
+import {
+  useKindergartenSettings,
+  type KindergartenSettingsGateway,
+} from '../composables/useKindergartenSettings'
 import * as settingsService from '../services/settings.service'
 import type { KindergartenSettings } from '../services/settings.service'
-import { uploadKindergartenAvatar } from '~/core/storage/avatar.service'
+import { visibleSettingsSections, type SettingsSection } from '../utils/settingsSections'
 
 const { t } = useI18n()
 const toast = useToast()
+const { can } = usePermissions()
 const actorStore = useActorStore()
 const tenantStore = useTenantStore()
 const client = useSupabaseClient()
 
-type Section = 'profile' | 'password' | 'language' | 'kindergarten'
-const activeSection = ref<Section>('profile')
+const activeSection = ref<SettingsSection>('profile')
 
 const fullName = ref(actorStore.actor?.fullName ?? '')
 const saving = ref(false)
 const sending = ref(false)
-const loadingKg = ref(false)
-const savingKg = ref(false)
-const uploadingKgAvatar = ref(false)
 
-const timezone = ref('Europe/Bucharest')
-const kgLocale = ref<'ro' | 'en'>('ro')
-const workingHoursStart = ref('07:30')
-const workingHoursEnd = ref('18:00')
-const kindergartenLogoUrl = ref<string | null>(null)
+const sectionPresentation: Record<SettingsSection, { icon: string, labelKey: string }> = {
+  profile: { icon: 'i-heroicons-user-circle', labelKey: 'settings.profileSection' },
+  kindergarten: { icon: 'i-heroicons-building-library', labelKey: 'settings.kindergartenSection' },
+  password: { icon: 'i-heroicons-lock-closed', labelKey: 'settings.passwordSection' },
+  language: { icon: 'i-heroicons-language', labelKey: 'settings.languageSection' },
+}
 
-const navItems = [
-  { key: 'profile' as Section, icon: 'i-heroicons-user-circle', labelKey: 'settings.profileSection' },
-  { key: 'kindergarten' as Section, icon: 'i-heroicons-building-library', labelKey: 'settings.kindergartenSection' },
-  { key: 'password' as Section, icon: 'i-heroicons-lock-closed', labelKey: 'settings.passwordSection' },
-  { key: 'language' as Section, icon: 'i-heroicons-language', labelKey: 'settings.languageSection' },
+const navItems = computed(() => visibleSettingsSections(can('update', 'kindergarten'))
+  .map(section => ({ key: section, ...sectionPresentation[section] })))
+
+const timezoneOptions = [
+  { label: 'Europe/Bucharest', value: 'Europe/Bucharest' },
+  { label: 'Europe/Chisinau', value: 'Europe/Chisinau' },
+  { label: 'UTC', value: 'UTC' },
 ]
 
-const selectedKgId = computed(() => tenantStore.selectedKindergartenId)
+const localeOptions = [
+  { label: 'Română', value: 'ro' },
+  { label: 'English', value: 'en' },
+]
 
 const userInitials = computed(() => {
   const name = actorStore.actor?.fullName ?? ''
   return name.trim().split(/\s+/).slice(0, 2).map((w: string) => w[0]?.toUpperCase() ?? '').join('') || '?'
+})
+
+const selectedKindergartenId = computed(() => tenantStore.selectedKindergartenId)
+
+const kindergartenSettingsGateway: KindergartenSettingsGateway = {
+  async fetchSettings(kindergartenId) {
+    const result = await settingsService.fetchKindergartenSettings(client, kindergartenId)
+    if (!result.success) return result
+    // logo_url is a column on kindergartens, not a key inside the settings jsonb.
+    return {
+      success: true,
+      data: { settings: result.data.settings as KindergartenSettings | null, logoUrl: result.data.logo_url },
+    }
+  },
+  async saveSettings(kindergartenId, actorId, form) {
+    const result = await settingsService.updateKindergartenSettings(client, kindergartenId, actorId, form)
+    return result.success ? { success: true, data: undefined } : result
+  },
+  async uploadLogo(kindergartenId, file) {
+    const result = await uploadKindergartenAvatar(client, kindergartenId, file)
+    return result.success && result.url
+      ? { success: true, data: result.url }
+      : { success: false, error: result.error ?? 'upload_failed' }
+  },
+  saveLogoUrl: (kindergartenId, actorId, logoUrl) =>
+    settingsService.updateKindergartenLogo(client, kindergartenId, actorId, logoUrl),
+}
+
+const kindergartenSettings = useKindergartenSettings(selectedKindergartenId, kindergartenSettingsGateway)
+const {
+  form: kindergartenForm,
+  logoUrl: kindergartenLogoUrl,
+  isLoading: loadingKindergartenSettings,
+  isSaving: savingKindergartenSettings,
+  isUploadingLogo: uploadingKindergartenLogo,
+  canSave: canSaveKindergartenSettings,
+} = kindergartenSettings
+
+watch([activeSection, selectedKindergartenId], ([section]) => {
+  if (section === 'kindergarten') kindergartenSettings.load()
 })
 
 async function saveProfile() {
@@ -72,78 +120,23 @@ async function handleAvatarUpload(event: Event) {
   toast.add({ title: t('settings.avatarUploadSuccess'), color: 'success' })
 }
 
-async function loadKindergartenSettings() {
-  if (!selectedKgId.value) return
-  loadingKg.value = true
-  const result = await settingsService.fetchKindergartenSettings(client, selectedKgId.value)
-  loadingKg.value = false
-
-  if (!result.success) {
-    toast.add({ title: t('settings.loadError'), color: 'error' })
-    return
-  }
-
-  const settings = (result.data.settings ?? {}) as KindergartenSettings
-  timezone.value = settings?.timezone ?? 'Europe/Bucharest'
-  kgLocale.value = settings?.default_locale === 'en' ? 'en' : 'ro'
-  workingHoursStart.value = settings?.working_hours?.start ?? '07:30'
-  workingHoursEnd.value = settings?.working_hours?.end ?? '18:00'
-  // logo_url is a column on kindergartens, not a key inside the settings jsonb
-  // (updateKindergartenSettings writes payload.logo_url), so read it off the row.
-  kindergartenLogoUrl.value = result.data.logo_url ?? null
-}
-
 async function saveKindergartenSettings() {
-  if (!selectedKgId.value || !actorStore.actor) return
-  savingKg.value = true
-  const result = await settingsService.updateKindergartenSettings(
-    client,
-    selectedKgId.value,
-    actorStore.actor.id,
-    {
-      timezone: timezone.value,
-      defaultLocale: kgLocale.value,
-      workingHoursStart: workingHoursStart.value,
-      workingHoursEnd: workingHoursEnd.value,
-    },
-  )
-  savingKg.value = false
-
-  if (!result.success) {
+  const saved = await kindergartenSettings.save(actorStore.actorId)
+  if (!saved) {
     toast.add({ title: t('settings.saveError'), color: 'error' })
     return
   }
-
   toast.add({ title: t('settings.saveSuccess'), color: 'success' })
 }
 
-async function handleKindergartenAvatarUpload(event: Event) {
-  const input = event.target as HTMLInputElement
-  if (!input.files?.[0] || !selectedKgId.value) return
-
-  const file = input.files[0]
-  uploadingKgAvatar.value = true
-  const result = await uploadKindergartenAvatar(client, selectedKgId.value, file)
-  uploadingKgAvatar.value = false
-
-  if (!result.success) {
+async function handleKindergartenLogoUpload(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const uploaded = await kindergartenSettings.uploadLogo(file, actorStore.actorId)
+  if (!uploaded) {
     toast.add({ title: t('settings.kindergartenAvatarUploadError'), color: 'error' })
     return
   }
-
-  kindergartenLogoUrl.value = result.url || null
-  await settingsService.updateKindergartenSettings(
-    client,
-    selectedKgId.value,
-    actorStore.actor?.id || '',
-    {
-      timezone: timezone.value,
-      defaultLocale: kgLocale.value,
-      workingHoursStart: workingHoursStart.value,
-      workingHoursEnd: workingHoursEnd.value,
-      logoUrl: result.url,
-    },
-  )
   toast.add({ title: t('settings.kindergartenAvatarUploadSuccess'), color: 'success' })
 }
 
@@ -157,23 +150,11 @@ async function sendPasswordReset() {
   )
   sending.value = false
   if (!result.success) {
-    toast.add({ title: result.error, color: 'error' })
+    toast.add({ title: t('settings.resetError'), color: 'error' })
     return
   }
   toast.add({ title: t('settings.resetSent'), color: 'success' })
 }
-
-onMounted(() => {
-  if (activeSection.value === 'kindergarten') {
-    loadKindergartenSettings()
-  }
-})
-
-watch(activeSection, (newSection) => {
-  if (newSection === 'kindergarten' && !timezone.value) {
-    loadKindergartenSettings()
-  }
-})
 </script>
 
 <template>
@@ -184,7 +165,6 @@ watch(activeSection, (newSection) => {
     <!-- Two-column layout -->
     <div class="flex flex-col gap-6 lg:flex-row lg:gap-8 lg:items-start">
 
-      <!-- ── Left sub-nav ──────────────────────────────────────────────── -->
       <nav class="grid w-full grid-cols-3 gap-1 lg:block lg:w-[220px] lg:shrink-0 lg:space-y-0.5">
         <button
           v-for="item in navItems"
@@ -206,7 +186,6 @@ watch(activeSection, (newSection) => {
         </button>
       </nav>
 
-      <!-- ── Right panel ───────────────────────────────────────────────── -->
       <div class="flex-1 min-w-0">
 
         <!-- Profile section -->
@@ -314,13 +293,18 @@ watch(activeSection, (newSection) => {
               <h2 class="text-base font-semibold text-slate-800">{{ t('settings.kindergartenSection') }}</h2>
               <p class="mt-0.5 text-sm text-slate-400">{{ t('settings.kindergartenDescription') }}</p>
             </div>
-            <UButton color="primary" :loading="savingKg" @click="saveKindergartenSettings">
+            <UButton
+              color="primary"
+              :loading="savingKindergartenSettings"
+              :disabled="!canSaveKindergartenSettings"
+              @click="saveKindergartenSettings"
+            >
               {{ t('settings.save') }}
             </UButton>
           </div>
 
           <div class="p-6 space-y-6">
-            <div v-if="loadingKg" class="flex justify-center py-8">
+            <div v-if="loadingKindergartenSettings" class="flex justify-center py-8">
               <UIcon name="i-heroicons-spinner" class="animate-spin h-5 w-5 text-teal-600" />
             </div>
             <div v-else class="space-y-6">
@@ -330,7 +314,7 @@ watch(activeSection, (newSection) => {
                   <img
                     v-if="kindergartenLogoUrl"
                     :src="kindergartenLogoUrl"
-                    alt="Kindergarten logo"
+                    :alt="t('settings.kindergartenLogo')"
                     class="inline-flex h-16 w-16 shrink-0 rounded-lg object-cover ring-4 ring-teal-50"
                   />
                   <div
@@ -344,8 +328,8 @@ watch(activeSection, (newSection) => {
                       type="file"
                       accept="image/*"
                       class="hidden"
-                      @change="handleKindergartenAvatarUpload"
-                      :disabled="uploadingKgAvatar"
+                      :disabled="uploadingKindergartenLogo"
+                      @change="handleKindergartenLogoUpload"
                     />
                     <div class="rounded-full bg-teal-600 p-1.5 text-white hover:bg-teal-700">
                       <UIcon name="i-heroicons-camera" class="h-3.5 w-3.5" />
@@ -362,35 +346,20 @@ watch(activeSection, (newSection) => {
               <div class="grid grid-cols-1 gap-5 max-w-lg">
                 <div>
                   <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.timezone') }}</label>
-                <USelect
-                  v-model="timezone"
-                  :options="[
-                    { label: 'Europe/Bucharest', value: 'Europe/Bucharest' },
-                    { label: 'Europe/Chisinau', value: 'Europe/Chisinau' },
-                    { label: 'UTC', value: 'UTC' },
-                  ]"
-                  class="w-full"
-                />
+                <USelect v-model="kindergartenForm.timezone" :items="timezoneOptions" class="w-full" />
               </div>
               <div>
                 <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.defaultLocale') }}</label>
-                <USelect
-                  v-model="kgLocale"
-                  :options="[
-                    { label: 'Română', value: 'ro' },
-                    { label: 'English', value: 'en' },
-                  ]"
-                  class="w-full"
-                />
+                <USelect v-model="kindergartenForm.defaultLocale" :items="localeOptions" class="w-full" />
               </div>
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.workingHoursStart') }}</label>
-                  <UInput v-model="workingHoursStart" type="time" class="w-full" />
+                  <UInput v-model="kindergartenForm.workingHoursStart" type="time" class="w-full" />
                 </div>
                 <div>
                   <label class="mb-1.5 block text-[13px] font-medium text-slate-600">{{ t('settings.workingHoursEnd') }}</label>
-                  <UInput v-model="workingHoursEnd" type="time" class="w-full" />
+                  <UInput v-model="kindergartenForm.workingHoursEnd" type="time" class="w-full" />
                 </div>
               </div>
               </div>

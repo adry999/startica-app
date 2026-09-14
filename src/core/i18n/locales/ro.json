@@ -391,7 +391,8 @@
     "kindergartenLogo": "Logo grădiniță",
     "kindergartenLogoDescription": "Încarcă un logo sau imagine pentru grădiniță.",
     "kindergartenAvatarUploadSuccess": "Logo grădiniță actualizat.",
-    "kindergartenAvatarUploadError": "Eroare la încărcare logo."
+    "kindergartenAvatarUploadError": "Eroare la încărcare logo.",
+    "resetError": "Emailul de resetare nu a putut fi trimis. Încearcă din nou mai târziu."
   },
   "guardians": {
     "title": "Contacte tutori",
