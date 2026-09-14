@@ -111,6 +111,78 @@ describe('useKindergartenSettings', () => {
     expect(settings.logoUrl.value).toBe('https://cdn.example/new-logo.png')
   })
 
+  it('sets loadFailed and stops loading when fetching settings fails, then clears loadFailed after a following success', async () => {
+    const gateway = createGateway({
+      fetchSettings: vi.fn<KindergartenSettingsGateway['fetchSettings']>()
+        .mockResolvedValueOnce({ success: false, error: 'network' })
+        .mockResolvedValueOnce({ success: true, data: storedRecord }),
+    })
+    const settings = useKindergartenSettings(ref('kg-1'), gateway)
+
+    await expect(settings.load()).resolves.toBe(false)
+
+    expect(settings.loadFailed.value).toBe(true)
+    expect(settings.isLoading.value).toBe(false)
+
+    await expect(settings.load()).resolves.toBe(true)
+
+    expect(settings.loadFailed.value).toBe(false)
+  })
+
+  it('does not set loadFailed for a superseded failed load, and leaves it false once the newer load succeeds', async () => {
+    let resolveFirst: (result: Result<KindergartenSettingsRecord>) => void = () => {}
+    const firstLoad = new Promise<Result<KindergartenSettingsRecord>>((resolve) => { resolveFirst = resolve })
+    const gateway = createGateway({
+      fetchSettings: vi.fn<KindergartenSettingsGateway['fetchSettings']>()
+        .mockReturnValueOnce(firstLoad)
+        .mockResolvedValueOnce({ success: true, data: storedRecord }),
+    })
+    const kindergartenId = ref<string | null>('kg-1')
+    const settings = useKindergartenSettings(kindergartenId, gateway)
+
+    const loadingFirst = settings.load()
+    kindergartenId.value = 'kg-2'
+    await settings.load()
+
+    expect(settings.loadFailed.value).toBe(false)
+
+    resolveFirst({ success: false, error: 'network' })
+    await loadingFirst
+
+    expect(settings.loadFailed.value).toBe(false)
+  })
+
+  it('marks the load as failed and stops loading when fetchSettings rejects, while still propagating the rejection', async () => {
+    const gateway = createGateway({
+      fetchSettings: vi.fn<KindergartenSettingsGateway['fetchSettings']>().mockRejectedValue(new Error('boom')),
+    })
+    const settings = useKindergartenSettings(ref('kg-1'), gateway)
+
+    await expect(settings.load()).rejects.toThrow('boom')
+
+    expect(settings.isLoading.value).toBe(false)
+    expect(settings.loadFailed.value).toBe(true)
+  })
+
+  it('does not apply an uploaded logo when the kindergarten changed before the upload finished', async () => {
+    let resolveUpload: (result: Result<string>) => void = () => {}
+    const uploadPromise = new Promise<Result<string>>((resolve) => { resolveUpload = resolve })
+    const gateway = createGateway({
+      uploadLogo: vi.fn<KindergartenSettingsGateway['uploadLogo']>().mockReturnValue(uploadPromise),
+    })
+    const kindergartenId = ref<string | null>('kg-1')
+    const settings = useKindergartenSettings(kindergartenId, gateway)
+    await settings.load()
+
+    const uploading = settings.uploadLogo(logoFile, 'actor-1')
+    kindergartenId.value = 'kg-2'
+    resolveUpload({ success: true, data: 'https://cdn.example/new-logo.png' })
+
+    await expect(uploading).resolves.toBe(true)
+
+    expect(settings.logoUrl.value).toBe('https://cdn.example/old-logo.png')
+  })
+
   it('ignores settings that arrive after the kindergarten changed', async () => {
     let resolveFirst: (result: Result<KindergartenSettingsRecord>) => void = () => {}
     const firstLoad = new Promise<Result<KindergartenSettingsRecord>>((resolve) => { resolveFirst = resolve })

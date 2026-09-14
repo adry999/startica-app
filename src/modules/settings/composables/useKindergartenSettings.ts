@@ -38,6 +38,7 @@ export function useKindergartenSettings(kindergartenId: Ref<string | null>, gate
   const logoUrl = ref<string | null>(null)
   const loadedKindergartenId = ref<string | null>(null)
   const isLoading = ref(false)
+  const loadFailed = ref(false)
   const isSaving = ref(false)
   const isUploadingLogo = ref(false)
 
@@ -50,17 +51,25 @@ export function useKindergartenSettings(kindergartenId: Ref<string | null>, gate
     if (!requestedId) return false
     const request = settingsRequests.begin()
     loadedKindergartenId.value = null
+    loadFailed.value = false
     isLoading.value = true
 
-    const result = await gateway.fetchSettings(requestedId)
-    if (!request.isLatest()) return false
-    isLoading.value = false
-    if (!result.success) return false
+    try {
+      const result = await gateway.fetchSettings(requestedId)
+      if (!request.isLatest()) return false
+      if (!result.success) return false
 
-    form.value = toForm(result.data.settings)
-    logoUrl.value = result.data.logoUrl
-    loadedKindergartenId.value = requestedId
-    return true
+      form.value = toForm(result.data.settings)
+      logoUrl.value = result.data.logoUrl
+      loadedKindergartenId.value = requestedId
+      return true
+    }
+    finally {
+      if (request.isLatest()) {
+        isLoading.value = false
+        loadFailed.value = loadedKindergartenId.value !== requestedId
+      }
+    }
   }
 
   async function save(actorId: string | null): Promise<boolean> {
@@ -93,5 +102,5 @@ export function useKindergartenSettings(kindergartenId: Ref<string | null>, gate
     }
   }
 
-  return { form, logoUrl, isLoading, isSaving, isUploadingLogo, canSave, load, save, uploadLogo }
+  return { form, logoUrl, isLoading, loadFailed, isSaving, isUploadingLogo, canSave, load, save, uploadLogo }
 }

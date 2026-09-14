@@ -80,19 +80,20 @@ const {
   form: kindergartenForm,
   logoUrl: kindergartenLogoUrl,
   isLoading: loadingKindergartenSettings,
+  loadFailed: kindergartenSettingsLoadFailed,
   isSaving: savingKindergartenSettings,
   isUploadingLogo: uploadingKindergartenLogo,
   canSave: canSaveKindergartenSettings,
 } = kindergartenSettings
 
-watch([activeSection, selectedKindergartenId], async ([section, kindergartenId]) => {
+watch([activeSection, selectedKindergartenId], ([section, kindergartenId]) => {
   if (section !== 'kindergarten' || !kindergartenId) return
-  const loaded = await kindergartenSettings.load()
-  // A superseded load also returns false; report only when nothing newer is loading or loaded.
-  if (!loaded && !loadingKindergartenSettings.value && !canSaveKindergartenSettings.value) {
-    toast.add({ title: t('settings.loadError'), color: 'error' })
-  }
+  void kindergartenSettings.load()
 })
+
+function retryKindergartenSettingsLoad() {
+  void kindergartenSettings.load()
+}
 
 async function saveProfile() {
   if (!actorStore.actor) return
@@ -309,9 +310,24 @@ async function sendPasswordReset() {
           </div>
 
           <div class="p-6 space-y-6">
-            <div v-if="loadingKindergartenSettings" class="flex justify-center py-8">
+            <p v-if="!selectedKindergartenId" class="text-sm text-slate-500">
+              {{ t('settings.selectKindergarten') }}
+            </p>
+            <div v-else-if="loadingKindergartenSettings" class="flex justify-center py-8">
               <UIcon name="i-heroicons-spinner" class="animate-spin h-5 w-5 text-teal-600" />
             </div>
+            <UAlert
+              v-else-if="kindergartenSettingsLoadFailed"
+              color="error"
+              variant="soft"
+              :title="t('settings.loadError')"
+            >
+              <template #actions>
+                <UButton color="error" variant="soft" size="xs" @click="retryKindergartenSettingsLoad">
+                  {{ t('common.retry') }}
+                </UButton>
+              </template>
+            </UAlert>
             <div v-else class="space-y-6">
               <!-- Avatar section -->
               <div class="flex items-center gap-4 pb-6 border-b border-border">

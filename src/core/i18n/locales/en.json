@@ -392,7 +392,8 @@
     "kindergartenLogoDescription": "Upload a logo or image for your kindergarten.",
     "kindergartenAvatarUploadSuccess": "Kindergarten logo updated.",
     "kindergartenAvatarUploadError": "Logo upload failed.",
-    "resetError": "The reset email could not be sent. Try again later."
+    "resetError": "The reset email could not be sent. Try again later.",
+    "selectKindergarten": "Select a kindergarten to see its settings."
   },
   "guardians": {
     "title": "Guardian Contacts",
