@@ -1,139 +1,138 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '~/core/supabase/types'
-import type { Result } from '~/shared/types/result'
-import { expenseSchema, type ExpenseInput } from '~/shared/schemas/expense.schema'
-import type { Expense, ExpenseCategory, ExpenseStatus, ExpenseSummary } from '../types/expenses.types'
+import { appErrorFromPostgrest, appErrorFromValidation } from '@core/errors/app-error'
+import type { Database, Json, Tables } from '@core/supabase/types'
+import { expenseCategories, expenseRejectionSchema, expenseSchema } from '@shared/schemas/expense.schema'
+import type { Expense, ExpenseSummary, ExpensesService } from '../types/expenses.types'
 
-type Client = SupabaseClient<Database>
+const expenseNotDraft = { kind: 'refused', reason: 'expense_not_draft' } as const
 
-function toExpense(row: Record<string, unknown>): Expense {
+function toExpense(row: Tables<'expenses'>): Expense {
   return {
-    id: row.id as string,
-    kindergartenId: row.kindergarten_id as string,
-    category: row.category as ExpenseCategory,
+    id: row.id,
+    kindergartenId: row.kindergarten_id,
+    category: row.category,
     amount: Number(row.amount),
-    expenseDate: row.expense_date as string,
-    description: (row.description as string | null) ?? null,
-    status: row.status as ExpenseStatus,
-    approvedBy: (row.approved_by as string | null) ?? null,
-    rejectionReason: (row.rejection_reason as string | null) ?? null,
-    createdAt: row.created_at as string,
-    updatedAt: row.updated_at as string,
-    createdBy: (row.created_by as string | null) ?? null,
-    updatedBy: (row.updated_by as string | null) ?? null,
+    expenseDate: row.expense_date,
+    description: row.description,
+    status: row.status,
+    approvedBy: row.approved_by,
+    rejectionReason: row.rejection_reason,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    createdBy: row.created_by,
+    updatedBy: row.updated_by,
   }
 }
 
-export async function listExpenses(
-  client: Client,
-  kindergartenId: string,
-  status?: ExpenseStatus,
-): Promise<Result<Expense[]>> {
-  let q = client
-    .from('expenses')
-    .select('*')
-    .eq('kindergarten_id', kindergartenId)
-    .is('deleted_at', null)
-    .order('expense_date', { ascending: false })
-
-  if (status) q = q.eq('status', status)
-
-  const { data, error } = await q
-  if (error) return { success: false, error: error.message }
-  return { success: true, data: (data ?? []).map(r => toExpense(r as Record<string, unknown>)) }
-}
-
-export async function createExpense(
-  client: Client,
-  input: ExpenseInput,
-  userId: string,
-): Promise<Result<Expense>> {
-  const parsed = expenseSchema.safeParse(input)
-  if (!parsed.success) {
-    return { success: false, error: parsed.error.issues[0]?.message ?? 'validation_failed' }
+function toCategoryTotals(byCategory: Json): ExpenseSummary['byCategory'] {
+  const totals: ExpenseSummary['byCategory'] = {}
+  if (!byCategory || typeof byCategory !== 'object' || Array.isArray(byCategory)) return totals
+  for (const category of expenseCategories) {
+    const total = byCategory[category]
+    if (total !== undefined && total !== null) totals[category] = Number(total)
   }
-  const v = parsed.data
-
-  const { data, error } = await client
-    .from('expenses')
-    .insert({
-      kindergarten_id: v.kindergartenId,
-      category: v.category,
-      amount: v.amount,
-      expense_date: v.expenseDate,
-      description: v.description ?? null,
-      created_by: userId,
-      updated_by: userId,
-    })
-    .select()
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'create_failed' }
-  return { success: true, data: toExpense(data as Record<string, unknown>) }
+  return totals
 }
 
-export async function approveExpense(
-  client: Client,
-  id: string,
-  userId: string,
-): Promise<Result<Expense>> {
-  const { data, error } = await client
-    .from('expenses')
-    .update({ status: 'approved', approved_by: userId, updated_by: userId })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'update_failed' }
-  return { success: true, data: toExpense(data as Record<string, unknown>) }
-}
-
-export async function rejectExpense(
-  client: Client,
-  id: string,
-  reason: string,
-  userId: string,
-): Promise<Result<Expense>> {
-  const { data, error } = await client
-    .from('expenses')
-    .update({ status: 'rejected', rejection_reason: reason, updated_by: userId })
-    .eq('id', id)
-    .select()
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'update_failed' }
-  return { success: true, data: toExpense(data as Record<string, unknown>) }
-}
-
-export async function getSummary(
-  client: Client,
-  kindergartenId: string,
-): Promise<Result<ExpenseSummary>> {
-  // Aggregated in Postgres: selecting every row and summing in JS silently
-  // under-reported once a kindergarten passed PostgREST's 1000-row response cap.
-  const { data, error } = await client
-    .rpc('expense_summary', { p_kindergarten_id: kindergartenId })
-    .single()
-
-  if (error || !data) return { success: false, error: error?.message ?? 'summary_failed' }
-
-  const row = data as {
-    total_spent: number | string
-    total_approved: number | string
-    total_pending: number | string
-    by_category: Record<string, number | string> | null
-  }
-
-  const byCategory: Record<string, number> = {}
-  for (const [k, v] of Object.entries(row.by_category ?? {})) byCategory[k] = Number(v)
-
+export function createExpensesService(client: SupabaseClient<Database>): ExpensesService {
   return {
-    success: true,
-    data: {
-      totalSpent: Number(row.total_spent),
-      totalApproved: Number(row.total_approved),
-      totalPending: Number(row.total_pending),
-      byCategory: byCategory as ExpenseSummary['byCategory'],
+    async listExpenses(kindergartenId) {
+      const response = await client
+        .from('expenses')
+        .select('*')
+        .eq('kindergarten_id', kindergartenId)
+        .is('deleted_at', null)
+        .order('expense_date', { ascending: false })
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: response.data.map(toExpense) }
+    },
+
+    // Aggregated in Postgres: summing or counting the list in the browser under-reports past PostgREST's 1000-row cap.
+    async getSummary(kindergartenId) {
+      const [summaryResponse, draftCountResponse] = await Promise.all([
+        client
+          .rpc('expense_summary', { p_kindergarten_id: kindergartenId })
+          .single(),
+        client
+          .from('expenses')
+          .select('id', { count: 'exact', head: true })
+          .eq('kindergarten_id', kindergartenId)
+          .eq('status', 'draft')
+          .is('deleted_at', null),
+      ])
+
+      if (summaryResponse.error) return { success: false, error: appErrorFromPostgrest(summaryResponse) }
+      if (draftCountResponse.error) return { success: false, error: appErrorFromPostgrest(draftCountResponse) }
+      return {
+        success: true,
+        data: {
+          totalSpent: Number(summaryResponse.data.total_spent),
+          totalApproved: Number(summaryResponse.data.total_approved),
+          totalPending: Number(summaryResponse.data.total_pending),
+          byCategory: toCategoryTotals(summaryResponse.data.by_category),
+          draftCount: draftCountResponse.count ?? 0,
+        },
+      }
+    },
+
+    async recordExpense(input, actorId) {
+      const parsed = expenseSchema.safeParse(input)
+      if (!parsed.success) return { success: false, error: appErrorFromValidation(parsed.error) }
+      const expense = parsed.data
+
+      const response = await client
+        .from('expenses')
+        .insert({
+          kindergarten_id: expense.kindergartenId,
+          category: expense.category,
+          amount: expense.amount,
+          expense_date: expense.expenseDate,
+          description: expense.description || null,
+          created_by: actorId,
+          updated_by: actorId,
+        })
+        .select()
+        .single()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      return { success: true, data: toExpense(response.data) }
+    },
+
+    async approveExpense({ expenseId, kindergartenId, actorId }) {
+      const response = await client
+        .from('expenses')
+        .update({ status: 'approved', approved_by: actorId, updated_by: actorId })
+        .eq('id', expenseId)
+        .eq('kindergarten_id', kindergartenId)
+        .eq('status', 'draft')
+        .is('deleted_at', null)
+        .select()
+        .maybeSingle()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      // No row: someone already approved or rejected it, or RLS hides it.
+      if (!response.data) return { success: false, error: expenseNotDraft }
+      return { success: true, data: toExpense(response.data) }
+    },
+
+    async rejectExpense({ expenseId, kindergartenId, actorId, reason }) {
+      const parsed = expenseRejectionSchema.safeParse({ rejectionReason: reason })
+      if (!parsed.success) return { success: false, error: appErrorFromValidation(parsed.error) }
+
+      const response = await client
+        .from('expenses')
+        .update({ status: 'rejected', rejection_reason: parsed.data.rejectionReason, updated_by: actorId })
+        .eq('id', expenseId)
+        .eq('kindergarten_id', kindergartenId)
+        .eq('status', 'draft')
+        .is('deleted_at', null)
+        .select()
+        .maybeSingle()
+
+      if (response.error) return { success: false, error: appErrorFromPostgrest(response) }
+      if (!response.data) return { success: false, error: expenseNotDraft }
+      return { success: true, data: toExpense(response.data) }
     },
   }
 }

@@ -512,7 +512,8 @@
       "session_expired": "Your session has expired. Please log in again.",
       "invoice_not_payable": "This invoice can no longer be marked as paid. Reload the list.",
       "payment_not_pending": "This payment is no longer pending. Reload the list.",
-      "invoice_not_accepting_payments": "This invoice no longer accepts payments. Reload the list."
+      "invoice_not_accepting_payments": "This invoice no longer accepts payments. Reload the list.",
+      "expense_not_draft": "This expense is no longer a draft. Reload the list."
     },
     "page": {
       "title": "This page could not be displayed.",
@@ -630,7 +631,12 @@
     },
     "rejectTitle": "Reject expense",
     "rejectionReason": "Rejection reason",
-    "rejectionReasonHint": "Briefly explain why this expense is rejected (max 500 characters)."
+    "rejectionReasonHint": "Briefly explain why this expense is rejected (max 500 characters).",
+    "selectKindergarten": "Select a kindergarten to view expenses.",
+    "recordSuccess": "Expense recorded.",
+    "approveSuccess": "Expense approved.",
+    "rejectSuccess": "Expense rejected.",
+    "summaryOutdated": "Totals may be out of date. Retry to update them."
   },
   "payroll": {
     "title": "Payroll",

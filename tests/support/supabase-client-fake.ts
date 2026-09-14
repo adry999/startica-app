@@ -15,10 +15,11 @@ export interface FakeResponse {
   data: unknown
   error: { code: string, message: string, details: string, hint: string } | null
   status: number
+  count?: number | null
 }
 
-export function successResponse(data: unknown): FakeResponse {
-  return { data, error: null, status: 200 }
+export function successResponse(data: unknown, count: number | null = null): FakeResponse {
+  return { data, error: null, status: 200, count }
 }
 
 export function refusalResponse(code: string, status: number): FakeResponse {
